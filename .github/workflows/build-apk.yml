@@ -1,0 +1,129 @@
+name: Build Android APK
+
+# Builds an installable .apk from this repo's GitHub Pages site and attaches
+# it to the run as a downloadable artifact (Actions tab -> this run ->
+# Artifacts section, near the bottom of the run summary page).
+#
+# Requires GitHub Pages to already be enabled for this repository
+# (Settings -> Pages -> Deploy from a branch -> main -> / (root)), since the
+# APK is a Trusted Web Activity that wraps the live site at
+# https://<owner>.github.io/<repo>/.
+#
+# The signing key used here is generated fresh on every run purely so the
+# APK can be installed for testing/sideloading. It is NOT suitable for
+# publishing updates to the Google Play Store, which requires a stable,
+# securely-stored signing key you keep across releases.
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Use the Android SDK already on this runner
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
+
+      - name: Generate a signing key for this build
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          PASS="${KEYSTORE_PASSWORD:-ledgerboard123}"
+          echo "BUBBLEWRAP_KEYSTORE_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          echo "BUBBLEWRAP_KEY_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          keytool -genkeypair -v \
+            -keystore android.keystore \
+            -alias ledgerboard \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "$PASS" -keypass "$PASS" \
+            -dname "CN=Ledger and Board, OU=Trainer, O=Trainer, L=City, S=State, C=US"
+
+      - name: Write twa-manifest.json for this repository's Pages site
+        env:
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          node -e '
+          const fs = require("fs");
+          const owner = String(process.env.OWNER || "").toLowerCase();
+          const repo = String(process.env.REPO || "");
+          const runNumber = parseInt(process.env.RUN_NUMBER || "1", 10);
+          const host = owner + ".github.io";
+          const base = "https://" + host + "/" + repo + "/";
+          let pkgSuffix = owner.replace(/[^a-z0-9]/g, "");
+          if (/^[0-9]/.test(pkgSuffix)) pkgSuffix = "u" + pkgSuffix;
+          if (!pkgSuffix) pkgSuffix = "app";
+          const packageId = "io.github." + pkgSuffix + ".ledgerboard";
+          const manifest = {
+            packageId: packageId,
+            host: host,
+            name: "Ledger & Board",
+            launcherName: "Ledger & Board",
+            display: "standalone",
+            orientation: "portrait",
+            themeColor: "#1B140F",
+            navigationColor: "#1B140F",
+            navigationColorDark: "#1B140F",
+            navigationDividerColor: "#1B140F",
+            navigationDividerColorDark: "#1B140F",
+            backgroundColor: "#1B140F",
+            enableNotifications: false,
+            startUrl: "/" + repo + "/index.html",
+            iconUrl: base + "icon-512.png",
+            maskableIconUrl: base + "icon-512-maskable.png",
+            splashScreenFadeOutDuration: 300,
+            signingKey: { path: "./android.keystore", alias: "ledgerboard" },
+            appVersionName: "1.0." + runNumber,
+            appVersionCode: runNumber,
+            shortcuts: [],
+            generatorApp: "bubblewrap-cli",
+            webManifestUrl: base + "manifest.json",
+            fallbackType: "customtabs",
+            features: {},
+            enableSiteSettingsShortcut: true,
+            isChromeOSOnly: false,
+            isMetaQuest: false,
+            fullScopeUrl: base,
+            minSdkVersion: 23
+          };
+          fs.writeFileSync("twa-manifest.json", JSON.stringify(manifest, null, 2) + "\n");
+          console.log(fs.readFileSync("twa-manifest.json", "utf8"));
+          '
+      - name: Generate the Android project from the manifest
+        run: yes | bubblewrap update --manifest=./twa-manifest.json --skipVersionUpgrade
+
+      - name: Build the signed APK
+        run: yes | bubblewrap build --skipPwaValidation
+
+      - name: Upload APK as a downloadable build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ledger-and-board-apk
+          path: app-release-signed.apk
+          if-no-files-found: error
+          retention-days: 90
