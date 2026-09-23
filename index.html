@@ -6,61 +6,26 @@
 <title>Ledger &amp; Board — Chess Puzzle Trainer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
 <meta name="theme-color" content="#1B140F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,500&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#1b140f;
-    --bg-2:#221912;
-    --panel:#2b2016;
-    --panel-2:#332619;
-    --rule:#4a3a28;
-    --ink:#f2e8d8;
-    --ink-dim:#c3ae8c;
-    --ink-faint:#8f7c62;
-    --accent:#caa24e;
-    --accent-ink:#241b12;
-    --good:#7fa06a;
-    --good-ink:#f2e8d8;
-    --bad:#c1543a;
-    --bad-ink:#f2e8d8;
-    --board-light:#ecdfc4;
-    --board-dark:#8a5c3a;
-    --board-line:#5a3c24;
-    --sel:#caa24e;
-    --dot: rgba(20,15,10,0.35);
-    --shadow: 0 10px 30px rgba(0,0,0,0.35);
-    --radius: 14px;
-    color-scheme: dark;
-  }
-  :root[data-theme="light"], :root:not([data-theme="dark"]) {
+    --bg:#1b140f; --bg-2:#221912; --panel:#2b2016; --panel-2:#332619; --rule:#4a3a28;
+    --ink:#f2e8d8; --ink-dim:#c3ae8c; --ink-faint:#8f7c62; --accent:#caa24e; --accent-ink:#241b12;
+    --good:#7fa06a; --good-ink:#f2e8d8; --bad:#c1543a; --bad-ink:#f2e8d8;
+    --board-light:#ecdfc4; --board-dark:#8a5c3a; --board-line:#5a3c24; --sel:#caa24e; --dot: rgba(20,15,10,0.35);
+    --shadow: 0 10px 30px rgba(0,0,0,0.35); --radius: 14px; color-scheme: dark;
   }
   @media (prefers-color-scheme: light){
     :root:not([data-theme="dark"]){
-      --bg:#f3ecdb;
-      --bg-2:#ece2cb;
-      --panel:#fbf6ea;
-      --panel-2:#f3ead6;
-      --rule:#d8c8a6;
-      --ink:#2a2013;
-      --ink-dim:#5c4c34;
-      --ink-faint:#8a765a;
-      --accent:#9c7327;
-      --accent-ink:#fbf6ea;
-      --good:#4c7a3a;
-      --good-ink:#fbf6ea;
-      --bad:#a5432b;
-      --bad-ink:#fbf6ea;
-      --board-light:#f6ecd8;
-      --board-dark:#b3814f;
-      --board-line:#8a5c3a;
-      --sel:#9c7327;
-      --dot: rgba(20,15,10,0.28);
-      --shadow: 0 10px 24px rgba(60,45,25,0.18);
-      color-scheme: light;
+      --bg:#f3ecdb; --bg-2:#ece2cb; --panel:#fbf6ea; --panel-2:#f3ead6; --rule:#d8c8a6;
+      --ink:#2a2013; --ink-dim:#5c4c34; --ink-faint:#8a765a; --accent:#9c7327; --accent-ink:#fbf6ea;
+      --good:#4c7a3a; --good-ink:#fbf6ea; --bad:#a5432b; --bad-ink:#fbf6ea;
+      --board-light:#f6ecd8; --board-dark:#b3814f; --board-line:#8a5c3a; --sel:#9c7327; --dot: rgba(20,15,10,0.28);
+      --shadow: 0 10px 24px rgba(60,45,25,0.18); color-scheme: light;
     }
   }
   :root[data-theme="light"]{
@@ -81,31 +46,18 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
   html,body{height:100%;}
   body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
+    margin:0; background:var(--bg); color:var(--ink);
     font-family:"Source Serif 4", Georgia, "Iowan Old Style", serif;
-    display:flex;
-    justify-content:center;
-    min-height:100vh;
+    display:flex; justify-content:center; min-height:100vh;
   }
   .app{
-    width:100%;
-    max-width:520px;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    background:
-      radial-gradient(1200px 400px at 50% -10%, var(--bg-2), transparent 60%),
-      var(--bg);
+    width:100%; max-width:520px; min-height:100vh; display:flex; flex-direction:column;
+    background: radial-gradient(1200px 400px at 50% -10%, var(--bg-2), transparent 60%), var(--bg);
   }
 
   header.top{
-    position:sticky; top:0; z-index:20;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:14px 16px 10px;
-    background:linear-gradient(var(--bg), rgba(0,0,0,0));
-    border-bottom:1px solid var(--rule);
+    position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px 10px; background:linear-gradient(var(--bg), rgba(0,0,0,0)); border-bottom:1px solid var(--rule);
   }
   .brand{ display:flex; align-items:baseline; gap:8px; }
   .brand .mark{ font-size:22px; color:var(--accent); }
@@ -114,68 +66,60 @@
   .iconbtn{
     border:1px solid var(--rule); background:var(--panel); color:var(--ink);
     width:38px;height:38px;border-radius:10px; font-size:16px; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
+    display:flex; align-items:center; justify-content:center; position:relative;
   }
   .iconbtn:active{ transform:translateY(1px); }
   .iconrow{ display:flex; gap:8px; }
+  .iconbtn .pip{
+    position:absolute; top:-3px; right:-3px; width:9px; height:9px; border-radius:50%;
+    background:var(--accent); border:1.5px solid var(--bg);
+  }
 
-  .segmented{
-    display:flex; margin:12px 16px 0; background:var(--panel);
-    border:1px solid var(--rule); border-radius:12px; padding:3px; gap:3px;
+  .strip{
+    display:flex; gap:8px; overflow-x:auto; padding:12px 16px 4px; scrollbar-width:none;
   }
-  .segmented button{
-    flex:1; border:none; background:transparent; color:var(--ink-dim);
-    font-family:inherit; font-size:14px; padding:9px 6px; border-radius:9px; cursor:pointer;
-    font-weight:600; letter-spacing:.01em;
-  }
-  .segmented button.active{ background:var(--accent); color:var(--accent-ink); }
-
-  .chips{
-    display:flex; gap:8px; overflow-x:auto; padding:12px 16px 4px;
-    scrollbar-width:none;
-  }
-  .chips::-webkit-scrollbar{ display:none; }
+  .strip::-webkit-scrollbar{ display:none; }
   .chip{
     flex:0 0 auto; border:1px solid var(--rule); background:var(--panel);
-    color:var(--ink-dim); padding:7px 12px; border-radius:999px; font-size:12.5px;
-    cursor:pointer; white-space:nowrap; font-family:inherit;
+    color:var(--ink-dim); padding:8px 13px; border-radius:999px; font-size:12.5px;
+    cursor:pointer; white-space:nowrap; font-family:inherit; display:flex; align-items:center; gap:5px;
   }
   .chip.active{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600; }
+  .chip.add{ border-style:dashed; color:var(--accent); }
+  .chip.sub{ padding:7px 12px; font-size:12px; }
 
   main{ flex:1; padding:14px 16px 10px; display:flex; flex-direction:column; gap:12px; }
 
-  .status{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:0 2px;
-  }
-  .status .who{ font-size:13.5px; color:var(--ink-dim); }
+  .status{ display:flex; align-items:center; justify-content:space-between; padding:0 2px; gap:8px; }
+  .status .who{ font-size:13.5px; color:var(--ink-dim); flex:1; min-width:0; }
   .status .who b{ color:var(--ink); font-weight:600; }
+  .status .right{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+  .status .timer{
+    font-family:"JetBrains Mono", monospace; font-size:12.5px; color:var(--ink-faint);
+    border:1px solid var(--rule); border-radius:999px; padding:3px 9px;
+  }
+  .status .timer.done{ color:var(--good); border-color:var(--good); }
   .status .badge{
     font-size:11px; padding:3px 9px; border-radius:999px; border:1px solid var(--rule);
-    color:var(--ink-faint); letter-spacing:.02em;
+    color:var(--ink-faint); letter-spacing:.02em; white-space:nowrap;
   }
   .status .badge.solved{ background:var(--good); color:var(--good-ink); border-color:var(--good); }
-  .status .badge.viewed{ background:var(--panel-2); color:var(--ink-dim); }
 
   .board-wrap{
     position:relative; width:100%; aspect-ratio:1/1; border-radius:10px;
-    box-shadow:var(--shadow); border:1px solid var(--board-line); overflow:hidden;
-    background:var(--board-dark);
+    box-shadow:var(--shadow); border:1px solid var(--board-line); overflow:hidden; background:var(--board-dark);
   }
-  .board{
-    display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr);
-    width:100%; height:100%;
-  }
-  .sq{
-    position:relative; display:flex; align-items:center; justify-content:center;
-    font-size:clamp(20px, 7vw, 34px); user-select:none; cursor:pointer;
-    transition:background-color .12s ease;
-  }
+  .board{ display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); width:100%; height:100%; }
+  .sq{ position:relative; display:flex; align-items:center; justify-content:center; user-select:none; cursor:pointer; transition:background-color .12s ease; }
   .sq.light{ background:var(--board-light); }
   .sq.dark{ background:var(--board-dark); }
-  .sq .glyph{ line-height:1; pointer-events:none; filter:drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
-  .sq .glyph.white-pc{ color:#fbf6ea; -webkit-text-stroke:1px #241b12; }
-  .sq .glyph.black-pc{ color:#1c140c; -webkit-text-stroke:0.5px #1c140c;}
+  .sq .glyph{
+    line-height:1; pointer-events:none; font-size:clamp(36px, 11.8vw, 60px);
+    font-family:"DejaVu Sans","Segoe UI Symbol","Noto Sans Symbols 2",Arial,sans-serif;
+    filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35));
+  }
+  .sq .glyph.white-pc{ color:#fdf9ef; -webkit-text-stroke:1.4px #241b12; paint-order:stroke fill; }
+  .sq .glyph.black-pc{ color:#17110b; -webkit-text-stroke:0.6px #17110b; }
   .sq.sel{ box-shadow:inset 0 0 0 3px var(--sel); }
   .sq.from{ background-color: color-mix(in srgb, var(--accent) 35%, var(--board-light)); }
   .sq.dark.from{ background-color: color-mix(in srgb, var(--accent) 45%, var(--board-dark)); }
@@ -201,28 +145,20 @@
   .feedback.bad{ background:var(--bad); color:var(--bad-ink); border-color:var(--bad); animation:shake .32s ease; }
   @keyframes shake{ 10%,90%{transform:translateX(-1px);} 20%,80%{transform:translateX(2px);} 30%,50%,70%{transform:translateX(-4px);} 40%,60%{transform:translateX(4px);} }
 
-  .card{
-    background:var(--panel); border:1px solid var(--rule); border-radius:var(--radius);
-    padding:13px 14px;
-  }
+  .card{ background:var(--panel); border:1px solid var(--rule); border-radius:var(--radius); padding:13px 14px; }
   .card h2{ margin:0 0 6px; font-size:14.5px; font-weight:600; color:var(--accent); letter-spacing:.02em; }
   .card p{ margin:0; font-size:14.5px; line-height:1.55; color:var(--ink); }
   .card p + p{ margin-top:8px; }
-
   .lesson-card h2{ font-size:19px; color:var(--ink); }
-  .lesson-card .chapter{ font-size:12px; color:var(--accent); text-transform:none; letter-spacing:.03em; margin-bottom:4px; }
+  .lesson-card .chapter{ font-size:12px; color:var(--accent); margin-bottom:4px; }
   .lesson-card p{ font-size:15.5px; }
 
   .ledger{ display:none; flex-direction:column; gap:0; }
   .ledger.open{ display:flex; }
-  .ledger .line{
-    display:flex; gap:8px; padding:8px 0; border-bottom:1px dashed var(--rule);
-    font-size:14px; align-items:baseline;
-  }
+  .ledger .line{ display:flex; gap:8px; padding:8px 0; border-bottom:1px dashed var(--rule); font-size:14px; align-items:baseline; }
   .ledger .line:last-child{ border-bottom:none; }
   .ledger .mv{ font-family:"JetBrains Mono", monospace; font-weight:700; color:var(--accent); flex:0 0 auto; min-width:60px; }
   .ledger .cm{ color:var(--ink-dim); line-height:1.5; }
-  .ledger .tag{ font-family:"JetBrains Mono", monospace; font-size:11px; color:var(--ink-faint); }
 
   .actions-row{ display:flex; gap:8px; }
   .btn{
@@ -233,14 +169,13 @@
   .btn:active{ transform:translateY(1px); }
   .btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
   .btn.ghost{ background:transparent; }
+  .btn.danger{ color:var(--bad); border-color:var(--bad); background:transparent; }
   .btn:disabled{ opacity:.4; cursor:default; }
 
   footer.bottom{
-    position:sticky; bottom:0; z-index:20;
-    display:flex; align-items:center; gap:8px;
+    position:sticky; bottom:0; z-index:20; display:flex; align-items:center; gap:8px;
     padding:10px 16px calc(10px + env(safe-area-inset-bottom));
-    background:linear-gradient(rgba(0,0,0,0), var(--bg) 30%);
-    border-top:1px solid var(--rule);
+    background:linear-gradient(rgba(0,0,0,0), var(--bg) 30%); border-top:1px solid var(--rule);
   }
   .navbtn{
     border:1px solid var(--rule); background:var(--panel); color:var(--ink);
@@ -248,10 +183,7 @@
     display:flex; align-items:center; justify-content:center; flex:0 0 auto;
   }
   .navbtn:disabled{ opacity:.35; }
-  .counter{
-    flex:1; text-align:center; font-size:12.5px; color:var(--ink-faint);
-    font-family:"JetBrains Mono", monospace;
-  }
+  .counter{ flex:1; text-align:center; font-size:12.5px; color:var(--ink-faint); font-family:"JetBrains Mono", monospace; }
   .counter b{ color:var(--ink); }
   .showbtn{
     flex:0 0 auto; border:1px solid var(--accent); background:transparent; color:var(--accent);
@@ -263,18 +195,52 @@
     position:fixed; left:50%; bottom:90px; transform:translateX(-50%) translateY(10px);
     background:var(--panel); border:1px solid var(--rule); color:var(--ink);
     padding:9px 14px; border-radius:10px; font-size:13px; opacity:0; pointer-events:none;
-    transition:opacity .2s ease, transform .2s ease; box-shadow:var(--shadow); z-index:40; max-width:80%; text-align:center;
+    transition:opacity .2s ease, transform .2s ease; box-shadow:var(--shadow); z-index:60; max-width:80%; text-align:center;
   }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
-  .loading, .err{
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:10px; padding:60px 20px; color:var(--ink-dim); text-align:center; font-size:14px;
-  }
+  .loading, .err{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:60px 20px; color:var(--ink-dim); text-align:center; font-size:14px; }
   .err{ color:var(--bad); }
+
+  /* ---- modal ---- */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(10,7,4,.55); z-index:50; display:none;
+    align-items:flex-end; justify-content:center;
+  }
+  .modal-backdrop.open{ display:flex; }
+  .modal{
+    width:100%; max-width:520px; max-height:86vh; overflow-y:auto; background:var(--bg);
+    border-top:1px solid var(--rule); border-radius:18px 18px 0 0; padding:16px 16px calc(20px + env(safe-area-inset-bottom));
+    box-shadow:0 -12px 30px rgba(0,0,0,.4);
+  }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .modal-head h2{ margin:0; font-size:17px; font-weight:600; }
+  .modal-close{ border:none; background:var(--panel); color:var(--ink); width:32px; height:32px; border-radius:9px; font-size:15px; cursor:pointer; }
+
+  .stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+  .stat-box{ background:var(--panel); border:1px solid var(--rule); border-radius:12px; padding:10px 12px; }
+  .stat-box .v{ font-size:20px; font-weight:700; color:var(--accent); font-family:"JetBrains Mono", monospace; }
+  .stat-box .l{ font-size:11.5px; color:var(--ink-faint); margin-top:2px; }
+  .sparkline{ width:100%; height:44px; margin:4px 0 14px; }
+
+  .lib-item{
+    display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px dashed var(--rule);
+  }
+  .lib-item:last-child{ border-bottom:none; }
+  .lib-item .meta{ flex:1; min-width:0; }
+  .lib-item .fname{ font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lib-item .fsub{ font-size:11.5px; color:var(--ink-faint); margin-top:1px; }
+  .lib-item button{
+    flex:0 0 auto; border:1px solid var(--bad); color:var(--bad); background:transparent;
+    border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; font-family:inherit;
+  }
+  .modal-section{ margin-bottom:18px; }
+  .modal-section h3{ font-size:13px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em; margin:0 0 8px; font-weight:600; }
+  .empty-note{ font-size:13px; color:var(--ink-faint); padding:8px 0; }
 
   a{ color:var(--accent); }
   ::selection{ background:var(--accent); color:var(--accent-ink); }
+  input[type=file]{ display:none; }
 </style>
 </head>
 <body>
@@ -289,23 +255,25 @@
       </div>
     </div>
     <div class="iconrow">
+      <button class="iconbtn" id="statsBtn" title="Stats &amp; library" aria-label="Stats and library">📊</button>
       <button class="iconbtn" id="flipBtn" title="Flip board" aria-label="Flip board">⇅</button>
       <button class="iconbtn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">◐</button>
     </div>
   </header>
 
-  <div class="segmented" role="tablist">
-    <button id="tabEndings" class="active" role="tab">Endings · 300</button>
-    <button id="tabStrategy" role="tab">Strategy · 108</button>
-  </div>
-
-  <div class="chips" id="chapterChips" style="display:none;"></div>
+  <div class="strip" id="collectionStrip" role="tablist"></div>
+  <div class="strip" id="chapterChips" style="display:none;"></div>
 
   <main id="main">
     <div class="loading" id="loading">Setting up the board…</div>
   </main>
 
   <div class="toast" id="toast"></div>
+  <input type="file" id="fileInput" accept=".pgn,text/plain,application/x-chess-pgn" multiple>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" id="modal"></div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
@@ -320,45 +288,69 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   var app = document.getElementById('app');
   var mainEl = document.getElementById('main');
   var toastEl = document.getElementById('toast');
+  var collectionStripEl = document.getElementById('collectionStrip');
   var chapterChipsEl = document.getElementById('chapterChips');
   var collectionLabel = document.getElementById('collectionLabel');
-  var tabEndings = document.getElementById('tabEndings');
-  var tabStrategy = document.getElementById('tabStrategy');
   var flipBtn = document.getElementById('flipBtn');
   var themeBtn = document.getElementById('themeBtn');
+  var statsBtn = document.getElementById('statsBtn');
+  var fileInput = document.getElementById('fileInput');
+  var modalBackdrop = document.getElementById('modalBackdrop');
+  var modalEl = document.getElementById('modal');
 
-  var COLLECTIONS = {
-    endings: { label:'Practical Chess Endings', items: DATA.endings, chapters: null },
-    strategy:{ label:'Chess Strategy: Simplified', items: DATA.strategy, chapters: buildChapters(DATA.strategy) }
-  };
+  // ============================================================
+  // Storage (progress, ratings, and the user's own PGN library)
+  // ============================================================
+  var STORE_KEY = 'ledgerboard_progress_v2';
+  var LIB_INDEX_KEY = 'ledgerboard_library_index_v1';
+  var LIB_ITEM_PREFIX = 'ledgerboard_pgn_v1:';
+  var storageOK = true;
 
-  function buildChapters(items){
-    var order = [], seen = {};
-    for (var i=0;i<items.length;i++){
-      var c = items[i].chapter || '—';
-      if (!seen[c]){ seen[c]=true; order.push(c); }
-    }
-    return order;
+  function safeGet(key){
+    try{ return localStorage.getItem(key); }catch(e){ storageOK = false; return null; }
+  }
+  function safeSet(key, val){
+    try{ localStorage.setItem(key, val); return true; }
+    catch(e){ storageOK = false; return false; }
+  }
+  function safeRemove(key){
+    try{ localStorage.removeItem(key); }catch(e){ storageOK = false; }
   }
 
-  // ---------- persistent state ----------
-  var STORE_KEY = 'ledgerboard_progress_v1';
   var progress = loadProgress();
   function loadProgress(){
+    var fallback = { solved:{}, viewed:{}, theme:null, flipped:false, rating:1200, history:[] };
+    var raw = safeGet(STORE_KEY);
+    if (!raw) return fallback;
     try{
-      var raw = localStorage.getItem(STORE_KEY);
-      if (!raw) return { solved:{}, viewed:{}, theme:null, flipped:false };
       var p = JSON.parse(raw);
       p.solved = p.solved || {}; p.viewed = p.viewed || {};
+      p.rating = typeof p.rating === 'number' ? p.rating : 1200;
+      p.history = Array.isArray(p.history) ? p.history : [];
       return p;
-    }catch(e){ return { solved:{}, viewed:{}, theme:null, flipped:false }; }
+    }catch(e){ return fallback; }
   }
-  function saveProgress(){
-    try{ localStorage.setItem(STORE_KEY, JSON.stringify(progress)); }catch(e){}
-  }
-  function puzzleKey(source, num){ return source+':'+num; }
+  function saveProgress(){ safeSet(STORE_KEY, JSON.stringify(progress)); }
 
-  // ---------- theme ----------
+  // (per-collection puzzle progress keys are built by recordKey(), below)
+
+  function loadLibraryIndex(){
+    var raw = safeGet(LIB_INDEX_KEY);
+    if (!raw) return [];
+    try{ var idx = JSON.parse(raw); return Array.isArray(idx) ? idx : []; }catch(e){ return []; }
+  }
+  function saveLibraryIndex(idx){ return safeSet(LIB_INDEX_KEY, JSON.stringify(idx)); }
+  function loadLibraryItems(id){
+    var raw = safeGet(LIB_ITEM_PREFIX+id);
+    if (!raw) return null;
+    try{ return JSON.parse(raw); }catch(e){ return null; }
+  }
+
+  var library = loadLibraryIndex(); // [{id, filename, count, addedAt}]
+
+  // ============================================================
+  // Theme
+  // ============================================================
   function applyTheme(){
     if (progress.theme === 'light' || progress.theme === 'dark'){
       document.documentElement.setAttribute('data-theme', progress.theme);
@@ -368,19 +360,162 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   }
   applyTheme();
   themeBtn.addEventListener('click', function(){
-    var cur = progress.theme;
     var mql = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    var effective = cur || mql;
+    var effective = progress.theme || mql;
     progress.theme = (effective === 'dark') ? 'light' : 'dark';
     saveProgress(); applyTheme();
   });
+  flipBtn.addEventListener('click', function(){
+    progress.flipped = !progress.flipped;
+    saveProgress();
+    renderBoard();
+  });
 
-  // ---------- app state ----------
+  // ============================================================
+  // Tiny PGN parser (mirrors the Python tool used to build the
+  // built-in collections) so people can add their own files.
+  // ============================================================
+  var HEADER_RE = /^\[(\w+)\s+"([\s\S]*?)"\]\s*$/gm;
+
+  function extractComments(text){
+    var comments = [], out = [], i = 0, n = text.length;
+    while (i < n){
+      var c = text[i];
+      if (c === '{'){
+        var j = text.indexOf('}', i+1);
+        if (j === -1) j = n;
+        comments.push(text.slice(i+1, j).trim());
+        out.push('\u0000'+(comments.length-1)+'\u0000');
+        i = j+1;
+      } else { out.push(c); i++; }
+    }
+    return { stripped: out.join(''), comments: comments };
+  }
+
+  var MOVENUM_RE = /^\d+\.+$/;
+  var NAG_RE = /^\$\d+$/;
+  var COMMENT_PH_RE = /^\u0000(\d+)\u0000$/;
+  var RESULT_TOKENS = {'1-0':1,'0-1':1,'1/2-1/2':1,'*':1};
+
+  function parseMovetext(movetext){
+    var ec = extractComments(movetext);
+    var stripped = ec.stripped.replace(/\(/g, ' ( ').replace(/\)/g, ' ) ');
+    var tokens = stripped.split(/\s+/).filter(Boolean);
+    var depth = 0, mainline = [], moveComments = {}, moveNags = {}, intro = [], cur = -1;
+    for (var t=0; t<tokens.length; t++){
+      var tok = tokens[t];
+      if (tok === '('){ depth++; continue; }
+      if (tok === ')'){ depth = Math.max(0, depth-1); continue; }
+      if (depth > 0) continue;
+      if (RESULT_TOKENS[tok]) break;
+      if (MOVENUM_RE.test(tok)) continue;
+      if (NAG_RE.test(tok)){
+        if (cur >= 0){ (moveNags[cur] = moveNags[cur]||[]).push(tok); }
+        continue;
+      }
+      var m = COMMENT_PH_RE.exec(tok);
+      if (m){
+        var ctext = ec.comments[parseInt(m[1],10)];
+        if (!ctext) continue;
+        if (cur === -1) intro.push(ctext);
+        else (moveComments[cur] = moveComments[cur]||[]).push(ctext);
+        continue;
+      }
+      mainline.push(tok);
+      cur = mainline.length - 1;
+    }
+    return { mainline: mainline, moveComments: moveComments, moveNags: moveNags, intro: intro.join(' ').trim() };
+  }
+
+  function cleanComment(text){
+    text = text.replace(/\[%\w+[^\]]*\]/g, '');
+    return text.replace(/\s+/g, ' ').trim();
+  }
+
+  function splitGames(txt){
+    var parts = txt.trim().split(/\n(?=\[Event )/);
+    return parts.filter(function(p){ return p.trim().length; });
+  }
+
+  function parsePgnText(text, sourceId){
+    text = text.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
+    var games = splitGames(text);
+    var items = [], pnum = 0;
+    games.forEach(function(block){
+      HEADER_RE.lastIndex = 0;
+      var headers = {}, lastEnd = 0, mm;
+      while ((mm = HEADER_RE.exec(block)) !== null){
+        headers[mm[1]] = mm[2];
+        lastEnd = mm.index + mm[0].length;
+      }
+      var movetext = block.slice(lastEnd);
+      var pr = parseMovetext(movetext);
+      var intro = cleanComment(pr.intro);
+      var mc = {};
+      Object.keys(pr.moveComments).forEach(function(k){
+        var joined = cleanComment(pr.moveComments[k].join(' '));
+        if (joined) mc[k] = joined;
+      });
+      var mn = {};
+      Object.keys(pr.moveNags).forEach(function(k){ mn[k] = pr.moveNags[k]; });
+      var chapter = (headers.White || '').trim();
+      var title = (headers.Black || '').trim();
+      var fen = (headers.FEN || '').trim();
+      var realMoves = pr.mainline.filter(function(x){ return x !== 'Z0'; });
+      if (!fen || realMoves.length === 0){
+        items.push({ type:'text', source:sourceId, chapter:chapter, title:title, intro:intro });
+        return;
+      }
+      pnum++;
+      items.push({
+        type:'puzzle', source:sourceId, num:pnum, chapter:chapter, title:title, fen:fen,
+        moves: pr.mainline, moveComments: mc, moveNags: mn, intro: intro
+      });
+    });
+    return items;
+  }
+
+  // ============================================================
+  // Collections: built-in + user library
+  // ============================================================
+  function buildChapters(items){
+    var order = [], seen = {};
+    items.forEach(function(it){
+      var c = it.chapter || '\u2014';
+      if (!seen[c]){ seen[c]=true; order.push(c); }
+    });
+    return order.length > 1 ? order : null;
+  }
+
+  function builtin(name){
+    var items = DATA[name];
+    return { key:name, kind:'builtin', label: name==='endings' ? 'Practical Chess Endings' : 'Chess Strategy: Simplified',
+             shortLabel: name==='endings' ? 'Endings' : 'Strategy', items: items, chapters: buildChapters(items) };
+  }
+
+  function collectionFor(key){
+    if (key === 'endings' || key === 'strategy') return builtin(key);
+    var entry = library.filter(function(l){ return l.id === key; })[0];
+    if (!entry) return null;
+    var items = loadLibraryItems(key);
+    if (!items) return null;
+    return { key:key, kind:'custom', label: entry.filename, shortLabel: entry.filename.replace(/\.pgn$/i,''),
+             items: items, chapters: buildChapters(items) };
+  }
+
+  function allCollectionKeys(){
+    return ['endings','strategy'].concat(library.map(function(l){ return l.id; }));
+  }
+
+  // ============================================================
+  // App state
+  // ============================================================
   var state = {
-    collection: 'endings',
-    chapter: null,        // for strategy
-    filtered: [],          // current list of items in play
-    index: 0,               // index into filtered
+    collectionKey: 'endings',
+    collection: null,
+    chapter: null,
+    filtered: [],
+    index: 0,
     chess: null,
     solverColor: 'w',
     moveIndex: 0,
@@ -388,48 +523,65 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     solved: false,
     revealed: false,
     wrongCount: 0,
-    autoplaying: false
+    hintsUsed: 0,
+    autoplaying: false,
+    startTime: null,
+    timerHandle: null,
+    ratingCounted: false
   };
 
-  flipBtn.addEventListener('click', function(){
-    progress.flipped = !progress.flipped;
-    saveProgress();
-    renderBoard();
-  });
+  function renderCollectionStrip(){
+    collectionStripEl.innerHTML = '';
+    allCollectionKeys().forEach(function(key){
+      var col = collectionFor(key);
+      if (!col) return;
+      var b = document.createElement('button');
+      b.className = 'chip' + (key === state.collectionKey ? ' active' : '');
+      var puzCount = col.items.filter(function(it){ return it.type==='puzzle'; }).length;
+      var icon = col.kind === 'custom' ? '📄 ' : '';
+      b.textContent = icon + col.shortLabel + ' · ' + puzCount;
+      b.addEventListener('click', function(){ switchCollection(key); });
+      collectionStripEl.appendChild(b);
+    });
+    var addChip = document.createElement('button');
+    addChip.className = 'chip add';
+    addChip.textContent = '+ Add PGN';
+    addChip.addEventListener('click', function(){ fileInput.click(); });
+    collectionStripEl.appendChild(addChip);
+  }
 
-  tabEndings.addEventListener('click', function(){ switchCollection('endings'); });
-  tabStrategy.addEventListener('click', function(){ switchCollection('strategy'); });
-
-  function switchCollection(name){
-    state.collection = name;
-    tabEndings.classList.toggle('active', name==='endings');
-    tabStrategy.classList.toggle('active', name==='strategy');
-    collectionLabel.textContent = COLLECTIONS[name].label;
-    if (name === 'strategy'){
+  function switchCollection(key){
+    var col = collectionFor(key);
+    if (!col){ showToast('Could not open that file.'); return; }
+    state.collectionKey = key;
+    state.collection = col;
+    collectionLabel.textContent = col.label;
+    renderCollectionStrip();
+    if (col.chapters){
       chapterChipsEl.style.display = 'flex';
       renderChapterChips();
-      setChapter(COLLECTIONS.strategy.chapters[0]);
+      setChapter(col.chapters[0]);
     } else {
       chapterChipsEl.style.display = 'none';
       state.chapter = null;
-      state.filtered = COLLECTIONS.endings.items;
-      goToIndex(firstUnsolvedIndex(state.filtered) , true);
+      state.filtered = col.items;
+      goToIndex(firstUnsolvedIndex(state.filtered));
     }
   }
 
   function firstUnsolvedIndex(list){
     for (var i=0;i<list.length;i++){
       var it = list[i];
-      if (it.type==='puzzle' && !progress.solved[puzzleKey(it.source,it.num)]) return i;
+      if (it.type==='puzzle' && !progress.solved[state.collectionKey+'::'+it.source+':'+it.num]) return i;
     }
     return 0;
   }
 
   function renderChapterChips(){
     chapterChipsEl.innerHTML = '';
-    COLLECTIONS.strategy.chapters.forEach(function(ch){
+    state.collection.chapters.forEach(function(ch){
       var b = document.createElement('button');
-      b.className = 'chip' + (ch===state.chapter ? ' active' : '');
+      b.className = 'chip sub' + (ch===state.chapter ? ' active' : '');
       b.textContent = ch;
       b.addEventListener('click', function(){ setChapter(ch); });
       chapterChipsEl.appendChild(b);
@@ -438,57 +590,83 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
   function setChapter(ch){
     state.chapter = ch;
-    Array.prototype.forEach.call(chapterChipsEl.children, function(c){
-      c.classList.toggle('active', c.textContent === ch);
-    });
-    state.filtered = COLLECTIONS.strategy.items.filter(function(it){ return it.chapter === ch; });
-    goToIndex(0, true);
-    // scroll chip into view
+    Array.prototype.forEach.call(chapterChipsEl.children, function(c){ c.classList.toggle('active', c.textContent === ch); });
+    state.filtered = state.collection.items.filter(function(it){ return it.chapter === ch; });
+    goToIndex(0);
     var active = chapterChipsEl.querySelector('.chip.active');
     if (active && active.scrollIntoView) active.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
   }
 
-  function goToIndex(i, resetToBeginningIfSolvedSkip){
+  function goToIndex(i){
     if (i<0) i=0;
     if (i>=state.filtered.length) i = state.filtered.length-1;
+    if (i<0) i=0;
     state.index = i;
     loadCurrentItem();
   }
-
   function currentItem(){ return state.filtered[state.index]; }
 
-  // ---------- loading an item ----------
-  function loadCurrentItem(){
-    var item = currentItem();
-    if (!item){ mainEl.innerHTML = '<div class="loading">Nothing here yet.</div>'; return; }
-    if (item.type === 'text'){
-      renderLesson(item);
-      return;
-    }
-    // puzzle
-    try{
-      state.chess = new Chess(item.fen);
-    }catch(e){
-      state.chess = null;
-    }
-    state.solverColor = state.chess ? state.chess.turn() : 'w';
-    state.moveIndex = 0;
-    state.selected = null;
-    state.solved = !!progress.solved[puzzleKey(item.source, item.num)];
-    state.revealed = false;
-    state.wrongCount = 0;
-    state.autoplaying = false;
-    renderPuzzle(item);
-  }
+  // unique key for progress/rating records, namespaced by collection
+  function recordKey(item){ return state.collectionKey + '::' + item.source + ':' + item.num; }
 
   function showToast(msg){
     toastEl.textContent = msg;
     toastEl.classList.add('show');
     clearTimeout(showToast._t);
-    showToast._t = setTimeout(function(){ toastEl.classList.remove('show'); }, 1600);
+    showToast._t = setTimeout(function(){ toastEl.classList.remove('show'); }, 1900);
   }
 
-  // ---------- lesson rendering ----------
+  // ============================================================
+  // Loading an item
+  // ============================================================
+  function stopTimer(){
+    if (state.timerHandle){ clearInterval(state.timerHandle); state.timerHandle = null; }
+  }
+
+  function loadCurrentItem(){
+    stopTimer();
+    var item = currentItem();
+    if (!item){ mainEl.innerHTML = '<div class="loading">Nothing here yet.</div>'; renderFooter(); return; }
+    if (item.type === 'text'){ renderLesson(item); return; }
+
+    try{ state.chess = new Chess(item.fen); }
+    catch(e){ state.chess = null; }
+
+    if (!state.chess){
+      mainEl.innerHTML = '<div class="err">This position could not be loaded (the FEN looks invalid). Try the next puzzle.</div>';
+      renderFooter();
+      return;
+    }
+
+    state.solverColor = state.chess.turn();
+    state.moveIndex = 0;
+    state.selected = null;
+    state.solved = !!progress.solved[recordKey(item)];
+    state.revealed = false;
+    state.wrongCount = 0;
+    state.hintsUsed = 0;
+    state.autoplaying = false;
+    state.startTime = Date.now();
+    state.ratingCounted = false;
+    renderPuzzle(item);
+    state.timerHandle = setInterval(updateTimerDisplay, 1000);
+  }
+
+  function formatTime(ms){
+    var s = Math.floor(ms/1000);
+    var m = Math.floor(s/60);
+    s = s % 60;
+    return m + ':' + (s<10?'0':'') + s;
+  }
+  function updateTimerDisplay(){
+    var el = document.getElementById('liveTimer');
+    if (!el || !state.startTime) return;
+    el.textContent = '\u23f1 ' + formatTime(Date.now() - state.startTime);
+  }
+
+  // ============================================================
+  // Lesson rendering
+  // ============================================================
   function renderLesson(item){
     mainEl.innerHTML = '';
     var card = document.createElement('div');
@@ -500,9 +678,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     h2.textContent = item.title || '';
     var p = document.createElement('p');
     p.textContent = item.intro || '';
-    card.appendChild(chapterLine);
-    card.appendChild(h2);
-    card.appendChild(p);
+    card.appendChild(chapterLine); card.appendChild(h2); card.appendChild(p);
     mainEl.appendChild(card);
 
     var actions = document.createElement('div');
@@ -514,11 +690,12 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     cont.addEventListener('click', function(){ goToIndex(state.index+1); });
     actions.appendChild(cont);
     mainEl.appendChild(actions);
-
     renderFooter();
   }
 
-  // ---------- puzzle rendering ----------
+  // ============================================================
+  // Puzzle rendering
+  // ============================================================
   var NAG_MAP = {
     '$1':'good move','$2':'weak move','$3':'excellent move','$4':'blunder',
     '$6':'dubious move','$7':'forced move','$11':'equal position',
@@ -530,37 +707,36 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   function renderPuzzle(item){
     mainEl.innerHTML = '';
 
-    // status row
     var status = document.createElement('div');
     status.className = 'status';
     var who = document.createElement('div');
     who.className = 'who';
-    var srcLabel = item.source === 'endings' ? 'Ending' : 'Puzzle';
-    var chapterBit = item.source === 'strategy' ? (item.title ? (' — ' + item.title) : '') : '';
+    var srcLabel = state.collection.kind === 'builtin' && item.source==='endings' ? 'Ending' : 'Puzzle';
+    var chapterBit = (state.collection.kind !== 'builtin' || item.source === 'strategy') && item.title ? (' — ' + item.title) : '';
     who.innerHTML = srcLabel + ' No. ' + item.num + chapterBit + ' &middot; <b>' + (state.solverColor==='w' ? 'White' : 'Black') + ' to move</b>';
+    var right = document.createElement('div');
+    right.className = 'right';
+    var timer = document.createElement('div');
+    timer.className = 'timer'; timer.id = 'liveTimer'; timer.textContent = '\u23f1 0:00';
     var badge = document.createElement('div');
     badge.className = 'badge' + (state.solved ? ' solved' : '');
-    badge.textContent = state.solved ? 'Solved ✓' : (progress.viewed[puzzleKey(item.source,item.num)] ? 'Viewed' : 'Unsolved');
-    status.appendChild(who); status.appendChild(badge);
+    badge.textContent = state.solved ? 'Solved ✓' : (progress.viewed[recordKey(item)] ? 'Viewed' : 'Unsolved');
+    right.appendChild(timer); right.appendChild(badge);
+    status.appendChild(who); status.appendChild(right);
     mainEl.appendChild(status);
 
-    // board
     var boardWrap = document.createElement('div');
     boardWrap.className = 'board-wrap';
     var board = document.createElement('div');
-    board.className = 'board';
-    board.id = 'board';
+    board.className = 'board'; board.id = 'board';
     boardWrap.appendChild(board);
     mainEl.appendChild(boardWrap);
 
-    // feedback
     var feedback = document.createElement('div');
-    feedback.className = 'feedback';
-    feedback.id = 'feedback';
+    feedback.className = 'feedback'; feedback.id = 'feedback';
     feedback.textContent = item.intro ? 'Study the position, then play the winning line.' : 'Find the best move for ' + (state.solverColor==='w'?'White':'Black') + '.';
     mainEl.appendChild(feedback);
 
-    // intro card (the question / context) — always visible, this is not the solution
     if (item.intro){
       var introCard = document.createElement('div');
       introCard.className = 'card';
@@ -572,21 +748,13 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       mainEl.appendChild(introCard);
     }
 
-    // ledger (solution), hidden until revealed or built progressively as solved
     var ledgerCard = document.createElement('div');
-    ledgerCard.className = 'card';
-    ledgerCard.id = 'ledgerCard';
-    ledgerCard.style.display = 'none';
-    var lh = document.createElement('h2');
-    lh.textContent = 'Solution';
-    var ledger = document.createElement('div');
-    ledger.className = 'ledger';
-    ledger.id = 'ledger';
-    ledgerCard.appendChild(lh);
-    ledgerCard.appendChild(ledger);
+    ledgerCard.className = 'card'; ledgerCard.id = 'ledgerCard'; ledgerCard.style.display = 'none';
+    var lh = document.createElement('h2'); lh.textContent = 'Solution';
+    var ledger = document.createElement('div'); ledger.className = 'ledger'; ledger.id = 'ledger';
+    ledgerCard.appendChild(lh); ledgerCard.appendChild(ledger);
     mainEl.appendChild(ledgerCard);
 
-    // hint / reset row
     var actions = document.createElement('div');
     actions.className = 'actions-row';
     var hintBtn = document.createElement('button');
@@ -600,17 +768,11 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
     renderBoard();
     renderFooter();
-
-    if (state.solved){
-      // rebuild full ledger silently (already solved) but keep hidden until user taps show
-      buildFullLedger(item);
-    }
   }
 
   function squareEl(file, rank){ return document.querySelector('.sq[data-sq="'+file+rank+'"]'); }
 
   function renderBoard(){
-    var item = currentItem();
     var board = document.getElementById('board');
     if (!board || !state.chess) return;
     board.innerHTML = '';
@@ -621,16 +783,11 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
     var lastMove = state.chess.history({verbose:true}).slice(-1)[0];
     var inCheckSq = null;
-    if (state.chess.in_check()){
-      var turnColor = state.chess.turn();
-      inCheckSq = findKingSquare(state.chess, turnColor);
-    }
+    if (state.chess.in_check()) inCheckSq = findKingSquare(state.chess, state.chess.turn());
 
     for (var r=0;r<8;r++){
       for (var f=0;f<8;f++){
-        var file = fileOrder[f];
-        var rank = rankOrder[r];
-        var sqName = file+''+rank;
+        var file = fileOrder[f], rank = rankOrder[r], sqName = file+''+rank;
         var isLight = ((files.indexOf(file) + rank) % 2 === 1);
         var sq = document.createElement('div');
         sq.className = 'sq ' + (isLight ? 'light':'dark');
@@ -643,25 +800,18 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
           span.textContent = pieceGlyph(piece.type, piece.color);
           sq.appendChild(span);
         }
-        if (lastMove && (lastMove.from===sqName)) sq.classList.add('from');
-        if (lastMove && (lastMove.to===sqName)) sq.classList.add('to');
+        if (lastMove && lastMove.from===sqName) sq.classList.add('from');
+        if (lastMove && lastMove.to===sqName) sq.classList.add('to');
         if (inCheckSq === sqName) sq.classList.add('check');
         if (state.selected === sqName) sq.classList.add('sel');
-
-        if (f===0){
-          var rc = document.createElement('span'); rc.className='coord rank'; rc.textContent=rank; sq.appendChild(rc);
-        }
-        if (r===7){
-          var fc = document.createElement('span'); fc.className='coord file'; fc.textContent=file; sq.appendChild(fc);
-        }
+        if (f===0){ var rc=document.createElement('span'); rc.className='coord rank'; rc.textContent=rank; sq.appendChild(rc); }
+        if (r===7){ var fc=document.createElement('span'); fc.className='coord file'; fc.textContent=file; sq.appendChild(fc); }
 
         sq.addEventListener('click', onSquareClick);
         board.appendChild(sq);
       }
     }
-    if (state.selected){
-      highlightMoves(state.selected);
-    }
+    if (state.selected) highlightMoves(state.selected);
   }
 
   function findKingSquare(chess, color){
@@ -676,19 +826,25 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     return null;
   }
 
+  // Append U+FE0E (text variation selector) so these render as crisp
+  // text-style glyphs instead of tiny/inconsistent emoji-style pictures
+  // on Android devices that substitute a color emoji font.
   var GLYPHS = {
-    w:{ k:'♔', q:'♕', r:'♖', b:'♗', n:'♘', p:'♙' },
-    b:{ k:'♚', q:'♛', r:'♜', b:'♝', n:'♞', p:'♟' }
+    w:{ k:'\u2654\uFE0E', q:'\u2655\uFE0E', r:'\u2656\uFE0E', b:'\u2657\uFE0E', n:'\u2658\uFE0E', p:'\u2659\uFE0E' },
+    b:{ k:'\u265A\uFE0E', q:'\u265B\uFE0E', r:'\u265C\uFE0E', b:'\u265D\uFE0E', n:'\u265E\uFE0E', p:'\u265F\uFE0E' }
   };
   function pieceGlyph(type,color){ return GLYPHS[color][type]; }
 
   function highlightMoves(from){
     var moves = state.chess.moves({square:from, verbose:true});
+    var seen = {};
     moves.forEach(function(m){
+      if (seen[m.to]) return; // multiple promotion options -> one marker
+      seen[m.to] = true;
       var el = squareEl(m.to[0], m.to[1]);
       if (!el) return;
       var mark = document.createElement('span');
-      if (state.chess.get(m.to)) { mark.className='ring'; } else { mark.className='dot'; }
+      mark.className = state.chess.get(m.to) ? 'ring' : 'dot';
       el.appendChild(mark);
     });
   }
@@ -697,42 +853,31 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (state.autoplaying || state.revealed) return;
     var item = currentItem();
     if (!item || item.type !== 'puzzle' || !state.chess) return;
-    if (state.chess.turn() !== state.solverColor) return; // waiting for opponent auto-move
-    if (state.moveIndex >= item.moves.length) return; // already finished
+    if (state.chess.turn() !== state.solverColor) return;
+    if (state.moveIndex >= item.moves.length) return;
 
     var sqName = e.currentTarget.getAttribute('data-sq');
     var piece = state.chess.get(sqName);
 
     if (state.selected){
-      if (state.selected === sqName){
+      if (state.selected === sqName){ state.selected = null; renderBoard(); return; }
+      var legalToSquare = state.chess.moves({square:state.selected, verbose:true}).filter(function(m){ return m.to === sqName; });
+      if (legalToSquare.length === 0){
+        if (piece && piece.color === state.solverColor){ state.selected = sqName; renderBoard(); return; }
         state.selected = null; renderBoard(); return;
       }
-      var legal = state.chess.moves({square:state.selected, verbose:true});
-      var attempt = null;
-      for (var i=0;i<legal.length;i++){
-        if (legal[i].to === sqName){
-          if (legal[i].promotion && legal[i].promotion !== 'q'){ continue; }
-          attempt = legal[i]; break;
-        }
-      }
-      if (!attempt){
-        // maybe clicked own piece to re-select
-        if (piece && piece.color === state.solverColor){
-          state.selected = sqName; renderBoard(); return;
-        }
-        state.selected = null; renderBoard(); return;
-      }
-      tryMove(attempt);
-      return;
-    } else {
-      if (piece && piece.color === state.solverColor){
-        state.selected = sqName; renderBoard();
-      }
+      attemptMove(sqName);
+    } else if (piece && piece.color === state.solverColor){
+      state.selected = sqName; renderBoard();
     }
   }
 
-  function normSan(s){ return (s||'').replace(/[+#!?]+$/,'').replace(/\s+\$\d+/,''); }
+  function normSan(s){ return (s||'').replace(/[+#!?]+$/,''); }
 
+  // Finds the exact legal move (including correct promotion piece) that
+  // matches the puzzle's expected next SAN. Using this authoritative move
+  // object (rather than guessing the promotion piece from the click) means
+  // puzzles that promote to a knight/rook/bishop work correctly too.
   function expectedMove(item){
     var expectedSan = item.moves[state.moveIndex];
     if (expectedSan === undefined) return null;
@@ -744,24 +889,22 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     return null;
   }
 
-  function tryMove(attempt){
+  function attemptMove(toSquare){
     var item = currentItem();
     var exp = expectedMove(item);
-    var isCorrect = exp && exp.from===attempt.from && exp.to===attempt.to && (exp.promotion||'')===(attempt.promotion||'');
     var feedback = document.getElementById('feedback');
-    if (isCorrect){
-      var res = state.chess.move({from:attempt.from, to:attempt.to, promotion:attempt.promotion});
+    var correct = exp && exp.from === state.selected && exp.to === toSquare;
+
+    if (correct){
+      var res = state.chess.move({ from: exp.from, to: exp.to, promotion: exp.promotion });
       state.selected = null;
       appendLedgerLine(item, state.moveIndex, res.san);
       state.moveIndex++;
       feedback.className = 'feedback good';
       feedback.textContent = 'Correct — ' + res.san;
-      renderBoard(); updateStatusBadgeLive();
-      if (state.moveIndex >= item.moves.length){
-        onSolved(item);
-      } else {
-        maybeAutoReply(item);
-      }
+      renderBoard();
+      if (state.moveIndex >= item.moves.length) onSolved(item);
+      else maybeAutoReply(item);
     } else {
       state.wrongCount++;
       state.selected = null;
@@ -779,35 +922,26 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       var san = item.moves[state.moveIndex];
       var res = null;
       try{ res = state.chess.move(san); }catch(e){ res = null; }
-      if (!res){
-        try{ res = state.chess.move(san, {sloppy:true}); }catch(e2){ res = null; }
-      }
-      if (res){
-        appendLedgerLine(item, state.moveIndex, res.san);
-        state.moveIndex++;
-      } else {
-        state.moveIndex++; // avoid infinite loop on bad data
-      }
+      if (!res){ try{ res = state.chess.move(san, {sloppy:true}); }catch(e2){ res = null; } }
+      if (res){ appendLedgerLine(item, state.moveIndex, res.san); state.moveIndex++; }
+      else { state.moveIndex++; } // skip bad data rather than freezing the trainer
       state.autoplaying = false;
       renderBoard();
       var feedback = document.getElementById('feedback');
-      if (state.moveIndex >= item.moves.length){
-        onSolved(item);
-      } else {
+      if (state.moveIndex >= item.moves.length){ onSolved(item); }
+      else {
         feedback.className='feedback';
         feedback.textContent = 'Your move.';
-        if (state.chess.turn() !== state.solverColor){ maybeAutoReply(item); }
+        if (state.chess.turn() !== state.solverColor) maybeAutoReply(item);
       }
     }, 550);
   }
 
   function appendLedgerLine(item, idx, sanOverride){
     var ledger = document.getElementById('ledger');
-    var ledgerCard = document.getElementById('ledgerCard');
     if (!ledger) return;
     var san = sanOverride || item.moves[idx];
     var moveNo = Math.floor(idx/2)+1;
-    var isWhiteMove = (state.solverColorAtStart0 !== undefined) ? null : null;
     var line = document.createElement('div');
     line.className = 'line';
     var mv = document.createElement('div'); mv.className='mv';
@@ -815,42 +949,64 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var plyIsWhite = startedWhite ? (idx % 2 === 0) : (idx % 2 === 1);
     mv.textContent = plyIsWhite ? (moveNo + '.') : (moveNo + '...');
     var cm = document.createElement('div'); cm.className='cm';
-    var txt = san;
     var comment = item.moveComments && item.moveComments[String(idx)];
     var nag = item.moveNags && item.moveNags[String(idx)];
-    var nagTxt = '';
-    if (nag && nag.length){ nagTxt = ' (' + nag.map(function(n){return NAG_MAP[n]||n;}).join(', ') + ')'; }
-    cm.textContent = txt + nagTxt + (comment ? ' — ' + comment : '');
+    var nagTxt = (nag && nag.length) ? (' (' + nag.map(function(n){return NAG_MAP[n]||n;}).join(', ') + ')') : '';
+    cm.textContent = san + nagTxt + (comment ? ' — ' + comment : '');
     line.appendChild(mv); line.appendChild(cm);
     ledger.appendChild(line);
   }
 
-  function buildFullLedger(item){
-    var ledger = document.getElementById('ledger');
-    if (!ledger) return;
-    ledger.innerHTML = '';
-    for (var i=0;i<item.moves.length;i++){
-      appendLedgerLine(item, i);
-    }
-  }
-
   function updateStatusBadgeLive(){
     var badge = document.querySelector('.status .badge');
-    if (!badge) return;
-    if (state.solved){ badge.className='badge solved'; badge.textContent='Solved ✓'; }
+    if (badge && state.solved){ badge.className='badge solved'; badge.textContent='Solved ✓'; }
+  }
+
+  // ---- rating: a lightweight Elo-style estimate of solving strength ----
+  function puzzleDifficulty(item){
+    var total = state.filtered.filter(function(x){ return x.type==='puzzle'; }).length || 1;
+    var posRatio = Math.min(1, (item.num||1) / total);
+    var lengthFactor = Math.min(item.moves.length, 40) * 6;
+    return Math.round(950 + posRatio*650 + lengthFactor);
+  }
+
+  function applyRatingUpdate(item, score){
+    var diff = puzzleDifficulty(item);
+    var expected = 1 / (1 + Math.pow(10, (diff - progress.rating) / 400));
+    var K = 22;
+    var before = progress.rating;
+    var after = Math.round(before + K * (score - expected));
+    after = Math.max(400, Math.min(2800, after));
+    progress.rating = after;
+    progress.history.push({ t: Date.now(), rating: after, delta: after-before, key: recordKey(item), score: score });
+    if (progress.history.length > 300) progress.history = progress.history.slice(-300);
+    saveProgress();
+    return after - before;
   }
 
   function onSolved(item){
+    stopTimer();
+    var elapsed = Date.now() - state.startTime;
+    var already = state.solved;
     state.solved = true;
-    progress.solved[puzzleKey(item.source,item.num)] = true;
+    progress.solved[recordKey(item)] = true;
+    var delta = 0;
+    if (!already && !state.ratingCounted){
+      state.ratingCounted = true;
+      delta = applyRatingUpdate(item, 1);
+    }
     saveProgress();
     var feedback = document.getElementById('feedback');
     feedback.className = 'feedback good';
-    feedback.textContent = 'Solved! Well played.';
+    var deltaTxt = delta ? ('  ·  Rating ' + progress.rating + ' (' + (delta>=0?'+':'') + delta + ')') : '';
+    feedback.textContent = 'Solved in ' + formatTime(elapsed) + '!' + deltaTxt;
+    var liveTimer = document.getElementById('liveTimer');
+    if (liveTimer){ liveTimer.textContent = '\u23f1 ' + formatTime(elapsed); liveTimer.classList.add('done'); }
     updateStatusBadgeLive();
     document.getElementById('ledgerCard').style.display = 'block';
     document.getElementById('ledger').classList.add('open');
     renderFooter();
+    renderCollectionStrip();
     showToast('Puzzle solved ✓');
   }
 
@@ -858,11 +1014,11 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var item = currentItem();
     if (!item || item.type!=='puzzle' || !state.chess) return;
     if (state.chess.turn() !== state.solverColor || state.moveIndex >= item.moves.length){
-      showToast('No hint needed right now.');
-      return;
+      showToast('No hint needed right now.'); return;
     }
     var exp = expectedMove(item);
     if (!exp){ showToast('No hint available.'); return; }
+    state.hintsUsed++;
     var el = squareEl(exp.from[0], exp.from[1]);
     if (el){
       var ring = document.createElement('span');
@@ -875,16 +1031,18 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
   function onShowAnswer(){
     var item = currentItem();
-    if (!item || item.type!=='puzzle') return;
-    if (state.revealed) return;
+    if (!item || item.type!=='puzzle' || state.revealed) return;
     state.revealed = true;
-    progress.viewed[puzzleKey(item.source,item.num)] = true;
+    progress.viewed[recordKey(item)] = true;
+    if (!state.solved && !state.ratingCounted){
+      state.ratingCounted = true;
+      applyRatingUpdate(item, 0);
+    }
     saveProgress();
+    stopTimer();
     document.getElementById('ledgerCard').style.display = 'block';
     var ledger = document.getElementById('ledger');
-    ledger.classList.add('open');
-    ledger.innerHTML = '';
-    // replay from current position to the end, animating
+    ledger.classList.add('open'); ledger.innerHTML = '';
     state.autoplaying = true;
     var feedback = document.getElementById('feedback');
     feedback.className = 'feedback';
@@ -900,7 +1058,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       var res = null;
       try{ res = state.chess.move(san); }catch(e){ res=null; }
       if (!res){ try{ res = state.chess.move(san, {sloppy:true}); }catch(e2){ res=null; } }
-      if (res){ appendLedgerLine(item, state.moveIndex, res.san); }
+      if (res) appendLedgerLine(item, state.moveIndex, res.san);
       state.moveIndex++;
       renderBoard();
       ledger.scrollTop = ledger.scrollHeight;
@@ -909,7 +1067,9 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     renderFooter();
   }
 
-  // ---------- footer / nav ----------
+  // ============================================================
+  // Footer / nav
+  // ============================================================
   function renderFooter(){
     var old = document.querySelector('footer.bottom');
     if (old) old.remove();
@@ -925,7 +1085,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     counter.className = 'counter';
     var item = currentItem();
     var posLabel = item && item.type==='puzzle' ? ('No. '+item.num) : (item ? item.title : '');
-    counter.innerHTML = (state.index+1) + ' / ' + state.filtered.length + '<br><b>' + (posLabel||'') + '</b>';
+    counter.innerHTML = (state.filtered.length ? (state.index+1) : 0) + ' / ' + state.filtered.length + '<br><b>' + (posLabel||'') + '</b>';
 
     var showBtn = document.createElement('button');
     showBtn.className = 'showbtn' + (state.revealed ? ' revealed' : '');
@@ -940,32 +1100,195 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     next.disabled = state.index>=state.filtered.length-1;
     next.addEventListener('click', function(){ goToIndex(state.index+1); });
 
-    footer.appendChild(prev);
-    footer.appendChild(counter);
-    footer.appendChild(showBtn);
-    footer.appendChild(next);
+    footer.appendChild(prev); footer.appendChild(counter); footer.appendChild(showBtn); footer.appendChild(next);
     app.appendChild(footer);
   }
 
-  // keyboard nav (desktop convenience)
   document.addEventListener('keydown', function(e){
-    if (e.key === 'ArrowRight'){ goToIndex(state.index+1); }
-    else if (e.key === 'ArrowLeft'){ goToIndex(state.index-1); }
+    if (modalBackdrop.classList.contains('open')) return;
+    if (e.key === 'ArrowRight') goToIndex(state.index+1);
+    else if (e.key === 'ArrowLeft') goToIndex(state.index-1);
   });
 
-  // ---------- boot ----------
+  // ============================================================
+  // Upload / library management
+  // ============================================================
+  fileInput.addEventListener('change', function(){
+    var files = Array.prototype.slice.call(fileInput.files || []);
+    if (!files.length) return;
+    var addedKey = null;
+    var pending = files.length;
+    files.forEach(function(file){
+      var reader = new FileReader();
+      reader.onload = function(){
+        handleUploadedPgn(file.name, String(reader.result || ''));
+        pending--;
+        if (pending === 0){ fileInput.value = ''; }
+      };
+      reader.onerror = function(){
+        showToast('Could not read ' + file.name);
+        pending--;
+      };
+      reader.readAsText(file);
+    });
+  });
+
+  function handleUploadedPgn(filename, text){
+    var items;
+    try{ items = parsePgnText(text, 'lib'); }
+    catch(e){ showToast('Could not parse ' + filename + '.'); return; }
+    var puzCount = items.filter(function(it){ return it.type==='puzzle'; }).length;
+    if (puzCount === 0){ showToast('No puzzle positions found in ' + filename + ' (make sure it has [FEN] setup tags).'); return; }
+
+    var id = 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+    var ok = safeSet(LIB_ITEM_PREFIX+id, JSON.stringify(items));
+    if (!ok){ showToast('Storage is full — remove an old file first.'); return; }
+    library.push({ id:id, filename:filename, count:puzCount, addedAt:Date.now() });
+    if (!saveLibraryIndex(library)){ showToast('Storage is full — remove an old file first.'); library.pop(); return; }
+
+    showToast('Added ' + filename + ' (' + puzCount + ' puzzles)');
+    renderCollectionStrip();
+    switchCollection(id);
+  }
+
+  function removeLibraryFile(id){
+    library = library.filter(function(l){ return l.id !== id; });
+    saveLibraryIndex(library);
+    safeRemove(LIB_ITEM_PREFIX+id);
+    if (state.collectionKey === id) switchCollection('endings');
+    else renderCollectionStrip();
+    renderStatsModal();
+  }
+
+  // ============================================================
+  // Stats & library modal
+  // ============================================================
+  function computeStats(){
+    var hist = progress.history || [];
+    var solvedCount = Object.keys(progress.solved).length;
+    var solves = hist.filter(function(h){ return h.score === 1; });
+    var attempts = hist.length;
+    var accuracy = attempts ? Math.round(100 * solves.length / attempts) : 0;
+    return { rating: progress.rating, solvedCount: solvedCount, attempts: attempts, accuracy: accuracy, hist: hist };
+  }
+
+  function sparklineSVG(hist){
+    var pts = hist.slice(-24).map(function(h){ return h.rating; });
+    if (pts.length < 2) return '';
+    var min = Math.min.apply(null, pts), max = Math.max.apply(null, pts);
+    if (min === max){ min -= 10; max += 10; }
+    var w = 280, h = 40, pad = 4;
+    var stepX = (w - pad*2) / (pts.length-1);
+    var coords = pts.map(function(v,i){
+      var x = pad + i*stepX;
+      var y = h - pad - ((v-min)/(max-min))*(h-pad*2);
+      return x.toFixed(1)+','+y.toFixed(1);
+    }).join(' ');
+    return '<svg class="sparkline" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">' +
+      '<polyline points="'+coords+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>';
+  }
+
+  function renderStatsModal(){
+    var s = computeStats();
+    modalEl.innerHTML = '';
+
+    var head = document.createElement('div');
+    head.className = 'modal-head';
+    var h2 = document.createElement('h2'); h2.textContent = 'Stats & library';
+    var close = document.createElement('button'); close.className='modal-close'; close.textContent='✕';
+    close.addEventListener('click', closeModal);
+    head.appendChild(h2); head.appendChild(close);
+    modalEl.appendChild(head);
+
+    var statSection = document.createElement('div');
+    statSection.className = 'modal-section';
+    var grid = document.createElement('div'); grid.className = 'stat-grid';
+    [['Rating', s.rating], ['Puzzles solved', s.solvedCount], ['Accuracy', s.accuracy+'%'], ['Attempts logged', s.attempts]]
+      .forEach(function(pair){
+        var box = document.createElement('div'); box.className='stat-box';
+        var v = document.createElement('div'); v.className='v'; v.textContent = pair[1];
+        var l = document.createElement('div'); l.className='l'; l.textContent = pair[0];
+        box.appendChild(v); box.appendChild(l); grid.appendChild(box);
+      });
+    statSection.appendChild(grid);
+    if (s.hist.length >= 2){
+      var spark = document.createElement('div');
+      spark.innerHTML = sparklineSVG(s.hist);
+      statSection.appendChild(spark);
+    }
+    var resetBtn = document.createElement('button');
+    resetBtn.className = 'btn danger'; resetBtn.style.width='100%'; resetBtn.textContent = 'Reset stats and progress';
+    resetBtn.addEventListener('click', function(){
+      if (!confirm('This clears your rating, solved history, and puzzle progress on this device. Continue?')) return;
+      progress = { solved:{}, viewed:{}, theme:progress.theme, flipped:progress.flipped, rating:1200, history:[] };
+      saveProgress();
+      renderStatsModal();
+      loadCurrentItem();
+      renderCollectionStrip();
+      showToast('Progress reset.');
+    });
+    statSection.appendChild(document.createElement('br'));
+    statSection.appendChild(resetBtn);
+    modalEl.appendChild(statSection);
+
+    var libSection = document.createElement('div');
+    libSection.className = 'modal-section';
+    var h3 = document.createElement('h3'); h3.textContent = 'Your PGN files';
+    libSection.appendChild(h3);
+    if (!library.length){
+      var empty = document.createElement('div'); empty.className='empty-note';
+      empty.textContent = 'No files uploaded yet. Add a .pgn file with [FEN] puzzle positions to practice it here.';
+      libSection.appendChild(empty);
+    } else {
+      library.forEach(function(l){
+        var row = document.createElement('div'); row.className = 'lib-item';
+        var meta = document.createElement('div'); meta.className='meta';
+        var fname = document.createElement('div'); fname.className='fname'; fname.textContent = l.filename;
+        var fsub = document.createElement('div'); fsub.className='fsub';
+        fsub.textContent = l.count + ' puzzles · added ' + new Date(l.addedAt).toLocaleDateString();
+        meta.appendChild(fname); meta.appendChild(fsub);
+        var del = document.createElement('button'); del.textContent = 'Remove';
+        del.addEventListener('click', function(){
+          if (!confirm('Remove "'+l.filename+'" and its saved progress reference?')) return;
+          removeLibraryFile(l.id);
+        });
+        row.appendChild(meta); row.appendChild(del);
+        libSection.appendChild(row);
+      });
+    }
+    var addBtn = document.createElement('button');
+    addBtn.className = 'btn primary'; addBtn.style.width='100%'; addBtn.style.marginTop='10px';
+    addBtn.textContent = 'Upload PGN file(s)';
+    addBtn.addEventListener('click', function(){ closeModal(); fileInput.click(); });
+    libSection.appendChild(addBtn);
+    if (!storageOK){
+      var warn = document.createElement('div'); warn.className='empty-note';
+      warn.style.color = 'var(--bad)';
+      warn.textContent = 'Local storage isn\u2019t available in this browser (e.g. private browsing) — progress and uploads won\u2019t be saved.';
+      libSection.appendChild(warn);
+    }
+    modalEl.appendChild(libSection);
+  }
+
+  function openModal(){ renderStatsModal(); modalBackdrop.classList.add('open'); }
+  function closeModal(){ modalBackdrop.classList.remove('open'); }
+  statsBtn.addEventListener('click', openModal);
+  modalBackdrop.addEventListener('click', function(e){ if (e.target === modalBackdrop) closeModal(); });
+
+  // ============================================================
+  // Boot
+  // ============================================================
   function boot(){
     if (typeof Chess === 'undefined'){
       mainEl.innerHTML = '<div class="err">The chess engine could not load (no internet connection). Please reconnect and reload.</div>';
       return;
     }
+    renderCollectionStrip();
     switchCollection('endings');
   }
   boot();
 
-  // Optional: register a service worker for offline use when this file is
-  // served over http(s) from its own folder (e.g. GitHub Pages). This is a
-  // no-op — and safe to ignore if it fails — inside sandboxed previews.
   if ('serviceWorker' in navigator && (location.protocol === 'http:' || location.protocol === 'https:')){
     window.addEventListener('load', function(){
       navigator.serviceWorker.register('service-worker.js').catch(function(){});

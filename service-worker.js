@@ -1,9 +1,16 @@
-const CACHE_NAME = 'ledger-board-v1';
+const CACHE_NAME = 'ledger-board-v2';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './icon-48.png',
+  './icon-72.png',
+  './icon-96.png',
+  './icon-144.png',
+  './icon-152.png',
+  './icon-180.png',
   './icon-192.png',
+  './icon-384.png',
   './icon-512.png',
   './icon-512-maskable.png',
   'https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js'
