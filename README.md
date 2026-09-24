@@ -9,6 +9,10 @@ A self-contained puzzle trainer built from two PGN collections, with:
   rating (starts at 1200) adjusts after every solve or "show answer," based on
   how hard the puzzle was relative to your current rating. See it all in the
   📊 panel: rating, accuracy, puzzles solved, and a small trend line.
+- **A colour-coded puzzle picker** — the number strip below the puzzle/chapter
+  chips lets you jump to any puzzle directly, and shows at a glance which ones
+  are solved (green), answered wrong / answer shown (red), opened but not
+  finished (amber), or never opened (plain).
 - **An automatic Android build** — push to `main` and GitHub Actions builds a
   downloadable `.apk` for you (see below).
 
@@ -24,6 +28,24 @@ server-side code, no database.
    folder `/ (root)` → Save.
 3. Your site goes live at `https://<your-username>.github.io/<your-repo>/`
    within about a minute.
+
+## About the browser address bar
+
+Visiting the Pages URL in a browser (or an in-app browser / Custom Tab, which
+is what shows the `X`, share icon, and URL bar) will always show that
+browser's own toolbar — that's the browser's UI, not something a website can
+turn off. To get the app-like, chrome-free view, **install it**: open the
+site in Chrome, use the browser menu → **"Add to Home Screen"** (or Chrome
+may prompt you automatically), then always launch it from that home-screen
+icon rather than a link. That launches it in `display: standalone` mode with
+no address bar, using the name and icon from `manifest.json`.
+
+If you'd previously added it to your home screen *before* an update, the
+shortcut keeps the old name/icon — remove it and re-add it to pick up
+changes, since Android only reads the manifest at install time. Likewise,
+because of the offline service worker, a browser tab can keep showing a
+cached older version for a visit or two after an update; a hard refresh or
+closing and reopening the tab clears it.
 
 ## Download the APK from Actions
 

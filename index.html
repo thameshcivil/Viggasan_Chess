@@ -16,6 +16,7 @@
     --bg:#1b140f; --bg-2:#221912; --panel:#2b2016; --panel-2:#332619; --rule:#4a3a28;
     --ink:#f2e8d8; --ink-dim:#c3ae8c; --ink-faint:#8f7c62; --accent:#caa24e; --accent-ink:#241b12;
     --good:#7fa06a; --good-ink:#f2e8d8; --bad:#c1543a; --bad-ink:#f2e8d8;
+    --amber:#c98a3a; --amber-ink:#241b12;
     --board-light:#ecdfc4; --board-dark:#8a5c3a; --board-line:#5a3c24; --sel:#caa24e; --dot: rgba(20,15,10,0.35);
     --shadow: 0 10px 30px rgba(0,0,0,0.35); --radius: 14px; color-scheme: dark;
   }
@@ -24,6 +25,7 @@
       --bg:#f3ecdb; --bg-2:#ece2cb; --panel:#fbf6ea; --panel-2:#f3ead6; --rule:#d8c8a6;
       --ink:#2a2013; --ink-dim:#5c4c34; --ink-faint:#8a765a; --accent:#9c7327; --accent-ink:#fbf6ea;
       --good:#4c7a3a; --good-ink:#fbf6ea; --bad:#a5432b; --bad-ink:#fbf6ea;
+      --amber:#b3791f; --amber-ink:#fbf6ea;
       --board-light:#f6ecd8; --board-dark:#b3814f; --board-line:#8a5c3a; --sel:#9c7327; --dot: rgba(20,15,10,0.28);
       --shadow: 0 10px 24px rgba(60,45,25,0.18); color-scheme: light;
     }
@@ -32,6 +34,7 @@
     --bg:#f3ecdb; --bg-2:#ece2cb; --panel:#fbf6ea; --panel-2:#f3ead6; --rule:#d8c8a6;
     --ink:#2a2013; --ink-dim:#5c4c34; --ink-faint:#8a765a; --accent:#9c7327; --accent-ink:#fbf6ea;
     --good:#4c7a3a; --good-ink:#fbf6ea; --bad:#a5432b; --bad-ink:#fbf6ea;
+    --amber:#b3791f; --amber-ink:#fbf6ea;
     --board-light:#f6ecd8; --board-dark:#b3814f; --board-line:#8a5c3a; --sel:#9c7327; --dot: rgba(20,15,10,0.28);
     --shadow: 0 10px 24px rgba(60,45,25,0.18); color-scheme: light;
   }
@@ -39,6 +42,7 @@
     --bg:#1b140f; --bg-2:#221912; --panel:#2b2016; --panel-2:#332619; --rule:#4a3a28;
     --ink:#f2e8d8; --ink-dim:#c3ae8c; --ink-faint:#8f7c62; --accent:#caa24e; --accent-ink:#241b12;
     --good:#7fa06a; --good-ink:#f2e8d8; --bad:#c1543a; --bad-ink:#f2e8d8;
+    --amber:#c98a3a; --amber-ink:#241b12;
     --board-light:#ecdfc4; --board-dark:#8a5c3a; --board-line:#5a3c24; --sel:#caa24e; --dot: rgba(20,15,10,0.35);
     --shadow: 0 10px 30px rgba(0,0,0,0.35); color-scheme: dark;
   }
@@ -78,7 +82,7 @@
   }
 
   .strip{
-    display:flex; gap:8px; overflow-x:auto; padding:12px 16px 4px; scrollbar-width:none;
+    display:flex; gap:8px; overflow-x:auto; overflow-y:hidden; padding:12px 16px 4px; scrollbar-width:none;
   }
   .strip::-webkit-scrollbar{ display:none; }
   .chip{
@@ -89,6 +93,17 @@
   .chip.active{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600; }
   .chip.add{ border-style:dashed; color:var(--accent); }
   .chip.sub{ padding:7px 12px; font-size:12px; }
+
+  .numstrip{ padding-top:6px; padding-bottom:10px; }
+  .numchip{
+    flex:0 0 auto; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:"JetBrains Mono", monospace; font-size:12px; font-weight:600; cursor:pointer;
+    border:1px solid var(--rule); background:var(--panel); color:var(--ink-faint);
+  }
+  .numchip.opened{ background:var(--amber); color:var(--amber-ink); border-color:var(--amber); }
+  .numchip.wrong{ background:var(--bad); color:var(--bad-ink); border-color:var(--bad); }
+  .numchip.solved{ background:var(--good); color:var(--good-ink); border-color:var(--good); }
+  .numchip.current{ box-shadow:0 0 0 2px var(--sel); }
 
   main{ flex:1; padding:14px 16px 10px; display:flex; flex-direction:column; gap:12px; }
 
@@ -265,6 +280,7 @@
 
   <div class="strip" id="collectionStrip" role="tablist"></div>
   <div class="strip" id="chapterChips" style="display:none;"></div>
+  <div class="strip numstrip" id="puzzleNumStrip" style="display:none;"></div>
 
   <main id="main">
     <div class="loading" id="loading">Setting up the board…</div>
@@ -292,6 +308,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   var toastEl = document.getElementById('toast');
   var collectionStripEl = document.getElementById('collectionStrip');
   var chapterChipsEl = document.getElementById('chapterChips');
+  var puzzleNumStripEl = document.getElementById('puzzleNumStrip');
   var collectionLabel = document.getElementById('collectionLabel');
   var flipBtn = document.getElementById('flipBtn');
   var themeBtn = document.getElementById('themeBtn');
@@ -321,12 +338,12 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
   var progress = loadProgress();
   function loadProgress(){
-    var fallback = { solved:{}, viewed:{}, theme:null, flipped:false, rating:1200, history:[] };
+    var fallback = { solved:{}, viewed:{}, opened:{}, theme:null, flipped:false, rating:1200, history:[] };
     var raw = safeGet(STORE_KEY);
     if (!raw) return fallback;
     try{
       var p = JSON.parse(raw);
-      p.solved = p.solved || {}; p.viewed = p.viewed || {};
+      p.solved = p.solved || {}; p.viewed = p.viewed || {}; p.opened = p.opened || {};
       p.rating = typeof p.rating === 'number' ? p.rating : 1200;
       p.history = Array.isArray(p.history) ? p.history : [];
       return p;
@@ -607,6 +624,38 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (active && active.scrollIntoView) active.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
   }
 
+  // Horizontally-scrolling puzzle picker for the current list, colour-coded:
+  // green = solved, red = answer shown without solving, amber = opened but
+  // no result yet, plain = never opened. Rebuilt on every navigation since
+  // even a few hundred small chips is cheap to redraw.
+  function puzzleStatus(item){
+    var key = recordKey(item);
+    if (progress.solved[key]) return 'solved';
+    if (progress.viewed[key]) return 'wrong';
+    if (progress.opened[key]) return 'opened';
+    return 'unopened';
+  }
+
+  function renderPuzzleNumberStrip(){
+    var puzzles = [];
+    state.filtered.forEach(function(it, idx){ if (it.type === 'puzzle') puzzles.push({ item: it, index: idx }); });
+    if (puzzles.length < 2){ puzzleNumStripEl.style.display = 'none'; puzzleNumStripEl.innerHTML = ''; return; }
+    puzzleNumStripEl.style.display = 'flex';
+    puzzleNumStripEl.innerHTML = '';
+    puzzles.forEach(function(p){
+      var b = document.createElement('button');
+      var status = puzzleStatus(p.item);
+      b.className = 'numchip' + (status !== 'unopened' ? ' ' + status : '') + (p.index === state.index ? ' current' : '');
+      b.textContent = p.item.num;
+      b.title = 'No. ' + p.item.num + ' \u2014 ' +
+        (status === 'solved' ? 'solved' : status === 'wrong' ? 'answer shown' : status === 'opened' ? 'opened, unanswered' : 'not opened yet');
+      b.addEventListener('click', function(){ goToIndex(p.index); });
+      puzzleNumStripEl.appendChild(b);
+    });
+    var current = puzzleNumStripEl.querySelector('.numchip.current');
+    if (current && current.scrollIntoView) current.scrollIntoView({inline:'center', block:'nearest'});
+  }
+
   function goToIndex(i){
     if (i<0) i=0;
     if (i>=state.filtered.length) i = state.filtered.length-1;
@@ -637,6 +686,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     stopTimer();
     var item = currentItem();
     if (!item){ mainEl.innerHTML = '<div class="loading">Nothing here yet.</div>'; renderFooter(); return; }
+    renderPuzzleNumberStrip();
     if (item.type === 'text'){ renderLesson(item); return; }
 
     try{ state.chess = new Chess(item.fen); }
@@ -647,6 +697,9 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       renderFooter();
       return;
     }
+
+    progress.opened[recordKey(item)] = true;
+    saveProgress();
 
     state.solverColor = state.chess.turn();
     state.moveIndex = 0;
@@ -1017,6 +1070,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     document.getElementById('ledger').classList.add('open');
     renderFooter();
     renderCollectionStrip();
+    renderPuzzleNumberStrip();
     showToast('Puzzle solved ✓');
   }
 
@@ -1050,6 +1104,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     }
     saveProgress();
     stopTimer();
+    renderPuzzleNumberStrip();
     document.getElementById('ledgerCard').style.display = 'block';
     var ledger = document.getElementById('ledger');
     ledger.classList.add('open'); ledger.innerHTML = '';
@@ -1231,7 +1286,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     resetBtn.className = 'btn danger'; resetBtn.style.width='100%'; resetBtn.textContent = 'Reset stats and progress';
     resetBtn.addEventListener('click', function(){
       if (!confirm('This clears your rating, solved history, and puzzle progress on this device. Continue?')) return;
-      progress = { solved:{}, viewed:{}, theme:progress.theme, flipped:progress.flipped, rating:1200, history:[] };
+      progress = { solved:{}, viewed:{}, opened:{}, theme:progress.theme, flipped:progress.flipped, rating:1200, history:[] };
       saveProgress();
       renderStatsModal();
       loadCurrentItem();
