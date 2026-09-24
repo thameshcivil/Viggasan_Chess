@@ -1,6 +1,6 @@
 {
-  "name": "Ledger & Board — Chess Puzzle Trainer",
-  "short_name": "Ledger & Board",
+  "name": "Vigaasan's Chess Board — Chess Puzzle Trainer",
+  "short_name": "Vigaasan",
   "description": "Solve chess endgame and strategy puzzles from your own study collection, with the answer hidden until you're ready to see it.",
   "start_url": "./index.html",
   "scope": "./",

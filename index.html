@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Ledger &amp; Board — Chess Puzzle Trainer</title>
+<title>Vigaasan's Chess Board — Chess Puzzle Trainer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -45,6 +45,8 @@
 
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
   html,body{height:100%;}
+  html{ scroll-padding-top: env(safe-area-inset-top, 0px); }
+  :root{ padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); background: var(--bg); }
   body{
     margin:0; background:var(--bg); color:var(--ink);
     font-family:"Source Serif 4", Georgia, "Iowan Old Style", serif;
@@ -56,7 +58,7 @@
   }
 
   header.top{
-    position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:env(safe-area-inset-top, 0px); z-index:20; display:flex; align-items:center; justify-content:space-between;
     padding:14px 16px 10px; background:linear-gradient(var(--bg), rgba(0,0,0,0)); border-bottom:1px solid var(--rule);
   }
   .brand{ display:flex; align-items:baseline; gap:8px; }
@@ -250,7 +252,7 @@
     <div class="brand">
       <span class="mark">♞</span>
       <div>
-        <h1>Ledger &amp; Board</h1>
+        <h1>Vigaasan's Chess Board</h1>
         <small id="collectionLabel">Practical Chess Endings</small>
       </div>
     </div>
@@ -480,11 +482,19 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   // ============================================================
   function buildChapters(items){
     var order = [], seen = {};
+    var puzzleCount = 0;
     items.forEach(function(it){
+      if (it.type === 'puzzle') puzzleCount++;
       var c = it.chapter || '\u2014';
       if (!seen[c]){ seen[c]=true; order.push(c); }
     });
-    return order.length > 1 ? order : null;
+    // Only treat "chapter" values as real chapters if they actually group
+    // more than one puzzle together. Some PGN sets (e.g. numbered endgame
+    // studies) give every single puzzle its own unique label in that field
+    // ("No 1", "No 2", ...) -- there order.length ends up equal to
+    // puzzleCount, which is a numbering scheme, not chapters, and treating
+    // it as chapters turns every chip into a filter over a single puzzle.
+    return (order.length > 1 && order.length < puzzleCount) ? order : null;
   }
 
   function builtin(name){
