@@ -40,6 +40,23 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Give Bubblewrap the SDK layout it expects
+        # Bubblewrap's own SDK check (AndroidSdkTools.validatePath) only
+        # accepts a path if "<sdk>/tools" or "<sdk>/bin" exists directly
+        # inside it -- a layout from the old, discontinued Android SDK
+        # tools package. The SDK preinstalled on GitHub-hosted runners is
+        # perfectly valid but only has "cmdline-tools/latest/bin", so
+        # Bubblewrap rejects it with "The provided androidSdk isn't
+        # correct" even though every tool it needs is present. Symlinking
+        # <sdk>/bin to the real cmdline-tools location satisfies the check
+        # without moving or duplicating anything.
+        run: |
+          if [ ! -e "$ANDROID_HOME/bin" ] && [ -d "$ANDROID_HOME/cmdline-tools/latest/bin" ]; then
+            ln -s cmdline-tools/latest/bin "$ANDROID_HOME/bin"
+            echo "Linked $ANDROID_HOME/bin -> cmdline-tools/latest/bin"
+          fi
+          ls -la "$ANDROID_HOME"
+
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
