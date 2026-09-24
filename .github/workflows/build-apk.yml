@@ -40,13 +40,24 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Use the Android SDK already on this runner
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
-          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
-
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
+
+      - name: Point Bubblewrap at the pre-installed JDK and Android SDK
+        # Left unconfigured, Bubblewrap interactively asks to download its
+        # own JDK and its own Android SDK (a prompt visible in CI logs as
+        # "Do you want Bubblewrap to install the JDK (recommended)?"),
+        # separate from the JDK/SDK already set up by setup-java and the
+        # runner image. Piping "yes" into that prompt just means it silently
+        # spends several minutes installing a redundant copy, and the two
+        # copies can end up disagreeing with each other (Gradle then fails
+        # with "Several environment variables ... contain different paths
+        # to the SDK"). Explicitly configuring Bubblewrap's own config file
+        # (~/.bubblewrap/config.json) to point at what's already installed
+        # avoids the prompt and the redundant download entirely.
+        run: |
+          bubblewrap updateConfig --jdkPath="$JAVA_HOME" --androidSdkPath="$ANDROID_HOME"
+          bubblewrap doctor || true
 
       - name: Generate a signing key for this build
         env:
