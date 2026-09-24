@@ -44,6 +44,119 @@ jobs:
         run: npm install -g @bubblewrap/cli
 
       - name: Point Bubblewrap at the pre-installed JDK and Android SDK
+        # The very first time ANY bubblewrap command runs, it checks for
+        # ~/.bubblewrap/config.json and, if missing, launches an interactive
+        # first-run wizard ("Do you want Bubblewrap to install the JDK
+        # (recommended)?") before doing anything else -- even before running
+        # `updateConfig`. There's no CI-safe flag to skip that wizard, and
+        # with no terminal attached it just fails immediately (exit 130).
+        # The documented config file format is simple
+        # ({"jdkPath": "...", "androidSdkPath": "..."}), so writing it
+        # ourselves before invoking the CLI at all sidesteps the wizard
+        # completely, for every subcommand that follows.
+        run: |
+          mkdir -p "$HOME/.bubblewrap"
+          node -e '
+          const fs = require("fs");
+          const path = require("path");
+          const dir = path.join(process.env.HOME, ".bubblewrap");
+          const config = {
+            jdkPath: process.env.JAVA_HOME,
+            androidSdkPath: process.env.ANDROID_HOME
+          };
+          fs.writeFileSync(path.join(dir, "config.json"), JSON.stringify(config, null, 2) + "\n");
+          console.log(fs.readFileSync(path.join(dir, "config.json"), "utf8"));
+          '
+          bubblewrap doctor || true
+
+      - name: Generate a signing key for this build
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          PASS="${KEYSTORE_PASSWORD:-ledgerboard123}"
+          echo "BUBBLEWRAP_KEYSTORE_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          echo "BUBBLEWRAP_KEY_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          keytool -genkeypair -v \
+            -keystore android.keystore \
+            -alias ledgerboard \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "$PASS" -keypass "$PASS" \
+            -dname "CN=Ledger and Board, OU=Trainer, O=Trainer, L=City, S=State, C=US"
+
+      - name: Write twa-manifest.json for this repository's Pages site
+        env:
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          node -e '
+          const fs = require("fs");
+          const owner = String(process.env.OWNER || "").toLowerCase();
+          const repo = String(process.env.REPO || "");
+          const runNumber = parseInt(process.env.RUN_NUMBER || "1", 10);
+          const host = owner + ".github.io";
+          const base = "https://" + host + "/" + repo + "/";
+          let pkgSuffix = owner.replace(/[^a-z0-9]/g, "");
+          if (/^[0-9]/.test(pkgSuffix)) pkgSuffix = "u" + pkgSuffix;
+          if (!pkgSuffix) pkgSuffix = "app";
+          const packageId = "io.github." + pkgSuffix + ".ledgerboard";
+          const manifest = {
+            packageId: packageId,
+            host: host,
+            name: "Ledger & Board",
+            launcherName: "Ledger & Board",
+            display: "standalone",
+            orientation: "portrait",
+            themeColor: "#1B140F",
+            navigationColor: "#1B140F",
+            navigationColorDark: "#1B140F",
+            navigationDividerColor: "#1B140F",
+            navigationDividerColorDark: "#1B140F",
+            backgroundColor: "#1B140F",
+            enableNotifications: false,
+            startUrl: "/" + repo + "/index.html",
+            iconUrl: base + "icon-512.png",
+            maskableIconUrl: base + "icon-512-maskable.png",
+            splashScreenFadeOutDuration: 300,
+            signingKey: { path: "./android.keystore", alias: "ledgerboard" },
+            appVersionName: "1.0." + runNumber,
+            appVersionCode: runNumber,
+            shortcuts: [],
+            generatorApp: "bubblewrap-cli",
+            webManifestUrl: base + "manifest.json",
+            fallbackType: "customtabs",
+            features: {},
+            enableSiteSettingsShortcut: true,
+            isChromeOSOnly: false,
+            isMetaQuest: false,
+            fullScopeUrl: base,
+            minSdkVersion: 23
+          };
+          fs.writeFileSync("twa-manifest.json", JSON.stringify(manifest, null, 2) + "\n");
+          console.log(fs.readFileSync("twa-manifest.json", "utf8"));
+          '
+      - name: Generate the Android project from the manifest
+        run: yes | bubblewrap update --manifest=./twa-manifest.json --skipVersionUpgrade
+
+      - name: Build the signed APK
+        run: yes | bubblewrap build --skipPwaValidation
+
+      - name: Upload APK as a downloadable build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ledger-and-board-apk
+          path: app-release-signed.apk
+          if-no-files-found: error
+          retention-days: 90      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
+
+      - name: Point Bubblewrap at the pre-installed JDK and Android SDK
         # Left unconfigured, Bubblewrap interactively asks to download its
         # own JDK and its own Android SDK (a prompt visible in CI logs as
         # "Do you want Bubblewrap to install the JDK (recommended)?"),
