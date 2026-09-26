@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vigaasan-chess-v6';
+const CACHE_NAME = 'vigaasan-chess-v7';
 const CORE_ASSETS = [
   './',
   './index.html',

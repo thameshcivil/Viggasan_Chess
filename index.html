@@ -128,6 +128,10 @@
     border:1px solid var(--rule); border-radius:999px; padding:3px 9px;
   }
   .status .timer.done{ color:var(--good); border-color:var(--good); }
+  .status .wrongcount{
+    font-family:"JetBrains Mono", monospace; font-size:12.5px; color:var(--bad);
+    border:1px solid var(--bad); border-radius:999px; padding:3px 9px;
+  }
   .status .badge{
     font-size:11px; padding:3px 9px; border-radius:999px; border:1px solid var(--rule);
     color:var(--ink-faint); letter-spacing:.02em; white-space:nowrap;
@@ -137,13 +141,14 @@
   .board-wrap{
     position:relative; width:100%; aspect-ratio:1/1; border-radius:10px;
     box-shadow:var(--shadow); border:1px solid var(--board-line); overflow:hidden; background:var(--board-dark);
+    --sq-size: 44px; /* overwritten inline by sizeBoard() once the real pixel size is known */
   }
   .board{ display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); width:100%; height:100%; }
   .sq{ position:relative; display:flex; align-items:center; justify-content:center; user-select:none; cursor:pointer; transition:background-color .12s ease; }
   .sq.light{ background:var(--board-light); }
   .sq.dark{ background:var(--board-dark); }
   .sq .glyph{
-    line-height:1; pointer-events:none; font-size:clamp(36px, 11.8vw, 60px);
+    line-height:1; pointer-events:none; font-size:calc(var(--sq-size) * 0.72);
     font-family:"DejaVu Sans","Segoe UI Symbol","Noto Sans Symbols 2",Arial,sans-serif;
     filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35));
   }
@@ -895,15 +900,17 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     right.className = 'right';
     var timer = document.createElement('div');
     timer.className = 'timer'; timer.id = 'liveTimer'; timer.textContent = '\u23f1 0:00';
+    var wrongCount = document.createElement('div');
+    wrongCount.className = 'wrongcount'; wrongCount.id = 'wrongCount'; wrongCount.style.display = 'none';
     var badge = document.createElement('div');
     badge.className = 'badge' + (state.solved ? ' solved' : '');
     badge.textContent = state.solved ? 'Solved ✓' : (progress.viewed[recordKey(item)] ? 'Viewed' : 'Unsolved');
-    right.appendChild(timer); right.appendChild(badge);
+    right.appendChild(timer); right.appendChild(wrongCount); right.appendChild(badge);
     status.appendChild(who); status.appendChild(right);
     mainEl.appendChild(status);
 
     var boardWrap = document.createElement('div');
-    boardWrap.className = 'board-wrap';
+    boardWrap.className = 'board-wrap'; boardWrap.id = 'boardWrap';
     var board = document.createElement('div');
     board.className = 'board'; board.id = 'board';
     boardWrap.appendChild(board);
@@ -943,11 +950,38 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     actions.appendChild(hintBtn); actions.appendChild(resetBtn);
     mainEl.appendChild(actions);
 
+    sizeBoard();
     renderBoard();
     renderFooter();
   }
 
   function squareEl(file, rank){ return document.querySelector('.sq[data-sq="'+file+rank+'"]'); }
+
+  // Sizes the board to an exact multiple of 8 pixels so all 64 squares are
+  // perfectly uniform -- CSS Grid's `1fr` tracks divide the container's
+  // actual pixel width evenly, but when that width isn't itself a multiple
+  // of 8 the leftover pixels get distributed unevenly across a few tracks,
+  // making some squares a hair larger than others. Also publishes the
+  // resulting square size as --sq-size so piece glyphs can be sized as a
+  // ratio of the *real* square (see .sq .glyph), not a viewport guess.
+  function sizeBoard(){
+    var wrap = document.getElementById('boardWrap');
+    if (!wrap) return;
+    wrap.style.width = '';
+    wrap.style.height = '';
+    var available = wrap.clientWidth;
+    if (!available) return;
+    var square = Math.floor(available / 8);
+    if (square < 8) return;
+    var size = square * 8;
+    wrap.style.width = size + 'px';
+    wrap.style.height = size + 'px';
+    wrap.style.setProperty('--sq-size', square + 'px');
+  }
+  window.addEventListener('resize', function(){
+    clearTimeout(sizeBoard._t);
+    sizeBoard._t = setTimeout(sizeBoard, 120);
+  });
 
   function renderBoard(){
     var board = document.getElementById('board');
@@ -1088,6 +1122,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       var wrongMsg = state.wrongCount >= 3 ? 'Not quite. Tap Hint if you\u2019d like a nudge.' : 'Not quite — try again.';
       feedback.className = 'feedback bad';
       feedback.textContent = wrongMsg;
+      var wcEl = document.getElementById('wrongCount');
+      if (wcEl){ wcEl.textContent = '\u2717 ' + state.wrongCount; wcEl.style.display = 'inline-block'; }
       notifyWrongMove(wrongMsg);
       renderBoard();
     }
