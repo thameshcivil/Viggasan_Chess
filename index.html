@@ -107,7 +107,17 @@
   .numchip.solved{ background:var(--good); color:var(--good-ink); border-color:var(--good); }
   .numchip.current{ box-shadow:0 0 0 2px var(--sel); }
 
-  main{ flex:1; padding:14px 16px 10px; display:flex; flex-direction:column; gap:12px; }
+  main{ flex:1; padding:14px 16px 10px; display:flex; flex-direction:column; gap:12px; min-width:0; }
+
+  /* .layout holds the left sidebar (PGN/chapter/puzzle chips), the board
+     (#main), and the right sidebar (solution ledger). In portrait it's just
+     a normal top-to-bottom stack; the landscape media query below turns it
+     into a real three-column layout. */
+  .layout{ display:flex; flex-direction:column; flex:1; min-height:0; }
+  .sidebar-left{ display:flex; flex-direction:column; flex-shrink:0; }
+  .sidebar-right{ flex-shrink:0; padding:0 16px 10px; }
+  .sidebar-right .empty-note{ font-style:italic; }
+  .sidebar-right .card{ margin:0; }
 
   .status{ display:flex; align-items:center; justify-content:space-between; padding:0 2px; gap:8px; }
   .status .who{ font-size:13.5px; color:var(--ink-dim); flex:1; min-width:0; }
@@ -262,15 +272,45 @@
   ::selection{ background:var(--accent); color:var(--accent-ink); }
   input[type=file]{ display:none; }
 
-  /* Short/landscape viewports (phone rotated, some tablets): reclaim
-     vertical space and cap the board's height so it can't push the strips
-     or footer out of view. */
+  /* Short/landscape phones: reclaim vertical space and cap the board's
+     height so nothing gets pushed out of view, without going to a full
+     sidebar layout (too cramped on a narrow phone in landscape). */
   @media (max-height: 480px){
     header.top{ padding:8px 16px 6px; }
     .strip{ padding:6px 16px 4px; min-height:44px; }
     .numstrip{ padding-top:4px; padding-bottom:6px; }
     main{ padding:8px 16px 6px; gap:8px; }
     .board-wrap{ max-width:min(62vh, 100%); margin:0 auto; }
+  }
+
+  /* Tablets (and wide phones) in landscape: a real three-column layout --
+     PGN/chapter/puzzle lists on the left, board in the middle, solution
+     ledger on the right -- instead of stacking everything, which is what
+     caused rows to be starved of height on short landscape viewports. */
+  @media (orientation: landscape) and (min-width: 680px){
+    .app{ max-width:none; width:100%; height:100vh; height:100dvh; min-height:0; }
+    header.top{ padding:10px 20px 8px; }
+
+    .layout{ flex-direction:row; align-items:stretch; flex:1; min-height:0; overflow:hidden; }
+
+    .sidebar-left{
+      width:210px; flex:0 0 210px; overflow-y:auto; overflow-x:hidden;
+      border-right:1px solid var(--rule); padding:8px 8px 16px;
+    }
+    .sidebar-left .strip{
+      flex-direction:column; align-items:stretch; overflow:visible;
+      padding:6px 2px; min-height:0; gap:6px;
+    }
+    .sidebar-left .chip{ width:100%; white-space:normal; text-align:left; }
+    .sidebar-left #puzzleNumStrip{ flex-direction:row; flex-wrap:wrap; gap:6px; }
+
+    main{ flex:1; min-width:0; overflow-y:auto; padding:14px 20px; }
+    .board-wrap{ max-width:min(58vh, 100%); margin:0 auto; }
+
+    .sidebar-right{
+      width:290px; flex:0 0 290px; overflow-y:auto;
+      border-left:1px solid var(--rule); padding:14px 16px 16px;
+    }
   }
 </style>
 </head>
@@ -292,13 +332,21 @@
     </div>
   </header>
 
-  <div class="strip" id="collectionStrip" role="tablist"></div>
-  <div class="strip" id="chapterChips" style="display:none;"></div>
-  <div class="strip numstrip" id="puzzleNumStrip" style="display:none;"></div>
+  <div class="layout" id="layout">
+    <aside class="sidebar-left" id="sidebarLeft">
+      <div class="strip" id="collectionStrip" role="tablist"></div>
+      <div class="strip" id="chapterChips" style="display:none;"></div>
+      <div class="strip numstrip" id="puzzleNumStrip" style="display:none;"></div>
+    </aside>
 
-  <main id="main">
-    <div class="loading" id="loading">Setting up the board…</div>
-  </main>
+    <main id="main">
+      <div class="loading" id="loading">Setting up the board…</div>
+    </main>
+
+    <aside class="sidebar-right" id="sidebarRight">
+      <div class="empty-note" id="sidebarRightPlaceholder">Moves you play — or the answer, once shown — will appear here.</div>
+    </aside>
+  </div>
 
   <div class="toast" id="toast"></div>
   <input type="file" id="fileInput" accept=".pgn,text/plain,application/x-chess-pgn" multiple>
@@ -323,6 +371,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   var collectionStripEl = document.getElementById('collectionStrip');
   var chapterChipsEl = document.getElementById('chapterChips');
   var puzzleNumStripEl = document.getElementById('puzzleNumStrip');
+  var sidebarRightEl = document.getElementById('sidebarRight');
   var collectionLabel = document.getElementById('collectionLabel');
   var flipBtn = document.getElementById('flipBtn');
   var themeBtn = document.getElementById('themeBtn');
@@ -742,6 +791,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
     if (!state.chess){
       mainEl.innerHTML = '<div class="err">This position could not be loaded (the FEN looks invalid). Try the next puzzle.</div>';
+      resetSidebarRight();
       renderFooter();
       return;
     }
@@ -780,6 +830,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   // ============================================================
   function renderLesson(item){
     mainEl.innerHTML = '';
+    resetSidebarRight();
     var card = document.createElement('div');
     card.className = 'card lesson-card';
     var chapterLine = document.createElement('div');
@@ -815,8 +866,23 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     '$18':'winning for White','$19':'winning for Black'
   };
 
+  // The solution ledger lives in the persistent right-hand sidebar (a real
+  // sidebar in landscape, stacked after the board in portrait) rather than
+  // being rebuilt inside #main each time, so CSS alone can reposition it
+  // for landscape without any JS branching on orientation.
+  function resetSidebarRight(){
+    sidebarRightEl.innerHTML = '<div class="empty-note" id="sidebarRightPlaceholder">Moves you play \u2014 or the answer, once shown \u2014 will appear here.</div>';
+  }
+  function showLedgerCard(){
+    var card = document.getElementById('ledgerCard');
+    var placeholder = document.getElementById('sidebarRightPlaceholder');
+    if (card) card.style.display = 'block';
+    if (placeholder) placeholder.style.display = 'none';
+  }
+
   function renderPuzzle(item){
     mainEl.innerHTML = '';
+    resetSidebarRight();
 
     var status = document.createElement('div');
     status.className = 'status';
@@ -864,7 +930,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var lh = document.createElement('h2'); lh.textContent = 'Solution';
     var ledger = document.createElement('div'); ledger.className = 'ledger'; ledger.id = 'ledger';
     ledgerCard.appendChild(lh); ledgerCard.appendChild(ledger);
-    mainEl.appendChild(ledgerCard);
+    sidebarRightEl.appendChild(ledgerCard);
 
     var actions = document.createElement('div');
     actions.className = 'actions-row';
@@ -1116,7 +1182,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var liveTimer = document.getElementById('liveTimer');
     if (liveTimer){ liveTimer.textContent = '\u23f1 ' + formatTime(elapsed); liveTimer.classList.add('done'); }
     updateStatusBadgeLive();
-    document.getElementById('ledgerCard').style.display = 'block';
+    showLedgerCard();
     document.getElementById('ledger').classList.add('open');
     renderFooter();
     renderCollectionStrip();
@@ -1155,7 +1221,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     saveProgress();
     stopTimer();
     renderPuzzleNumberStrip();
-    document.getElementById('ledgerCard').style.display = 'block';
+    showLedgerCard();
     var ledger = document.getElementById('ledger');
     ledger.classList.add('open'); ledger.innerHTML = '';
     state.autoplaying = true;
