@@ -56,10 +56,23 @@ workflow**. Open that run and scroll to the bottom of the summary page for
 the **Artifacts** section — **`ledger-and-board-apk`** contains
 `app-release-signed.apk`, ready to sideload onto an Android phone.
 
-The signing key is generated fresh on every run, which is fine for
-installing/testing but not for publishing updates to the Play Store (that
-needs a stable key you keep across releases — ask if you want the workflow
-adjusted for that).
+**Important — one-time setup required, or the installed app will just open
+as a browser tab:** the workflow needs two repository secrets
+(`KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`) so it signs every build with the
+same key, and your GitHub Pages site needs a small `assetlinks.json` file
+published at your domain's root proving that key is authorized to
+represent it. Without both of these, Android falls back to showing the
+address bar — which is exactly what a TWA is supposed to do when it can't
+verify the app, as a safety measure. Full step-by-step instructions for
+both parts are in the separate signing-setup package (ask for it if you no
+longer have it) — it's a short one-time setup, not something you repeat
+per build.
+
+The signing key is now a stable key reused on every run (set up per the
+instructions above), not a fresh one each time — that instability was
+exactly what broke the browser-bar verification originally. This key is
+for sideloading/testing; publishing updates through the Google Play Store
+would need its own separate signing/release process.
 
 ### Alternative: PWABuilder (no CI)
 
