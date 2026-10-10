@@ -1,108 +1,119 @@
-# Vigaasan's Chess Board — Chess Puzzle Trainer
+# Vigaasan’s Chess Board
 
-A self-contained puzzle trainer built from two PGN collections, with:
+A chess puzzle trainer that looks like a printed chess book. Each puzzle is a
+numbered plate with a framed diagram, and your moves are written into a
+ledger beside it. It runs as a single web page, installs on a phone like an
+app, works offline, and has no server or database.
 
-- **Your own PGN library** — upload any `.pgn` file with `[FEN]` puzzle positions
-  (tap **+ Add PGN** in the top strip, or use the 📊 **Stats & library** panel).
-  Files are parsed in the browser and saved on-device; nothing is uploaded anywhere.
-- **A timer and a rating** — each puzzle is timed, and a lightweight Elo-style
-  rating (starts at 1200) adjusts after every solve or "show answer," based on
-  how hard the puzzle was relative to your current rating. See it all in the
-  📊 panel: rating, accuracy, puzzles solved, and a small trend line.
-- **A colour-coded puzzle picker** — the number strip below the puzzle/chapter
-  chips lets you jump to any puzzle directly, and shows at a glance which ones
-  are solved (green), answered wrong / answer shown (red), opened but not
-  finished (amber), or never opened (plain).
-- **An automatic Android build** — push to `main` and GitHub Actions builds a
-  downloadable `.apk` for you (see below).
+- **Two built-in collections:** *Practical Chess Endings* (300 puzzles) and
+  *Chess Strategy: Simplified* (108 puzzles plus 25 short lessons, in 10
+  chapters).
+- **Your own PGN files:** tap **+ PGN** in the collection tabs, or use
+  **ELO → Upload PGN file(s)**. Files are parsed in the browser and saved on
+  that device only.
+- **Timer and rating:** each puzzle is timed. An Elo-style rating starts at
+  1200 and moves once per puzzle, on your first result:
+  - a clean solve counts fully;
+  - hints and wrong tries count for less;
+  - revealing the answer counts as a miss.
 
-Everything lives in one folder — no local build step for the *website*, no
-server-side code, no database.
+  Tap the **ELO** button for your rating, puzzles solved, accuracy, average
+  solve time and rating trend.
+- **Plate index:** the numbered squares under the tabs let you jump to any
+  puzzle:
+  - green: solved
+  - red: answer revealed
+  - amber: opened, not finished
+  - outlined: never opened
+- **It remembers where you were** in each collection and chapter.
+- **Light and dark themes** follow the phone's setting; **◐** overrides it.
+  **⇅** flips the board.
+- **Layouts:** in portrait everything stacks. On tablets and phones in
+  landscape it becomes three columns: index, board, then the ledger.
 
-## Put it online with GitHub Pages (do this first)
+## Put it online with GitHub Pages
 
-1. Push every file in this folder to the root of your GitHub repository
-   (`index.html`, `manifest.json`, `service-worker.js`, the `icon-*.png`
-   files, `.nojekyll`, and the `.github/workflows/build-apk.yml` workflow).
-2. **Settings → Pages** → Source: "Deploy from a branch" → Branch `main`,
-   folder `/ (root)` → Save.
-3. Your site goes live at `https://<your-username>.github.io/<your-repo>/`
-   within about a minute.
+1. Push every file in this folder to the root of the repository. That means
+   `index.html`, `manifest.json`, `service-worker.js`, the `icon-*.png`
+   files, `.nojekyll`, and `.github/workflows/build-apk.yml`.
+2. Go to **Settings → Pages**. Set Source to "Deploy from a branch", choose
+   branch `main` and folder `/ (root)`, then Save.
+3. The site goes live at `https://<your-username>.github.io/<your-repo>/`
+   within a minute or two.
 
-## About the browser address bar
+Updates show up the next time you open the app, because the page is loaded
+network-first and served from cache only when you're offline.
 
-Visiting the Pages URL in a browser (or an in-app browser / Custom Tab, which
-is what shows the `X`, share icon, and URL bar) will always show that
-browser's own toolbar — that's the browser's UI, not something a website can
-turn off. To get the app-like, chrome-free view, **install it**: open the
-site in Chrome, use the browser menu → **"Add to Home Screen"** (or Chrome
-may prompt you automatically), then always launch it from that home-screen
-icon rather than a link. That launches it in `display: standalone` mode with
-no address bar, using the name and icon from `manifest.json`.
+## Install it on a phone
 
-If you'd previously added it to your home screen *before* an update, the
-shortcut keeps the old name/icon — remove it and re-add it to pick up
-changes, since Android only reads the manifest at install time. Likewise,
-because of the offline service worker, a browser tab can keep showing a
-cached older version for a visit or two after an update; a hard refresh or
-closing and reopening the tab clears it.
+Open the Pages URL in Chrome and use the menu → **Add to Home Screen** (or
+**Install app**). Launch it from that icon to get the full-screen view with
+no address bar. If you installed an older version, remove the icon and add
+it again to pick up the new name and icon.
 
-## Download the APK from Actions
+## Download the Android APK
 
-Once Pages is live, the **Build Android APK** workflow
-(`.github/workflows/build-apk.yml`) builds the app automatically on every
-push to `main`, or on demand from **Actions → Build Android APK → Run
-workflow**. Open that run and scroll to the bottom of the summary page for
-the **Artifacts** section — **`ledger-and-board-apk`** contains
-`app-release-signed.apk`, ready to sideload onto an Android phone.
+The **Build Android APK** workflow runs on every push to `main`. You can also
+start it from **Actions → Build Android APK → Run workflow**. Open the run
+and download **`vigaasans-chess-board-apk`** from the **Artifacts** section
+at the bottom. It contains `app-release-signed.apk`.
 
-**Important — one-time setup required, or the installed app will just open
-as a browser tab:** the workflow needs two repository secrets
-(`KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`) so it signs every build with the
-same key, and your GitHub Pages site needs a small `assetlinks.json` file
-published at your domain's root proving that key is authorized to
-represent it. Without both of these, Android falls back to showing the
-address bar — which is exactly what a TWA is supposed to do when it can't
-verify the app, as a safety measure. Full step-by-step instructions for
-both parts are in the separate signing-setup package (ask for it if you no
-longer have it) — it's a short one-time setup, not something you repeat
-per build.
+### Stable signing (needed to hide the address bar)
 
-The signing key is now a stable key reused on every run (set up per the
-instructions above), not a fresh one each time — that instability was
-exactly what broke the browser-bar verification originally. This key is
-for sideloading/testing; publishing updates through the Google Play Store
-would need its own separate signing/release process.
+Without any setup, the workflow signs each build with a one-off key and
+shows a warning. That APK installs and works for testing, but Android shows
+a browser address bar, and a new build can't install over the old one.
+
+To fix both, set up these three things once:
+
+1. **Create a keystore** on your computer (any machine with Java):
+   `keytool -genkeypair -keystore vigaasan.keystore -alias vigaasan -keyalg RSA -keysize 2048 -validity 10000`
+2. **Add repository secrets** under Settings → Secrets and variables →
+   Actions:
+   - `KEYSTORE_BASE64`: the output of `base64 -w0 vigaasan.keystore`
+   - `KEYSTORE_PASSWORD`: the password you chose
+   - `KEYSTORE_ALIAS` (optional): only needed if the alias isn't `vigaasan`
+3. **Publish `assetlinks.json` at your domain root.** It must be at
+   `https://<your-username>.github.io/.well-known/assetlinks.json`. That is
+   the root of the domain, *not* this project's folder, so it lives in a
+   separate repository named `<your-username>.github.io`, which also needs
+   a `.nojekyll` file. Use the package ID `io.github.<username>.ledgerboard`
+   and the SHA-256 fingerprint that the workflow prints in its "Print the
+   signing fingerprint" step.
+
+Keep the keystore file somewhere safe. Losing it means existing installs can
+never be updated.
 
 ### Alternative: PWABuilder (no CI)
 
-Paste your GitHub Pages URL into [pwabuilder.com](https://www.pwabuilder.com)
-→ **Package for stores** → **Android** → **Generate** → unzip → `.apk` is
-inside.
+Paste your Pages URL into [pwabuilder.com](https://www.pwabuilder.com), then
+choose **Package for stores → Android → Generate**.
 
-## Using your own PGN files in the app
+## Using your own PGN files
 
-Tap **+ Add PGN** in the collection strip (or **📊 → Upload PGN file(s)**).
-Each game needs a `[FEN "..."]` header and at least one move in the mainline
-to be treated as a puzzle; games without a FEN show as plain lesson/text
-cards. Uploaded files appear as their own chip, marked 📄, and can be removed
-any time from the 📊 panel. Everything is stored in the browser's local
-storage on that device — there's no server, so files don't sync between
-devices or browsers.
+Each game needs a `[FEN "..."]` header and at least one move in the main line
+to become a puzzle. Games without a FEN appear as text lessons. If the
+`White` header is shared by several games, it's used as the chapter name;
+`Black` is used as the puzzle title. Variations in parentheses are ignored,
+and comments in `{...}` appear in the ledger. Removing a file in the stats
+sheet also removes its progress.
 
 ## How solving works
 
-Tap a piece, then tap the destination square. Wrong tries flash red and let
-you retry; **Hint** highlights the correct piece to move; **Show answer**
-plays out the full solution with the original annotator's comments. A timer
-runs while you solve — solving without "Show answer" raises your rating,
-using it without solving lowers it. Progress, timing history, and rating are
-all saved locally per device.
+Tap a piece, then its destination square; the legal destinations are dotted.
+
+- **Wrong tries** shake the feedback line and let you retry.
+- **Hint** marks the piece to move.
+- **Reveal** plays out the rest of the line with the annotator's comments,
+  keeping any moves you've already played.
+- **Reset** starts the puzzle again.
+
+The opponent's replies play automatically.
 
 ## Credits
 
-Built-in puzzle content comes from `Practical-chessendings.pgn` and
-`Chess_Strategy_Simplified.pgn`. Move validation runs on
-[chess.js](https://github.com/jhlywa/chess.js) (loaded from cdnjs at
-runtime). Android packaging uses
+Built-in content comes from `Practical-chessendings.pgn` and
+`Chess_Strategy_Simplified.pgn`. Move validation uses
+[chess.js](https://github.com/jhlywa/chess.js) 0.10.3 from cdnjs. Fonts are
+Newsreader and JetBrains Mono from Google Fonts. Android packaging uses
 [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap).

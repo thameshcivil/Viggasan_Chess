@@ -1,18 +1,23 @@
 name: Build Android APK
 
-# Builds an installable .apk from this repo's GitHub Pages site and attaches
-# it to the run as a downloadable artifact (Actions tab -> this run ->
-# Artifacts section, near the bottom of the run summary page).
+# Builds an installable .apk of Vigaasan's Chess Board from this repo's
+# GitHub Pages site and attaches it to the run as a downloadable artifact
+# (Actions tab -> this run -> Artifacts, near the bottom of the summary).
 #
-# Requires GitHub Pages to already be enabled for this repository
+# Requires GitHub Pages to be enabled for this repository
 # (Settings -> Pages -> Deploy from a branch -> main -> / (root)), since the
 # APK is a Trusted Web Activity that wraps the live site at
 # https://<owner>.github.io/<repo>/.
 #
-# The signing key used here is generated fresh on every run purely so the
-# APK can be installed for testing/sideloading. It is NOT suitable for
-# publishing updates to the Google Play Store, which requires a stable,
-# securely-stored signing key you keep across releases.
+# Signing:
+#  * If the repository secrets KEYSTORE_BASE64 and KEYSTORE_PASSWORD are set
+#    (optionally KEYSTORE_ALIAS, default "vigaasan"), every build is signed
+#    with that same stable key. That is what lets Android verify the app
+#    against /.well-known/assetlinks.json and hide the browser address bar,
+#    and what lets a new APK install over an old one.
+#  * If they are NOT set, the build still succeeds using a throwaway key
+#    generated for this run only, with a warning. That APK installs fine for
+#    testing, but shows the address bar and can't update a previous install.
 
 on:
   push:
@@ -41,64 +46,54 @@ jobs:
           java-version: '17'
 
       - name: Give Bubblewrap the SDK layout it expects
-        # Bubblewrap's own SDK check (AndroidSdkTools.validatePath) only
-        # accepts a path if "<sdk>/tools" or "<sdk>/bin" exists directly
-        # inside it -- a layout from the old, discontinued Android SDK
-        # tools package. The SDK preinstalled on GitHub-hosted runners is
-        # perfectly valid but only has "cmdline-tools/latest/bin", so
-        # Bubblewrap rejects it with "The provided androidSdk isn't
-        # correct" even though every tool it needs is present. Symlinking
-        # <sdk>/bin to the real cmdline-tools location satisfies the check
-        # without moving or duplicating anything.
+        # Bubblewrap only accepts an SDK path containing "<sdk>/tools" or
+        # "<sdk>/bin"; GitHub's runner SDK only has cmdline-tools/latest/bin,
+        # so link it.
         run: |
           if [ ! -e "$ANDROID_HOME/bin" ] && [ -d "$ANDROID_HOME/cmdline-tools/latest/bin" ]; then
             ln -s cmdline-tools/latest/bin "$ANDROID_HOME/bin"
             echo "Linked $ANDROID_HOME/bin -> cmdline-tools/latest/bin"
           fi
-          ls -la "$ANDROID_HOME"
 
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
       - name: Point Bubblewrap at the pre-installed JDK and Android SDK
-        # The very first time ANY bubblewrap command runs, it checks for
-        # ~/.bubblewrap/config.json and, if missing, launches an interactive
-        # first-run wizard ("Do you want Bubblewrap to install the JDK
-        # (recommended)?") before doing anything else -- even before running
-        # `updateConfig`. There's no CI-safe flag to skip that wizard, and
-        # with no terminal attached it just fails immediately (exit 130).
-        # The documented config file format is simple
-        # ({"jdkPath": "...", "androidSdkPath": "..."}), so writing it
-        # ourselves before invoking the CLI at all sidesteps the wizard
-        # completely, for every subcommand that follows.
+        # Writing ~/.bubblewrap/config.json up front skips Bubblewrap's
+        # interactive first-run wizard, which can't run in CI.
         run: |
           mkdir -p "$HOME/.bubblewrap"
           node -e '
-          const fs = require("fs");
-          const path = require("path");
-          const dir = path.join(process.env.HOME, ".bubblewrap");
-          const config = {
-            jdkPath: process.env.JAVA_HOME,
-            androidSdkPath: process.env.ANDROID_HOME
-          };
-          fs.writeFileSync(path.join(dir, "config.json"), JSON.stringify(config, null, 2) + "\n");
-          console.log(fs.readFileSync(path.join(dir, "config.json"), "utf8"));
+          const fs = require("fs"), path = require("path");
+          const file = path.join(process.env.HOME, ".bubblewrap", "config.json");
+          fs.writeFileSync(file, JSON.stringify({ jdkPath: process.env.JAVA_HOME, androidSdkPath: process.env.ANDROID_HOME }, null, 2) + "\n");
+          console.log(fs.readFileSync(file, "utf8"));
           '
           bubblewrap doctor || true
 
-      - name: Generate a signing key for this build
+      - name: Prepare the signing key
         env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
         run: |
-          PASS="${KEYSTORE_PASSWORD:-ledgerboard123}"
+          ALIAS="${KEYSTORE_ALIAS:-vigaasan}"
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PASSWORD" ]; then
+            echo "Using the stable signing key from repository secrets (alias: $ALIAS)."
+            echo "$KEYSTORE_BASE64" | base64 -d > android.keystore
+            PASS="$KEYSTORE_PASSWORD"
+          else
+            echo "::warning::KEYSTORE_BASE64 / KEYSTORE_PASSWORD secrets are not set, so this APK is signed with a one-off key. It will install for testing, but will show the browser address bar and cannot update an earlier install. See README.md -> 'Stable signing'."
+            PASS="vigaasan-$(openssl rand -hex 12)"
+            keytool -genkeypair -v -keystore android.keystore -alias "$ALIAS" \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$PASS" -keypass "$PASS" \
+              -dname "CN=Vigaasan Chess Board, OU=Trainer, O=Vigaasan, C=IN"
+          fi
+          echo "::add-mask::$PASS"
           echo "BUBBLEWRAP_KEYSTORE_PASSWORD=$PASS" >> "$GITHUB_ENV"
           echo "BUBBLEWRAP_KEY_PASSWORD=$PASS" >> "$GITHUB_ENV"
-          keytool -genkeypair -v \
-            -keystore android.keystore \
-            -alias ledgerboard \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass "$PASS" -keypass "$PASS" \
-            -dname "CN=Ledger and Board, OU=Trainer, O=Trainer, L=City, S=State, C=US"
+          echo "KEY_ALIAS=$ALIAS" >> "$GITHUB_ENV"
 
       - name: Write twa-manifest.json for this repository's Pages site
         env:
@@ -116,27 +111,30 @@ jobs:
           let pkgSuffix = owner.replace(/[^a-z0-9]/g, "");
           if (/^[0-9]/.test(pkgSuffix)) pkgSuffix = "u" + pkgSuffix;
           if (!pkgSuffix) pkgSuffix = "app";
+          // The package id is internal (never shown to users). It keeps its
+          // original value so existing installs and any assetlinks.json you
+          // already published stay valid.
           const packageId = "io.github." + pkgSuffix + ".ledgerboard";
           const manifest = {
             packageId: packageId,
             host: host,
-            name: "Ledger & Board",
-            launcherName: "Ledger & Board",
+            name: "Vigaasan’s Chess Board",
+            launcherName: "Vigaasan",
             display: "standalone",
-            orientation: "portrait",
-            themeColor: "#1B140F",
-            navigationColor: "#1B140F",
-            navigationColorDark: "#1B140F",
-            navigationDividerColor: "#1B140F",
-            navigationDividerColorDark: "#1B140F",
-            backgroundColor: "#1B140F",
+            orientation: "default",
+            themeColor: "#1D0B12",
+            navigationColor: "#1D0B12",
+            navigationColorDark: "#1D0B12",
+            navigationDividerColor: "#1D0B12",
+            navigationDividerColorDark: "#1D0B12",
+            backgroundColor: "#1D0B12",
             enableNotifications: false,
             startUrl: "/" + repo + "/index.html",
             iconUrl: base + "icon-512.png",
             maskableIconUrl: base + "icon-512-maskable.png",
             splashScreenFadeOutDuration: 300,
-            signingKey: { path: "./android.keystore", alias: "ledgerboard" },
-            appVersionName: "1.0." + runNumber,
+            signingKey: { path: "./android.keystore", alias: process.env.KEY_ALIAS || "vigaasan" },
+            appVersionName: "2.0." + runNumber,
             appVersionCode: runNumber,
             shortcuts: [],
             generatorApp: "bubblewrap-cli",
@@ -152,16 +150,20 @@ jobs:
           fs.writeFileSync("twa-manifest.json", JSON.stringify(manifest, null, 2) + "\n");
           console.log(fs.readFileSync("twa-manifest.json", "utf8"));
           '
+
       - name: Generate the Android project from the manifest
         run: yes | bubblewrap update --manifest=./twa-manifest.json --skipVersionUpgrade
 
       - name: Build the signed APK
         run: yes | bubblewrap build --skipPwaValidation
 
+      - name: Print the signing fingerprint (for assetlinks.json)
+        run: keytool -list -v -keystore android.keystore -alias "$KEY_ALIAS" -storepass "$BUBBLEWRAP_KEYSTORE_PASSWORD" | grep -E "SHA256:" || true
+
       - name: Upload APK as a downloadable build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ledger-and-board-apk
+          name: vigaasans-chess-board-apk
           path: app-release-signed.apk
           if-no-files-found: error
           retention-days: 90
