@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/folio_plum</item>
+        <item name="android:statusBarColor">@color/folio_plum</item>
+        <item name="android:navigationBarColor">@color/folio_plum</item>
+        <item name="android:colorPrimary">@color/folio_plum</item>
+        <item name="android:colorAccent">@color/folio_brass</item>
+    </style>
+    <color name="folio_plum">#1D0B12</color>
+    <color name="folio_brass">#D4A25A</color>
+    <color name="icon_bg">#1B140F</color>
+</resources>

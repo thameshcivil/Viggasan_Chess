@@ -1,0 +1,45 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Version code comes from the CI run number so every build can install
+// over the previous one (when signed with the same key).
+def runNumber = (System.getenv("RUN_NUMBER") ?: "1").toInteger()
+
+android {
+    namespace 'io.github.thameshcivil.vigaasan'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'io.github.thameshcivil.vigaasan'
+        minSdk 24
+        targetSdk 35
+        versionCode runNumber
+        versionName "3.0." + runNumber
+        // The site the app shows. Change here if the Pages URL changes.
+        buildConfigField "String", "SITE_URL", "\"" + (System.getenv("SITE_URL") ?: "https://thameshcivil.github.io/Viggasan_Chess/") + "\""
+    }
+
+    buildFeatures { buildConfig true }
+
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KS_PATH") ?: "release.keystore")
+            storePassword System.getenv("KS_PASS")
+            keyAlias System.getenv("KS_ALIAS") ?: "vigaasan"
+            keyPassword System.getenv("KS_PASS")
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

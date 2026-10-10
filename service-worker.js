@@ -2,7 +2,7 @@
 // The page itself is fetched network-first, so a new version shows up on
 // the next launch instead of a visit or two later; everything else
 // (icons, chess.js, fonts) is served cache-first and refreshed quietly.
-const CACHE_NAME = 'vigaasan-chess-v8';
+const CACHE_NAME = 'vigaasan-chess-v9';
 const CORE_ASSETS = [
   './',
   './index.html',

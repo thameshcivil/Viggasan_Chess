@@ -1,23 +1,18 @@
 name: Build Android APK
 
-# Builds an installable .apk of Vigaasan's Chess Board from this repo's
-# GitHub Pages site and attaches it to the run as a downloadable artifact
-# (Actions tab -> this run -> Artifacts, near the bottom of the summary).
+# Builds Vigaasan's Chess Board as a native Android app (the android/
+# folder): a full-screen WebView showing this repo's GitHub Pages site.
+# A WebView has no browser toolbar, so unlike the old Trusted Web Activity
+# build there is no address bar and nothing to verify with assetlinks.json.
 #
-# Requires GitHub Pages to be enabled for this repository
-# (Settings -> Pages -> Deploy from a branch -> main -> / (root)), since the
-# APK is a Trusted Web Activity that wraps the live site at
-# https://<owner>.github.io/<repo>/.
+# Download: Actions tab -> latest run -> Artifacts -> vigaasans-chess-board-apk
 #
-# Signing:
-#  * If the repository secrets KEYSTORE_BASE64 and KEYSTORE_PASSWORD are set
-#    (optionally KEYSTORE_ALIAS, default "vigaasan"), every build is signed
-#    with that same stable key. That is what lets Android verify the app
-#    against /.well-known/assetlinks.json and hide the browser address bar,
-#    and what lets a new APK install over an old one.
-#  * If they are NOT set, the build still succeeds using a throwaway key
-#    generated for this run only, with a warning. That APK installs fine for
-#    testing, but shows the address bar and can't update a previous install.
+# Signing: if the repository secrets KEYSTORE_BASE64 and KEYSTORE_PASSWORD
+# (optionally KEYSTORE_ALIAS, default "vigaasan") are set, every build uses
+# that stable key, so new APKs install over old ones. Without them, a
+# one-off key is generated per run: the APK works, but to install a newer
+# build you must uninstall the old one first. As the app loads the live
+# site, you rarely need a new APK at all — web changes show up by themselves.
 
 on:
   push:
@@ -34,42 +29,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: '22'
-
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Give Bubblewrap the SDK layout it expects
-        # Bubblewrap only accepts an SDK path containing "<sdk>/tools" or
-        # "<sdk>/bin"; GitHub's runner SDK only has cmdline-tools/latest/bin,
-        # so link it.
-        run: |
-          if [ ! -e "$ANDROID_HOME/bin" ] && [ -d "$ANDROID_HOME/cmdline-tools/latest/bin" ]; then
-            ln -s cmdline-tools/latest/bin "$ANDROID_HOME/bin"
-            echo "Linked $ANDROID_HOME/bin -> cmdline-tools/latest/bin"
-          fi
-
-      - name: Install Bubblewrap CLI
-        run: npm install -g @bubblewrap/cli
-
-      - name: Point Bubblewrap at the pre-installed JDK and Android SDK
-        # Writing ~/.bubblewrap/config.json up front skips Bubblewrap's
-        # interactive first-run wizard, which can't run in CI.
-        run: |
-          mkdir -p "$HOME/.bubblewrap"
-          node -e '
-          const fs = require("fs"), path = require("path");
-          const file = path.join(process.env.HOME, ".bubblewrap", "config.json");
-          fs.writeFileSync(file, JSON.stringify({ jdkPath: process.env.JAVA_HOME, androidSdkPath: process.env.ANDROID_HOME }, null, 2) + "\n");
-          console.log(fs.readFileSync(file, "utf8"));
-          '
-          bubblewrap doctor || true
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
 
       - name: Prepare the signing key
         env:
@@ -78,102 +47,44 @@ jobs:
           KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
         run: |
           ALIAS="${KEYSTORE_ALIAS:-vigaasan}"
+          KS="$RUNNER_TEMP/release.keystore"
           if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PASSWORD" ]; then
             echo "Using the stable signing key from repository secrets (alias: $ALIAS)."
-            echo "$KEYSTORE_BASE64" | base64 -d > android.keystore
+            echo "$KEYSTORE_BASE64" | base64 -d > "$KS"
             PASS="$KEYSTORE_PASSWORD"
           else
-            echo "::warning::KEYSTORE_BASE64 / KEYSTORE_PASSWORD secrets are not set, so this APK is signed with a one-off key. It will install for testing, but will show the browser address bar and cannot update an earlier install. See README.md -> 'Stable signing'."
+            echo "::notice::No KEYSTORE_BASE64 / KEYSTORE_PASSWORD secrets, so this APK uses a one-off signing key. It works normally; to install a later build, uninstall this one first (export a backup from the app's ELO menu before you do)."
             PASS="vigaasan-$(openssl rand -hex 12)"
-            keytool -genkeypair -v -keystore android.keystore -alias "$ALIAS" \
+            keytool -genkeypair -keystore "$KS" -alias "$ALIAS" \
               -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass "$PASS" -keypass "$PASS" \
               -dname "CN=Vigaasan Chess Board, OU=Trainer, O=Vigaasan, C=IN"
           fi
           echo "::add-mask::$PASS"
-          echo "BUBBLEWRAP_KEYSTORE_PASSWORD=$PASS" >> "$GITHUB_ENV"
-          echo "BUBBLEWRAP_KEY_PASSWORD=$PASS" >> "$GITHUB_ENV"
-          echo "KEY_ALIAS=$ALIAS" >> "$GITHUB_ENV"
+          echo "KS_PATH=$KS" >> "$GITHUB_ENV"
+          echo "KS_PASS=$PASS" >> "$GITHUB_ENV"
+          echo "KS_ALIAS=$ALIAS" >> "$GITHUB_ENV"
 
-      - name: Write twa-manifest.json for this repository's Pages site
+      - name: Build the release APK
         env:
-          OWNER: ${{ github.repository_owner }}
-          REPO: ${{ github.event.repository.name }}
           RUN_NUMBER: ${{ github.run_number }}
-        run: |
-          node -e '
-          const fs = require("fs");
-          const owner = String(process.env.OWNER || "").toLowerCase();
-          const repo = String(process.env.REPO || "");
-          const runNumber = parseInt(process.env.RUN_NUMBER || "1", 10);
-          const host = owner + ".github.io";
-          const base = "https://" + host + "/" + repo + "/";
-          let pkgSuffix = owner.replace(/[^a-z0-9]/g, "");
-          if (/^[0-9]/.test(pkgSuffix)) pkgSuffix = "u" + pkgSuffix;
-          if (!pkgSuffix) pkgSuffix = "app";
-          // The package id is internal (never shown to users). It keeps its
-          // original value so existing installs and any assetlinks.json you
-          // already published stay valid.
-          const packageId = "io.github." + pkgSuffix + ".ledgerboard";
-          const manifest = {
-            packageId: packageId,
-            host: host,
-            name: "Vigaasan’s Chess Board",
-            launcherName: "Vigaasan",
-            display: "standalone",
-            orientation: "default",
-            themeColor: "#1D0B12",
-            navigationColor: "#1D0B12",
-            navigationColorDark: "#1D0B12",
-            navigationDividerColor: "#1D0B12",
-            navigationDividerColorDark: "#1D0B12",
-            backgroundColor: "#1D0B12",
-            enableNotifications: false,
-            startUrl: "/" + repo + "/index.html",
-            iconUrl: base + "icon-512.png",
-            maskableIconUrl: base + "icon-512-maskable.png",
-            splashScreenFadeOutDuration: 300,
-            signingKey: { path: "./android.keystore", alias: process.env.KEY_ALIAS || "vigaasan" },
-            appVersionName: "2.0." + runNumber,
-            appVersionCode: runNumber,
-            shortcuts: [],
-            generatorApp: "bubblewrap-cli",
-            webManifestUrl: base + "manifest.json",
-            fallbackType: "customtabs",
-            features: {},
-            enableSiteSettingsShortcut: true,
-            isChromeOSOnly: false,
-            isMetaQuest: false,
-            fullScopeUrl: base,
-            minSdkVersion: 24
-          };
-          fs.writeFileSync("twa-manifest.json", JSON.stringify(manifest, null, 2) + "\n");
-          console.log(fs.readFileSync("twa-manifest.json", "utf8"));
-          '
-
-      - name: Generate the Android project from the manifest
-        run: yes | bubblewrap update --manifest=./twa-manifest.json --skipVersionUpgrade
-
-      - name: Build the signed APK
-        # On failure, the last lines of output are re-emitted as annotations
-        # so the cause is visible on the run's summary page.
+          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
         run: |
           set +o pipefail
-          yes | bubblewrap build --skipPwaValidation > build.log 2>&1
-          rc=${PIPESTATUS[1]}
-          cat build.log
-          if [ "$rc" -ne 0 ] || [ ! -f app-release-signed.apk ]; then
-            grep -iE "error|what went wrong|exception|failed|cause" build.log | tail -25 | while IFS= read -r l; do echo "::error::${l:0:400}"; done
+          gradle -p android assembleRelease --no-daemon --stacktrace > build.log 2>&1
+          rc=$?
+          tail -n 60 build.log
+          if [ "$rc" -ne 0 ]; then
+            grep -E "error:|e: |What went wrong|> |FAILURE|Exception" build.log | head -25 | while IFS= read -r l; do echo "::error::${l:0:400}"; done
             exit 1
           fi
-
-      - name: Print the signing fingerprint (for assetlinks.json)
-        run: keytool -list -v -keystore android.keystore -alias "$KEY_ALIAS" -storepass "$BUBBLEWRAP_KEYSTORE_PASSWORD" | grep -E "SHA256:" || true
+          cp android/app/build/outputs/apk/release/app-release.apk vigaasans-chess-board.apk
+          ls -l vigaasans-chess-board.apk
 
       - name: Upload APK as a downloadable build artifact
         uses: actions/upload-artifact@v5
         with:
           name: vigaasans-chess-board-apk
-          path: app-release-signed.apk
+          path: vigaasans-chess-board.apk
           if-no-files-found: error
           retention-days: 90

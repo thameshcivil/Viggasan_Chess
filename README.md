@@ -10,7 +10,8 @@ app, works offline, and has no server or database.
   chapters).
 - **Your own PGN files:** tap **+ PGN** in the collection tabs, or use
   **ELO → Upload PGN file(s)**. Files are parsed in the browser and saved on
-  that device only.
+  that device only. To delete a file, tap the 🗑 trash icon next to its tab
+  or in the ELO sheet.
 - **Timer and rating:** each puzzle is timed. An Elo-style rating starts at
   1200 and moves once per puzzle, on your first result:
   - a clean solve counts fully;
@@ -46,48 +47,60 @@ network-first and served from cache only when you're offline.
 
 ## Install it on a phone
 
-Open the Pages URL in Chrome and use the menu → **Add to Home Screen** (or
-**Install app**). Launch it from that icon to get the full-screen view with
-no address bar. If you installed an older version, remove the icon and add
-it again to pick up the new name and icon.
+**Android app (recommended):** the **Build Android APK** workflow runs on
+every push to `main`. You can also start it from **Actions → Build Android
+APK → Run workflow**. Open the latest run and download
+**`vigaasans-chess-board-apk`** from **Artifacts**. Unzip it and install
+`vigaasans-chess-board.apk`.
 
-## Download the Android APK
+The app (in `android/`) is a full-screen WebView around the live site:
 
-The **Build Android APK** workflow runs on every push to `main`. You can also
-start it from **Actions → Build Android APK → Run workflow**. Open the run
-and download **`vigaasans-chess-board-apk`** from the **Artifacts** section
-at the bottom. It contains `app-release-signed.apk`.
+- **No browser bar, ever.** It's a WebView, not a Chrome tab, so there's no
+  address bar, share button or ✕, and no `assetlinks.json` or domain setup.
+- **Updates itself.** It loads the GitHub Pages site, so changes you push
+  appear the next time you open the app. You rarely need a new APK.
+- **Works offline** after the first launch.
+- **Native touches:** **+ PGN** and **Restore backup** open the phone's file
+  picker, and **Export backup** saves a `.json` file to your Downloads.
 
-### Stable signing (needed to hide the address bar)
+**Browser:** you can also open the Pages URL in Chrome and choose
+**Add to Home Screen**.
 
-Without any setup, the workflow signs each build with a one-off key and
-shows a warning. That APK installs and works for testing, but Android shows
-a browser address bar, and a new build can't install over the old one.
+### Moving your progress (backup & restore)
 
-To fix both, set up these three things once:
+Each app and browser keeps its own progress. To move it, tap **ELO → Export
+backup** where your progress is now. Then on the new app or device, tap
+**ELO → Restore backup → Choose file**, pick the backup, and tap
+**Restore**.
 
-1. **Create a keystore** on your computer (any machine with Java):
+The backup includes your rating, solved puzzles and uploaded PGN files.
+
+### Signing (optional)
+
+Without setup, each APK build is signed with a one-off key. It works
+normally, but to install a *newer* APK you must uninstall the old one first.
+Export a backup before you do.
+
+To make new APKs install straight over old ones, set this up once:
+
+1. **Create a keystore:**
    `keytool -genkeypair -keystore vigaasan.keystore -alias vigaasan -keyalg RSA -keysize 2048 -validity 10000`
 2. **Add repository secrets** under Settings → Secrets and variables →
    Actions:
    - `KEYSTORE_BASE64`: the output of `base64 -w0 vigaasan.keystore`
-   - `KEYSTORE_PASSWORD`: the password you chose
+   - `KEYSTORE_PASSWORD`: your password
    - `KEYSTORE_ALIAS` (optional): only needed if the alias isn't `vigaasan`
-3. **Publish `assetlinks.json` at your domain root.** It must be at
-   `https://<your-username>.github.io/.well-known/assetlinks.json`. That is
-   the root of the domain, *not* this project's folder, so it lives in a
-   separate repository named `<your-username>.github.io`, which also needs
-   a `.nojekyll` file. Use the package ID `io.github.<username>.ledgerboard`
-   and the SHA-256 fingerprint that the workflow prints in its "Print the
-   signing fingerprint" step.
 
-Keep the keystore file somewhere safe. Losing it means existing installs can
-never be updated.
+Keep the keystore safe.
 
-### Alternative: PWABuilder (no CI)
+### Why the old app showed an address bar
 
-Paste your Pages URL into [pwabuilder.com](https://www.pwabuilder.com), then
-choose **Package for stores → Android → Generate**.
+The previous APK was a Trusted Web Activity, which is a Chrome tab without
+the toolbar. Android hides that toolbar only after verifying the site
+through `/.well-known/assetlinks.json` at the domain root, signed with a
+stable key. Neither was set up, so Chrome fell back to showing the URL bar,
+✕ and share button. The WebView app replaces it and has no toolbar at all.
+Uninstall the old "Vigaasan" app once you've moved your progress.
 
 ## Using your own PGN files
 
@@ -115,5 +128,5 @@ The opponent's replies play automatically.
 Built-in content comes from `Practical-chessendings.pgn` and
 `Chess_Strategy_Simplified.pgn`. Move validation uses
 [chess.js](https://github.com/jhlywa/chess.js) 0.10.3 from cdnjs. Fonts are
-Newsreader and JetBrains Mono from Google Fonts. Android packaging uses
-[Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap).
+Newsreader and JetBrains Mono from Google Fonts. The Android app is a plain
+Android WebView project (no extra libraries).

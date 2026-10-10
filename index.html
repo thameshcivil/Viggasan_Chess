@@ -289,6 +289,19 @@
   .lib-item button{ flex:0 0 auto; border:1px solid var(--bad); color:var(--bad); background:transparent; padding:6px 10px; cursor:pointer;
     font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; }
   .warn{ color:var(--bad); font-style:italic; font-size:14px; margin-top:10px; }
+  .tab-wrap{ flex:0 0 auto; display:inline-flex; align-items:center; gap:2px; }
+  .trash{
+    flex:0 0 auto; display:inline-grid; place-items:center; width:30px; height:30px; padding:0; cursor:pointer;
+    border:1px solid transparent; background:transparent; color:var(--ink-faint);
+  }
+  .trash:hover, .trash:focus-visible{ color:var(--bad); border-color:var(--bad); }
+  .tab-wrap .trash{ width:26px; height:26px; margin-bottom:4px; }
+  .lib-item .trash{ width:36px; height:36px; border-color:var(--bad); color:var(--bad); }
+  .hint-text{ margin:0 0 10px; font-style:italic; font-size:14.5px; color:var(--ink-dim); }
+  .restore{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+  .restore-text{ width:100%; min-height:90px; resize:vertical; background:var(--panel); color:var(--ink); border:1px solid var(--rule);
+    font-family:var(--mono); font-size:11px; padding:8px; }
+  .restore input[type=file]{ display:none; }
 
   ::selection{ background:var(--accent); color:var(--accent-ink); }
   input[type=file]{ display:none; }
@@ -326,6 +339,8 @@
     .sidebar-left .strip{ flex-direction:column; align-items:stretch; overflow:visible; }
     .sidebar-left .tabs{ gap:0; padding:8px 16px; border-bottom:1px solid var(--rule-soft); }
     .sidebar-left .tab{ text-align:left; padding:9px 0; }
+    .sidebar-left .tab-wrap{ justify-content:space-between; }
+    .sidebar-left .tab-wrap .tab{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; }
     .sidebar-left .tab.active::after{ left:-16px; right:auto; top:0; bottom:0; width:3px; height:auto; }
     .sidebar-left .chap{ white-space:normal; text-align:left; }
     .sidebar-left .plates{ flex-direction:row; flex-wrap:wrap; }
@@ -406,6 +421,22 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (cls) e.className = cls;
     if (text !== undefined && text !== null) e.textContent = text;
     return e;
+  }
+
+  var TRASH_SVG = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10 11v6M14 11v6"/></svg>';
+  function trashButton(label, onClick){
+    var b = el('button', 'trash');
+    b.innerHTML = TRASH_SVG;
+    b.title = label; b.setAttribute('aria-label', label);
+    b.addEventListener('click', function(e){ e.stopPropagation(); onClick(); });
+    return b;
+  }
+  function confirmDelete(id){
+    var entry = library.filter(function(l){ return l.id === id; })[0];
+    if (!entry) return;
+    if (!confirm('Delete \u201c' + entry.filename + '\u201d and its progress from this device?')) return;
+    removeLibraryFile(id);
+    showToast('Deleted ' + entry.filename);
   }
 
   // ============================================================
@@ -655,7 +686,14 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       b.appendChild(document.createTextNode(col.shortLabel));
       b.appendChild(el('span', 'n', col.puzzleCount));
       b.addEventListener('click', function(){ switchCollection(key); });
-      collectionStripEl.appendChild(b);
+      if (col.kind === 'custom'){
+        var wrap = el('span', 'tab-wrap');
+        wrap.appendChild(b);
+        wrap.appendChild(trashButton('Delete ' + col.label, function(){ confirmDelete(key); }));
+        collectionStripEl.appendChild(wrap);
+      } else {
+        collectionStripEl.appendChild(b);
+      }
     });
     var add = el('button', 'tab add', '+ PGN');
     add.title = 'Add your own PGN file';
@@ -1351,7 +1389,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     pruneOrphans();
     if (state.collectionKey === id) switchCollection('endings');
     else renderCollectionStrip();
-    renderStatsModal();
+    if (modalBackdrop.classList.contains('open')) renderStatsModal();
   }
 
   // ============================================================
@@ -1441,12 +1479,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
         var row = el('div', 'lib-item'), meta = el('div', 'meta');
         meta.appendChild(el('div', 'fname', l.filename));
         meta.appendChild(el('div', 'fsub kicker', l.count + ' puzzles · added ' + new Date(l.addedAt).toLocaleDateString()));
-        var del = el('button', null, 'Remove');
-        del.addEventListener('click', function(){
-          if (!confirm('Remove “' + l.filename + '” and its progress?')) return;
-          removeLibraryFile(l.id);
-        });
-        row.appendChild(meta); row.appendChild(del);
+        row.appendChild(meta);
+        row.appendChild(trashButton('Delete ' + l.filename, function(){ confirmDelete(l.id); }));
         lib.appendChild(row);
       });
     }
@@ -1456,6 +1490,103 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     lib.appendChild(add);
     if (!storageOK) lib.appendChild(el('div', 'warn', 'Local storage isn’t available here (private browsing?) — progress and uploads won’t be saved.'));
     modalEl.appendChild(lib);
+
+    var bk = el('div', 'section');
+    bk.appendChild(el('h3', 'kicker', 'Backup & restore'));
+    bk.appendChild(el('p', 'hint-text', 'Move your rating, progress and PGN files to another device or app: export here, then restore there.'));
+    var brow = el('div', 'actions');
+    var exp = el('button', 'btn', 'Export backup');
+    exp.addEventListener('click', exportBackup);
+    var imp = el('button', 'btn', 'Restore backup');
+    imp.addEventListener('click', function(){ showRestoreBox(bk); });
+    brow.appendChild(exp); brow.appendChild(imp);
+    bk.appendChild(brow);
+    modalEl.appendChild(bk);
+  }
+
+  // ---- backup / restore ----
+  function buildBackup(){
+    var files = library.map(function(l){ return { meta:l, items: loadLibraryItems(l.id) || [] }; });
+    return JSON.stringify({ app:'vigaasans-chess-board', version:1, exportedAt:new Date().toISOString(), progress:progress, files:files });
+  }
+  function copyText(text){
+    var done = false;
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try{ done = document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    if (!done && navigator.clipboard){ navigator.clipboard.writeText(text).catch(function(){}); done = true; }
+    return done;
+  }
+  var IN_APP = /VigaasanApp/.test(navigator.userAgent);
+  function exportBackup(){
+    var text = buildBackup();
+    var stamp = new Date().toISOString().slice(0, 10);
+    if (IN_APP && window.VigaasanBridge && window.VigaasanBridge.saveBackup){
+      // Native app: saved straight to the phone's Downloads folder.
+      try{ window.VigaasanBridge.saveBackup('vigaasan-backup-' + stamp + '.json', text); return; }catch(e){}
+    }
+    try{
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([text], { type:'application/json' }));
+      a.download = 'vigaasan-backup-' + stamp + '.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+    }catch(e){}
+    copyText(text);
+    showToast('Backup downloaded (and copied to the clipboard).');
+  }
+  function showRestoreBox(container){
+    if (container.querySelector('.restore')) return;
+    var box = el('div', 'restore');
+    var ta = document.createElement('textarea');
+    ta.className = 'restore-text';
+    ta.placeholder = 'Choose your backup file, or paste the backup text here\u2026';
+    var row = el('div', 'actions');
+    var pick = el('button', 'btn quiet', 'Choose file');
+    var go = el('button', 'btn primary', 'Restore');
+    var fi = document.createElement('input');
+    fi.type = 'file'; fi.accept = '.json,application/json,text/plain';
+    fi.addEventListener('change', function(){
+      var f = fi.files && fi.files[0];
+      if (!f) return;
+      var r = new FileReader();
+      r.onload = function(){ ta.value = String(r.result || ''); showToast('Backup loaded \u2014 tap Restore.'); };
+      r.readAsText(f);
+    });
+    pick.addEventListener('click', function(){ fi.click(); });
+    go.addEventListener('click', function(){ restoreBackup(ta.value); });
+    row.appendChild(pick); row.appendChild(go);
+    box.appendChild(ta); box.appendChild(row); box.appendChild(fi);
+    container.appendChild(box);
+  }
+  function restoreBackup(text){
+    var data;
+    try{ data = JSON.parse(String(text || '').trim()); }catch(e){ showToast('That doesn\u2019t look like a backup.'); return; }
+    if (!data || data.app !== 'vigaasans-chess-board' || !data.progress){ showToast('That doesn\u2019t look like a backup.'); return; }
+    if (!confirm('Replace the progress on this device with the backup from ' + String(data.exportedAt || 'earlier').slice(0, 10) + '?')) return;
+    library.forEach(function(l){ safeRemove(LIB_ITEM_PREFIX + l.id); });
+    library = [];
+    (data.files || []).forEach(function(f){
+      if (!f || !f.meta || !f.meta.id || !Array.isArray(f.items)) return;
+      if (safeSet(LIB_ITEM_PREFIX + f.meta.id, JSON.stringify(f.items))) library.push(f.meta);
+    });
+    saveLibraryIndex(library);
+    colCache = {};
+    var keepTheme = progress.theme;
+    progress = data.progress;
+    ['solved','viewed','opened','rated','last'].forEach(function(k){ progress[k] = progress[k] || {}; });
+    progress.history = Array.isArray(progress.history) ? progress.history : [];
+    if (typeof progress.rating !== 'number') progress.rating = 1200;
+    if (!progress.theme) progress.theme = keepTheme;
+    saveProgress();
+    pruneOrphans();
+    applyTheme(); updateRatingBadge();
+    closeModal();
+    renderCollectionStrip();
+    switchCollection('endings');
+    showToast('Backup restored \u2713');
   }
 
   function openModal(){ renderStatsModal(); modalBackdrop.classList.add('open'); var c = modalEl.querySelector('.modal-close'); if (c) c.focus(); }
