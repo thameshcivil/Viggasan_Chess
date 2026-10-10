@@ -32,15 +32,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -145,7 +145,7 @@ jobs:
             isChromeOSOnly: false,
             isMetaQuest: false,
             fullScopeUrl: base,
-            minSdkVersion: 23
+            minSdkVersion: 24
           };
           fs.writeFileSync("twa-manifest.json", JSON.stringify(manifest, null, 2) + "\n");
           console.log(fs.readFileSync("twa-manifest.json", "utf8"));
