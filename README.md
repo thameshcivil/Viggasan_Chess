@@ -8,10 +8,15 @@ app, works offline, and has no server or database.
 - **Two built-in collections:** *Practical Chess Endings* (300 puzzles) and
   *Chess Strategy: Simplified* (108 puzzles plus 25 short lessons, in 10
   chapters).
-- **Your own PGN files:** tap **+ PGN** in the collection tabs, or use
-  **ELO → Upload PGN file(s)**. Files are parsed in the browser and saved on
-  that device only. To delete a file, tap the 🗑 trash icon next to its tab
-  or in the ELO sheet.
+- **Library tree:** every book and PGN file is a collapsible list:
+  **file ▸ group ▸ puzzle numbers**, with solved counts at each level.
+  It's the left column in landscape; on phones, tap **☰ Library**. The
+  breadcrumb and a row of the current group's numbers stay above the
+  board. **Prev / Next** continue from one group into the next.
+- **Your own PGN files:** tap **+ Add PGN file** at the bottom of the
+  Library, or use **ELO → Upload PGN file(s)**. Files are parsed in the
+  browser and saved on that device only. To delete one, tap its 🗑 icon in
+  the Library or in the ELO sheet.
 - **Timer and rating:** each puzzle is timed. An Elo-style rating starts at
   1200 and moves once per puzzle, on your first result:
   - a clean solve counts fully;
@@ -20,7 +25,7 @@ app, works offline, and has no server or database.
 
   Tap the **ELO** button for your rating, puzzles solved, accuracy, average
   solve time and rating trend.
-- **Plate index:** the numbered squares under the tabs let you jump to any
+- **Plate index:** the numbered squares in the Library let you jump to any
   puzzle:
   - green: solved
   - red: answer revealed
@@ -105,9 +110,11 @@ Uninstall the old "Vigaasan" app once you've moved your progress.
 ## Using your own PGN files
 
 Each game needs a `[FEN "..."]` header and at least one move in the main line
-to become a puzzle. Games without a FEN appear as text lessons. If the
-`White` header is shared by several games, it's used as the chapter name;
-`Black` is used as the puzzle title. Variations in parentheses are ignored,
+to become a puzzle. Games without a FEN appear as text lessons (¶ in the
+Library). If the `White` header is shared by several games, it becomes the
+group name in the Library (for game collections like *Woodpecker*, that
+groups the puzzles by player). Puzzle titles show "White – Black, Event" when
+the file has event names, otherwise the `Black` header. Variations in parentheses are ignored,
 and comments in `{...}` appear in the ledger. Removing a file in the stats
 sheet also removes its progress.
 
