@@ -74,7 +74,7 @@
   button{ font:inherit; color:inherit; }
   :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
   .app{
-    width:100%; max-width:560px; min-height:100vh; min-height:100dvh; display:flex; flex-direction:column;
+    width:100%; min-height:100vh; min-height:100dvh; display:flex; flex-direction:column;
     padding-top:env(safe-area-inset-top, 0px);
   }
 
@@ -138,16 +138,24 @@
   /* ---------- layout ---------- */
   .layout{ display:flex; flex-direction:column; flex:1; min-height:0; }
   .sidebar-left{ display:flex; flex-direction:column; flex-shrink:0; }
-  main{ flex:1; padding:16px 16px 12px; display:flex; flex-direction:column; gap:14px; min-width:0; }
+  main{ flex:1; padding:12px 10px 12px; display:flex; flex-direction:column; gap:12px; min-width:0; }
+  main > :not(.diagram), #controls{ width:100%; max-width:760px; margin-left:auto; margin-right:auto; }
+  #controls{ display:flex; flex-direction:column; gap:12px; }
+  .sidebar-right #controls{ margin-bottom:22px; }
+  .sidebar-right .plate-head{ margin-bottom:14px; flex-wrap:wrap; }
+  .sidebar-right .plate-no{ font-size:40px; }
+  .sidebar-right .meters{ flex-direction:row; align-items:center; gap:10px; width:100%; }
+  #ledgerBox{ max-width:760px; margin:0 auto; }
+  .sidebar-right #ledgerBox{ max-width:none; }
   .sidebar-right{ flex-shrink:0; padding:0 16px 16px; }
 
   /* ---------- plate head ---------- */
   .kicker{
     font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
   }
-  .plate-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; border-top:1px solid var(--ink); padding-top:10px; }
+  .plate-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; border-top:1px solid var(--ink); padding-top:8px; }
   .plate-head .left{ min-width:0; }
-  .plate-no{ margin:4px 0 0; font-size:42px; line-height:.95; font-weight:500; letter-spacing:-.02em; }
+  .plate-no{ margin:2px 0 0; font-size:34px; line-height:.95; font-weight:500; letter-spacing:-.02em; }
   .plate-no .no{ font-style:italic; font-weight:400; font-size:.55em; color:var(--accent); margin-right:.12em; letter-spacing:0; }
   .plate-title{ margin:6px 0 0; font-style:italic; font-size:16px; line-height:1.3; color:var(--ink-dim); }
   .meters{ display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex:0 0 auto; }
@@ -162,7 +170,7 @@
   .stamp.revealed{ border-color:var(--bad); color:var(--bad); }
 
   /* ---------- the diagram ---------- */
-  .diagram{ display:grid; grid-template-columns:16px auto; grid-template-rows:auto 16px; justify-content:center; --sq:40px; }
+  .diagram{ display:grid; grid-template-columns:14px auto; grid-template-rows:auto 14px; justify-content:center; --sq:40px; margin-left:-7px; }
   .frame{
     grid-column:2; grid-row:1; border:2px solid var(--frame); padding:2px; box-shadow:var(--shadow); background:var(--bg);
   }
@@ -190,7 +198,7 @@
   .sq .hintmark{ position:absolute; z-index:2; inset:3px; box-shadow:0 0 0 3px var(--accent); animation:pulse 1.1s ease-in-out 2; pointer-events:none; }
   @keyframes pulse{ 0%,100%{ opacity:.2; } 50%{ opacity:1; } }
 
-  .caption{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:-4px; font-style:italic; font-size:15px; color:var(--ink-dim); }
+  .caption{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:-6px; font-style:italic; font-size:15px; color:var(--ink-dim); }
   .caption .side{ width:11px; height:11px; border:1.5px solid var(--ink); display:inline-block; }
   .caption .side.b{ background:var(--ink); }
 
@@ -335,17 +343,20 @@
     header.top{ padding:12px 24px 10px; }
     .brand small{ max-width:none; }
     .layout{ flex-direction:row; overflow:hidden; }
-    .sidebar-left{ width:clamp(176px, 20vw, 228px); flex:0 0 auto; overflow-y:auto; border-right:1px solid var(--rule); padding:4px 0 16px; }
+    .sidebar-left{ width:clamp(170px, 18vw, 232px); flex:0 0 auto; overflow-y:auto; border-right:1px solid var(--rule); padding:4px 0 16px; }
     .sidebar-left .strip{ flex-direction:column; align-items:stretch; overflow:visible; }
     .sidebar-left .tabs{ gap:0; padding:8px 16px; border-bottom:1px solid var(--rule-soft); }
     .sidebar-left .tab{ text-align:left; padding:9px 0; }
     .sidebar-left .tab-wrap{ justify-content:space-between; }
+    .sidebar-left .tabs > .chapters, .sidebar-left .tabs > .plates{ padding:2px 0 12px 12px; border-left:2px solid var(--accent); margin:0 0 6px; }
+    .sidebar-left .tabs > .chapters{ padding-bottom:4px; margin-bottom:0; }
+    .sidebar-left .tabs > .chapters + .plates{ padding-top:6px; }
     .sidebar-left .tab-wrap .tab{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; }
     .sidebar-left .tab.active::after{ left:-16px; right:auto; top:0; bottom:0; width:3px; height:auto; }
     .sidebar-left .chap{ white-space:normal; text-align:left; }
     .sidebar-left .plates{ flex-direction:row; flex-wrap:wrap; }
-    main{ overflow-y:auto; padding:18px clamp(16px, 2.4vw, 28px); }
-    .sidebar-right{ width:clamp(210px, 26vw, 320px); flex:0 0 auto; overflow-y:auto; border-left:1px solid var(--rule); padding:18px 20px; }
+    main{ overflow-y:auto; padding:12px clamp(10px, 1.6vw, 22px); gap:10px; }
+    .sidebar-right{ width:clamp(200px, 24vw, 320px); flex:0 0 auto; overflow-y:auto; border-left:1px solid var(--rule); padding:18px 20px; }
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -382,7 +393,7 @@
       <div class="loading" id="loading">Setting up the board…</div>
     </main>
 
-    <aside class="sidebar-right" id="sidebarRight"></aside>
+    <aside class="sidebar-right" id="sidebarRight"><div id="controlsDock"></div><div id="ledgerBox"></div></aside>
   </div>
 
   <footer class="bottom" id="footer">
@@ -676,6 +687,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   function recordKey(item){ return state.collectionKey + '::' + item.source + ':' + item.num; }
 
   function renderCollectionStrip(){
+    var sl = $('sidebarLeft');
+    if (chapterChipsEl.parentNode === collectionStripEl){ sl.appendChild(chapterChipsEl); sl.appendChild(puzzleNumStripEl); }
     collectionStripEl.innerHTML = '';
     allCollectionKeys().forEach(function(key){
       var col = collectionFor(key);
@@ -699,6 +712,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     add.title = 'Add your own PGN file';
     add.addEventListener('click', function(){ fileInput.click(); });
     collectionStripEl.appendChild(add);
+    placeIndex();
   }
 
   function firstUnsolvedIndex(list){
@@ -903,16 +917,54 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     '$18':'winning for White', '$19':'winning for Black'
   };
 
+  var controlsDock = $('controlsDock'), ledgerBox = $('ledgerBox');
+  function isThreeCol(){ return window.matchMedia(THREE_COL).matches; }
+
+  // Hint / Reset / feedback sit under the board in portrait, and at the
+  // top of the right-hand column in landscape so the board can use the
+  // full height of the screen.
+  function placeControls(){
+    var c = $('controls'), ph = $('plateHead'), dg = $('diagram');
+    if (isThreeCol()){
+      if (ph && ph.parentNode !== controlsDock) controlsDock.insertBefore(ph, controlsDock.firstChild);
+      if (c && c.parentNode !== controlsDock) controlsDock.appendChild(c);
+    } else {
+      if (ph && dg && ph.parentNode !== mainEl) mainEl.insertBefore(ph, dg);
+      if (c && c.parentNode !== mainEl) mainEl.appendChild(c);
+    }
+  }
+
+  // In the landscape sidebar, each collection's chapters and puzzle
+  // numbers are nested directly under that collection's tab; in portrait
+  // they sit in their own rows below the tab strip.
+  function placeIndex(){
+    var sidebarLeft = $('sidebarLeft');
+    if (isThreeCol()){
+      var active = collectionStripEl.querySelector('.tab.active');
+      var anchor = active ? (active.parentNode.classList.contains('tab-wrap') ? active.parentNode : active) : null;
+      if (anchor){
+        anchor.parentNode.insertBefore(puzzleNumStripEl, anchor.nextSibling);
+        anchor.parentNode.insertBefore(chapterChipsEl, puzzleNumStripEl);
+        return;
+      }
+    }
+    if (chapterChipsEl.parentNode !== sidebarLeft || chapterChipsEl.previousElementSibling !== collectionStripEl){
+      sidebarLeft.appendChild(chapterChipsEl);
+      sidebarLeft.appendChild(puzzleNumStripEl);
+    }
+  }
+
   function resetSidebarRight(){
-    sidebarRightEl.innerHTML = '';
+    controlsDock.innerHTML = '';
+    ledgerBox.innerHTML = '';
     var head = el('div', 'ledger-head');
     head.appendChild(el('span', 'kicker', 'The ledger'));
-    sidebarRightEl.appendChild(head);
+    ledgerBox.appendChild(head);
     var ledger = el('div', 'ledger'); ledger.id = 'ledger';
-    sidebarRightEl.appendChild(ledger);
+    ledgerBox.appendChild(ledger);
     var note = el('div', 'empty-note', 'Moves you play — or the answer, once revealed — are written here.');
     note.id = 'ledgerEmpty';
-    sidebarRightEl.appendChild(note);
+    ledgerBox.appendChild(note);
   }
 
   function pad3(n){ n = String(n); return n.length >= 3 ? n : ('00' + n).slice(-3); }
@@ -924,7 +976,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var col = state.collection;
 
     // plate head
-    var head = el('div', 'plate-head');
+    var head = el('div', 'plate-head'); head.id = 'plateHead';
     var left = el('div', 'left');
     var kind = col.kind === 'builtin' && item.source === 'endings' ? 'Ending' : (col.chapters && item.chapter ? item.chapter : 'Puzzle');
     left.appendChild(el('div', 'kicker', col.shortLabel + ' · Plate ' + pad3(item.num) + ' of ' + pad3(col.puzzleCount)));
@@ -968,7 +1020,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var fb = el('div', 'feedback', item.intro ? 'Study the position, then play the main line.' : 'Find the best move for ' + (state.solverColor === 'w' ? 'White' : 'Black') + '.');
     fb.id = 'feedback';
     fb.setAttribute('aria-live', 'polite');
-    mainEl.appendChild(fb);
+    var controls = el('div'); controls.id = 'controls';
+    controls.appendChild(fb);
 
     var actions = el('div', 'actions');
     var hintBtn = el('button', 'btn quiet', 'Hint');
@@ -976,14 +1029,16 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var resetBtn = el('button', 'btn quiet', 'Reset ↺');
     resetBtn.addEventListener('click', function(){ loadCurrentItem(); });
     actions.appendChild(hintBtn); actions.appendChild(resetBtn);
-    mainEl.appendChild(actions);
+    controls.appendChild(actions);
 
     if (item.intro){
       var note = el('div', 'note');
       note.appendChild(el('div', 'kicker', 'Annotation'));
       note.appendChild(el('p', null, item.intro));
-      mainEl.appendChild(note);
+      controls.appendChild(note);
     }
+    mainEl.appendChild(controls);
+    placeControls();
 
     sizeBoard();
     renderBoard();
@@ -995,26 +1050,37 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   // Square size is a whole number of pixels so all 64 squares are equal;
   // it's derived from the space the diagram actually has.
   var THREE_COL = '(orientation: landscape) and (min-width: 700px)';
+  // Makes the board as large as the screen allows: full column width, but
+  // never taller than the space left between the plate heading and the
+  // footer, so the whole board is visible without scrolling.
   function sizeBoard(){
     var diagram = $('diagram');
     if (!diagram) return;
     var cs = getComputedStyle(mainEl);
-    var availW = mainEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    var w = availW - 16 - 10 - 6;  // rank gutter, frame borders + padding
-    if (window.matchMedia(THREE_COL).matches){
-      // Fit the diagram (plus file letters) into the visible column height,
-      // leaving room below for the caption/feedback/buttons on tall screens.
-      var head = mainEl.querySelector('.plate-head');
-      var avail = mainEl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - (head ? head.offsetHeight + 14 : 0) - 16 - 10;
-      if (window.innerHeight >= 600) avail -= 150;
-      w = Math.min(w, avail);
-    } else if (window.innerHeight < 520){
-      w = Math.min(w, window.innerHeight * 0.7);
+    var GUTTER = 14 + 10 + 2;   // rank letters, frame borders + padding
+    var availW = mainEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - GUTTER + 7;
+    var head = mainEl.querySelector('.plate-head');
+    var headH = head ? head.offsetHeight + parseFloat(cs.rowGap || cs.gap || 12) : 0;
+    var captionH = 30, filesH = 14 + 10;
+    var availH;
+    if (isThreeCol()){
+      availH = mainEl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - headH - captionH - filesH;
+    } else {
+      var footer = $('footer');
+      var top = head ? head.getBoundingClientRect().top + window.scrollY : 0;
+      availH = window.innerHeight - (footer ? footer.offsetHeight : 0) - top - headH - captionH - filesH;
+      // On short screens prefer a readable board and let the page scroll.
+      availH = Math.max(availH, Math.min(availW, window.innerHeight * 0.62));
     }
-    var sq = Math.max(22, Math.floor(w / 8));
-    if (sq > 84) sq = 84;
+    var w = Math.min(availW, availH);
+    var sq = Math.max(24, Math.floor(w / 8));
     diagram.style.setProperty('--sq', sq + 'px');
   }
+  window.matchMedia(THREE_COL).addEventListener('change', function(){
+    placeControls(); placeIndex(); sizeBoard();
+    var cur = puzzleNumStripEl.querySelector('.plate.current');
+    if (cur && cur.scrollIntoView) cur.scrollIntoView({ block:'nearest', inline:'center' });
+  });
   window.addEventListener('resize', function(){
     clearTimeout(sizeBoard._t);
     sizeBoard._t = setTimeout(sizeBoard, 100);
