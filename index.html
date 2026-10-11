@@ -465,7 +465,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
   function freshProgress(keep){
     keep = keep || {};
-    return { solved:{}, viewed:{}, opened:{}, rated:{}, last:{}, theme:keep.theme || null, flipped:!!keep.flipped, rating:1200, history:[] };
+    return { solved:{}, viewed:{}, opened:{}, rated:{}, last:{}, theme:keep.theme || null, flipOverride:!!keep.flipOverride, rating:1200, history:[] };
   }
   function loadProgress(){
     var raw = safeGet(STORE_KEY);
@@ -474,6 +474,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       var p = JSON.parse(raw);
       p.solved = p.solved || {}; p.viewed = p.viewed || {}; p.opened = p.opened || {};
       p.last = p.last || {};
+      if ('flipped' in p){ delete p.flipped; p.flipOverride = false; }
       p.rating = typeof p.rating === 'number' ? p.rating : 1200;
       p.history = Array.isArray(p.history) ? p.history : [];
       if (!p.rated){
@@ -536,7 +537,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     saveProgress(); applyTheme();
   });
   $('flipBtn').addEventListener('click', function(){
-    progress.flipped = !progress.flipped;
+    progress.flipOverride = !progress.flipOverride;
+    showToast(progress.flipOverride ? 'Board flipped \u2014 tap \u21c5 again to return to the mover\u2019s view' : 'Board follows the side to move');
     saveProgress(); renderBoard();
   });
 
@@ -1106,7 +1108,9 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (!board || !state.chess) return;
     board.innerHTML = '';
     var files = ['a','b','c','d','e','f','g','h'];
-    var flipped = !!progress.flipped;
+    // The side to move always sits at the bottom (Black to move = viewed
+    // from Black). The flip button inverts that, for every puzzle.
+    var flipped = (state.solverColor === 'b') !== !!progress.flipOverride;
     var rankOrder = flipped ? [1,2,3,4,5,6,7,8] : [8,7,6,5,4,3,2,1];
     var fileOrder = flipped ? files.slice().reverse() : files;
 
