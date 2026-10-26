@@ -2,7 +2,7 @@
 // The page itself is fetched network-first, so a new version shows up on
 // the next launch instead of a visit or two later; everything else
 // (icons, chess.js, fonts) is served cache-first and refreshed quietly.
-const CACHE_NAME = 'vigaasan-chess-v13';
+const CACHE_NAME = 'vigaasan-chess-v14';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -17,7 +17,8 @@ const CORE_ASSETS = [
   './icon-384.png',
   './icon-512.png',
   './icon-512-maskable.png',
-  'https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js'
+  'https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js',
+  'https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js'
 ];
 
 self.addEventListener('install', (event) => {

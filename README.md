@@ -130,6 +130,46 @@ Tap a piece, then its destination square; the legal destinations are dotted.
 
 The opponent's replies play automatically.
 
+## Vasthu Days tab
+
+Tap **⌂ Vasthu Days** under the header to switch from chess to the Vasthu
+planner, and **♞ Chess Puzzles** to switch back. The app remembers which tab
+you used last.
+
+**What it shows:** the upcoming Vasthu days (Chithirai 10, Vaikasi 21,
+Aadi 11, Avani 6, Aippasi 11, Karthigai 8, Thai 12 and Masi 22). Each one
+has its English and Tamil date, the traditional muhurtham in IST, and a
+countdown.
+
+**Owner details:** enter the house owner's name (optional), **Chandra Rasi**
+and **Surya Rasi**. Each Vasthu day then gets a verdict:
+
+- **Safe for the owner:** the Moon isn't in the 8th rasi from either rasi
+  during the muhurtham.
+- **Avoid (Chandrashtamam):** the Moon is in the 8th rasi from the
+  **Chandra Rasi**.
+- **Caution:** the Moon is in the 8th rasi from the **Surya Rasi** only.
+  Traditionally Chandrashtamam is counted from the Chandra Rasi, so this is
+  shown as an extra check.
+
+**Details for each day:**
+
+- the Moon's rasi and nakshatra during the muhurtham;
+- when the Moon enters and leaves that rasi;
+- which rasi has Chandrashtamam at that time;
+- a note when the Moon changes rasi close to the muhurtham, so you can
+  confirm with your panchangam.
+
+**How it's calculated:** everything is worked out on the device and works
+offline after the first open.
+
+- Tamil month starts use the Surya Siddhanta (Vakya) Sun and the
+  before-sunset rule. This reproduces every published Vasthu date for 2026
+  and 2027.
+- The Moon's position uses
+  [astronomy-engine](https://github.com/cosinekitty/astronomy) with the
+  Lahiri ayanamsa.
+
 ## Credits
 
 Built-in content comes from `Practical-chessendings.pgn` and
