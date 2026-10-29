@@ -107,6 +107,54 @@ stable key. Neither was set up, so Chrome fell back to showing the URL bar,
 ✕ and share button. The WebView app replaces it and has no toolbar at all.
 Uninstall the old "Vigaasan" app once you've moved your progress.
 
+## Settings (⚙)
+
+- **Attempts per puzzle:** Unlimited, 1, 2, 3 or 5. When you run out, the
+  answer is shown and the puzzle counts as missed.
+- **Valid moves:** show or hide the dots marking where the selected piece
+  can go.
+- **Time per puzzle:** Off, 30 s, or 1 to 10 min. The clock counts down and
+  turns red in the last 10 seconds. At zero the answer is shown and the
+  puzzle counts as missed.
+- **Opponent & replay speed:** Fast, Normal or Slow.
+- **Sort topics:** Book order, A→Z, Z→A, Most puzzles, Most unsolved or
+  Least completed. This sets the order of the topics (strategies, chapters,
+  player groups) in every book and file. Prev and Next follow it, and the
+  same control sits at the top of the Library.
+- **Built-in books:** restore *Practical Chess Endings* or *Chess Strategy:
+  Simplified* if you've removed them.
+- **Clear answers:** reset solved and revealed puzzles for this puzzle, this
+  topic, this file, or everything, to solve them again. Your rating history
+  is kept. The ↺ icon next to a file in the Library clears that file.
+
+## Deleting books and files
+
+Every book and file in the Library has a 🗑 icon.
+
+- **Uploaded PGN files** are deleted along with their progress.
+- **The two built-in books** are only removed from the Library. Your
+  progress in them is kept, and you can bring them back from ⚙ Settings
+  (or ELO → Built-in books).
+
+## Custom Positions tab
+
+Tap **✎ Custom Positions** under the header.
+
+1. **Set up the position.** Choose a piece from the palette and tap
+   squares; tap a piece again to remove it, or use the ✕ eraser. You can
+   also start from the starting position, an empty board, the puzzle
+   you're currently on, or a pasted FEN. Choose the side to move.
+   Castling rights are set automatically, and the app checks that the
+   position is legal.
+2. **Record the solution** by playing it on the board, both your moves and
+   the opponent's replies. Undo removes the last move.
+3. **Save** it with a title, a topic (strategy) and an optional note.
+
+Saved positions appear in the Library under **My Positions**, grouped by
+topic. They work like any other puzzle, with timer, rating, attempts and
+reveal. The list in the tab lets you **Practise**, **Edit** or **Delete**
+each one.
+
 ## Using your own PGN files
 
 Each game needs a `[FEN "..."]` header and at least one move in the main line

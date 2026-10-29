@@ -354,6 +354,90 @@
   .drawer-head h2{ margin:4px 0 0; font-size:26px; font-weight:500; }
   .drawer-body{ flex:1; min-height:0; overflow:hidden; display:flex; flex-direction:column; padding:6px 14px calc(12px + env(safe-area-inset-bottom, 0px)); }
 
+
+  /* ---------- section tabs ---------- */
+  .modes{ display:flex; border-bottom:1px solid var(--rule); flex-shrink:0; }
+  .mode{ flex:1; padding:11px 8px 10px; border:none; background:none; cursor:pointer; position:relative; color:var(--ink-faint);
+    font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+  .mode.active{ color:var(--ink); }
+  .mode.active::after{ content:""; position:absolute; left:18%; right:18%; bottom:-1px; height:2px; background:var(--accent); }
+  .editor-view{ display:none; flex:1; min-height:0; }
+  body.mode-editor .editor-view{ display:block; }
+  body.mode-editor .layout, body.mode-editor footer.bottom{ display:none !important; }
+
+  /* ---------- settings sheet ---------- */
+  .set-row{ padding:12px 0; border-bottom:1px solid var(--rule-soft); }
+  .set-row:last-child{ border-bottom:none; }
+  .set-title{ font-size:17px; margin-bottom:2px; }
+  .set-hint{ font-size:13.5px; font-style:italic; color:var(--ink-faint); line-height:1.45; margin:0 0 9px; }
+  .seg{ display:flex; flex-wrap:wrap; gap:5px; }
+  .seg-btn{ min-height:36px; padding:0 12px; border:1px solid var(--rule); background:transparent; cursor:pointer; color:var(--ink-dim);
+    font-family:var(--mono); font-size:11px; letter-spacing:.06em; }
+  .seg-btn.on{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .clear-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .clear-opt{ display:flex; flex-direction:column; align-items:flex-start; gap:3px; padding:11px 12px; border:1px solid var(--bad); background:transparent;
+    cursor:pointer; text-align:left; min-width:0; }
+  .co-title{ font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--bad); }
+  .co-sub{ font-style:italic; font-size:14px; color:var(--ink-dim); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .restore-btn{ flex:0 0 auto; border:1px solid var(--accent); color:var(--accent); background:transparent; padding:7px 11px; cursor:pointer;
+    font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; }
+  .restore-btn.quiet{ border-color:var(--rule); color:var(--ink-dim); }
+  .meter.countdown{ color:var(--accent); }
+  .meter.countdown.low{ color:var(--bad); font-weight:700; }
+  .empty-lib{ border-top:1px solid var(--ink); padding-top:12px; display:flex; flex-direction:column; gap:10px; }
+  .empty-lib h2{ margin:0; font-size:28px; font-weight:500; }
+  .empty-lib p{ margin:0; color:var(--ink-dim); font-style:italic; line-height:1.5; }
+
+  /* ---------- library tree extras ---------- */
+  .tree-tools{ flex:0 0 auto; display:flex; align-items:center; gap:8px; padding:6px 0 8px; border-bottom:1px solid var(--rule-soft); }
+  .tree-sort{ flex:1; min-width:0; height:30px; border:1px solid var(--rule); background:var(--panel); color:var(--ink); font-family:var(--mono); font-size:11px; padding:0 6px; }
+  .row-acts{ display:inline-flex; align-items:center; gap:2px; flex:0 0 auto; }
+  .trash.clear:hover, .trash.clear:focus-visible{ color:var(--accent); border-color:var(--accent); }
+
+  /* ---------- custom positions ---------- */
+  .ed-wrap{ max-width:1100px; margin:0 auto; padding:14px 12px calc(28px + env(safe-area-inset-bottom, 0px)); display:flex; flex-direction:column; gap:16px; }
+  .ed-head h2{ margin:4px 0 0; font-size:28px; font-weight:500; }
+  .ed-grid{ display:flex; flex-direction:column; gap:16px; min-width:0; }
+  .ed-wrap > *{ min-width:0; }
+  .ed-diagram{ margin-left:0; justify-content:start; }
+  .ed-board-col{ display:flex; flex-direction:column; gap:10px; min-width:0; }
+  .ed-panel{ display:flex; flex-direction:column; gap:10px; min-width:0; }
+  .ed-palette{ display:grid; grid-template-columns:repeat(7, 1fr); gap:5px; }
+  .ed-piece{ aspect-ratio:1 / 1; min-height:40px; display:grid; place-items:center; border:1px solid var(--rule); cursor:pointer;
+    background:var(--board-light); padding:0; }
+  .ed-piece:nth-child(n+7){ background:var(--board-dark); background-image:repeating-linear-gradient(135deg, var(--hatch) 0 1px, transparent 1px 4px); }
+  .ed-piece .glyph{ font-size:28px; }
+  .ed-piece.eraser{ grid-column:7; grid-row:1 / span 2; aspect-ratio:auto; background:transparent; color:var(--bad); font-family:var(--mono); font-size:16px; }
+  .ed-piece.on{ outline:3px solid var(--accent); outline-offset:-3px; }
+  .ed-actions{ display:flex; flex-wrap:wrap; gap:6px; }
+  .ed-actions .btn{ flex:1 1 auto; }
+  .ed-fenrow{ display:flex; gap:6px; }
+  .ed-fen{ flex:1; min-width:0; height:40px; border:1px solid var(--rule); background:var(--panel); color:var(--ink); font-family:var(--mono); font-size:12px; padding:0 8px; }
+  .ed-fenrow .btn{ flex:0 0 auto; }
+  .ed-status{ border-left:3px solid var(--rule); padding:4px 0 4px 10px; font-size:15px; color:var(--ink-dim); }
+  .ed-status.good{ border-color:var(--good); color:var(--ink); }
+  .ed-status.bad{ border-color:var(--bad); color:var(--ink); }
+  .ed-turn{ margin:0; font-style:italic; font-size:16px; color:var(--ink-dim); }
+  .ed-moves{ display:flex; flex-wrap:wrap; gap:4px 10px; padding:10px 0; border-top:1px solid var(--rule-soft); border-bottom:1px solid var(--rule-soft); min-height:44px; }
+  .ed-mv .mn{ font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); margin-right:4px; }
+  .ed-mv .san{ font-family:var(--mono); font-weight:700; font-size:14.5px; }
+  .ed-form{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .ed-form .ed-field:last-child{ grid-column:1 / -1; }
+  .ed-field{ display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .ed-field input, .ed-field textarea{ width:100%; border:1px solid var(--rule); background:var(--panel); color:var(--ink); font-family:var(--serif); font-size:16px; padding:8px 10px; }
+  .ed-field input{ height:40px; }
+  .ed-saved{ border-top:1px solid var(--ink); padding-top:10px; }
+  .ed-saved .lib-item{ gap:6px; }
+  @media (max-width:520px){
+    .clear-grid, .ed-form{ grid-template-columns:1fr; }
+  }
+  @media (orientation:landscape) and (min-width:700px){
+    body.mode-editor .editor-view{ overflow-y:auto; }
+    .ed-grid{ flex-direction:row; align-items:flex-start; }
+    .ed-board-col{ flex:0 0 auto; width:min(58vw, calc(100dvh - 180px)); }
+    .ed-panel{ flex:1; }
+  }
+
   ::selection{ background:var(--accent); color:var(--accent-ink); }
   input[type=file]{ display:none; }
 
@@ -422,10 +506,19 @@
     </div>
     <div class="tools">
       <button class="tool rating" id="statsBtn" title="Rating, stats &amp; library" aria-label="Rating, stats and library">ELO <b id="ratingBadge">1200</b></button>
-      <button class="tool" id="flipBtn" title="Flip board" aria-label="Flip board">⇅</button>
+      <button class="tool" id="settingsBtn" title="Settings" aria-label="Settings">⚙</button>
       <button class="tool" id="themeBtn" title="Light / dark" aria-label="Toggle light or dark theme">◐</button>
     </div>
   </header>
+
+  <nav class="modes" role="tablist" aria-label="Sections">
+    <button class="mode active" data-mode="puzzles" role="tab" aria-selected="true">♞ Puzzles</button>
+    <button class="mode" data-mode="editor" role="tab" aria-selected="false">✎ Custom Positions</button>
+  </nav>
+
+  <section class="editor-view" id="editorView" aria-label="Custom positions">
+    <div class="ed-wrap" id="editorBody"></div>
+  </section>
 
   <div class="layout" id="layout">
     <aside class="sidebar-left" id="sidebarLeft">
@@ -500,12 +593,36 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     b.addEventListener('click', function(e){ e.stopPropagation(); onClick(); });
     return b;
   }
+  var BUILTIN = { endings:'Practical Chess Endings', strategy:'Chess Strategy: Simplified' };
   function confirmDelete(id){
+    if (BUILTIN[id]){
+      if (!confirm('Remove “' + BUILTIN[id] + '” from your library?\n\nIt’s a built-in book, so you can bring it back any time from ⚙ Settings → Built-in books. Your progress in it is kept.')) return;
+      progress.hidden[id] = true;
+      saveProgress();
+      afterCollectionRemoved(id);
+      showToast('Removed ' + BUILTIN[id]);
+      return;
+    }
     var entry = library.filter(function(l){ return l.id === id; })[0];
     if (!entry) return;
-    if (!confirm('Delete \u201c' + entry.filename + '\u201d and its progress from this device?')) return;
+    if (!confirm('Delete “' + entry.filename + '” and its progress from this device?')) return;
     removeLibraryFile(id);
     showToast('Deleted ' + entry.filename);
+  }
+  function restoreBuiltin(id){
+    delete progress.hidden[id];
+    saveProgress();
+    renderTree();
+    if (!state.collection) switchCollection(id);
+    showToast('Restored ' + BUILTIN[id]);
+  }
+  function firstAvailable(){ return allCollectionKeys()[0] || null; }
+  function afterCollectionRemoved(id){
+    if (state.collectionKey === id || !state.collection){
+      var next = firstAvailable();
+      if (next) switchCollection(next); else showEmptyLibrary();
+    } else renderTree();
+    if (modalBackdrop.classList.contains('open')) rerenderModal();
   }
 
   // ============================================================
@@ -523,7 +640,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
   function freshProgress(keep){
     keep = keep || {};
-    return { solved:{}, viewed:{}, opened:{}, rated:{}, last:{}, theme:keep.theme || null, flipOverride:!!keep.flipOverride, rating:1200, history:[] };
+    return { solved:{}, viewed:{}, opened:{}, rated:{}, last:{}, theme:keep.theme || null, flipOverride:!!keep.flipOverride, rating:1200, history:[],
+             settings: keep.settings || {}, hidden: keep.hidden || {} };
   }
   function loadProgress(){
     var raw = safeGet(STORE_KEY);
@@ -547,6 +665,17 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   }
   var progress = loadProgress();
   function saveProgress(){ safeSet(STORE_KEY, JSON.stringify(progress)); }
+
+  // ---- player settings (saved with progress, so backups carry them) ----
+  var DEFAULT_SETTINGS = { showMoves:true, maxAttempts:0, timeLimit:0, replyMs:550, sortTopics:'book' };
+  function normaliseSettings(){
+    var s = progress.settings || {};
+    Object.keys(DEFAULT_SETTINGS).forEach(function(k){ if (s[k] === undefined) s[k] = DEFAULT_SETTINGS[k]; });
+    progress.settings = s;
+    progress.hidden = progress.hidden || {};
+  }
+  normaliseSettings();
+  function S(){ return progress.settings; }
 
   function loadLibraryIndex(){
     var raw = safeGet(LIB_INDEX_KEY);
@@ -594,11 +723,11 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     progress.theme = effective === 'dark' ? 'light' : 'dark';
     saveProgress(); applyTheme();
   });
-  $('flipBtn').addEventListener('click', function(){
+  function toggleFlip(){
     progress.flipOverride = !progress.flipOverride;
-    showToast(progress.flipOverride ? 'Board flipped \u2014 tap \u21c5 again to return to the mover\u2019s view' : 'Board follows the side to move');
+    showToast(progress.flipOverride ? 'Board flipped — tap Flip again to return to the mover’s view' : 'Board follows the side to move');
     saveProgress(); renderBoard();
-  });
+  }
 
   function updateRatingBadge(){ ratingBadge.textContent = progress.rating; }
 
@@ -731,7 +860,37 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     colCache[key] = col;
     return col;
   }
-  function allCollectionKeys(){ return ['endings','strategy'].concat(library.map(function(l){ return l.id; })); }
+  function allCollectionKeys(){
+    return ['endings','strategy'].filter(function(k){ return !progress.hidden[k]; })
+      .concat(library.map(function(l){ return l.id; }));
+  }
+
+  // Topic order inside a collection, per the "Sort topics" setting.
+  function chapterOrder(col, key){
+    if (!col || !col.chapters) return null;
+    var mode = S().sortTopics, chs = col.chapters.slice();
+    if (mode === 'book') return chs;
+    var info = {};
+    chs.forEach(function(ch){ info[ch] = { total:0, solved:0 }; });
+    col.items.forEach(function(it){
+      if (it.type !== 'puzzle') return;
+      var c = info[it.chapter || '—'];
+      if (!c) return;
+      c.total++;
+      if (progress.solved[key + '::' + it.source + ':' + it.num]) c.solved++;
+    });
+    var cmpName = function(x, y){ return x.localeCompare(y, undefined, { numeric:true, sensitivity:'base' }); };
+    if (mode === 'az') chs.sort(cmpName);
+    else if (mode === 'za') chs.sort(function(x, y){ return cmpName(y, x); });
+    else if (mode === 'most') chs.sort(function(x, y){ return (info[y].total - info[x].total) || cmpName(x, y); });
+    else if (mode === 'unsolved') chs.sort(function(x, y){ return ((info[y].total - info[y].solved) - (info[x].total - info[x].solved)) || cmpName(x, y); });
+    else if (mode === 'done') chs.sort(function(x, y){
+      var px = info[x].total ? info[x].solved / info[x].total : 1, py = info[y].total ? info[y].solved / info[y].total : 1;
+      return (px - py) || cmpName(x, y);
+    });
+    return chs;
+  }
+  var SORT_OPTIONS = [['book','Book order'], ['az','A → Z'], ['za','Z → A'], ['most','Most puzzles'], ['unsolved','Most unsolved'], ['done','Least completed']];
 
   // ============================================================
   // State
@@ -795,7 +954,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     state.collection = col;
     collectionLabel.textContent = col.label;
     if (col.chapters){
-      if (col.chapters.indexOf(chapter) === -1) chapter = col.chapters[0];
+      if (col.chapters.indexOf(chapter) === -1) chapter = chapterOrder(col, key)[0];
       state.chapter = chapter;
       state.filtered = col.items.filter(function(it){ return groupOf(it) === chapter; });
     } else {
@@ -821,7 +980,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (!col){ showToast('Could not open that file.'); return; }
     var last = progress.last[key];
     if (last) openAt(key, last.chapter, last.index);
-    else openAt(key, col.chapters ? col.chapters[0] : null, 'unsolved');
+    else openAt(key, col.chapters ? chapterOrder(col, key)[0] : null, 'unsolved');
   }
   function setChapter(ch, index){ openAt(state.collectionKey, ch, index); }
 
@@ -829,7 +988,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   // they continue into the neighbouring group.
   function neighbour(dir){
     if (state.index + dir >= 0 && state.index + dir < state.filtered.length) return { chapter: state.chapter, index: state.index + dir };
-    var chs = state.collection && state.collection.chapters;
+    var chs = chapterOrder(state.collection, state.collectionKey);
     if (!chs) return null;
     var ci = chs.indexOf(state.chapter) + dir;
     if (ci < 0 || ci >= chs.length) return null;
@@ -901,20 +1060,32 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var oldKids = navTree.querySelector('.tree-node.col.open > .tree-kids');
     var keepKey = oldKids ? oldKids.getAttribute('data-col') : null, keep = oldKids ? oldKids.scrollTop : 0;
     navTree.innerHTML = '';
+    var tools = el('div', 'tree-tools');
+    tools.appendChild(el('span', 'kicker', 'Sort topics'));
+    var sortSel = el('select', 'tree-sort');
+    sortSel.setAttribute('aria-label', 'Sort topics');
+    SORT_OPTIONS.forEach(function(o){ var op = el('option', null, o[1]); op.value = o[0]; sortSel.appendChild(op); });
+    sortSel.value = S().sortTopics;
+    sortSel.addEventListener('change', function(){ setSetting('sortTopics', sortSel.value); });
+    tools.appendChild(sortSel);
+    navTree.appendChild(tools);
+    if (!allCollectionKeys().length) navTree.appendChild(el('div', 'empty-note', 'Your library is empty. Add a PGN file, or restore the built-in books from ⚙ Settings.'));
     allCollectionKeys().forEach(function(key){
       var col = collectionFor(key);
       if (!col) return;
       var cOpen = !!progress.open['c:' + key];
       var t = tally(key, col.items);
       var node = el('div', 'tree-node col' + (key === state.collectionKey ? ' active' : '') + (cOpen ? ' open' : ''));
-      var del = col.kind === 'custom' ? trashButton('Delete ' + col.label, function(){ confirmDelete(key); }) : null;
-      var label = (col.kind === 'custom' ? '' : '') + (col.kind === 'custom' ? col.shortLabel : col.label);
-      node.appendChild(nodeRow('col-row', label, t.solved + '/' + t.total, cOpen, function(){ toggleOpen('c:' + key); }, del));
+      var acts = el('span', 'row-acts');
+      if (hasAnswers(key + '::')) acts.appendChild(clearButton('Clear answers in ' + col.label, function(){ clearAnswersFor({ prefix: key + '::', label: col.label }); }));
+      acts.appendChild(trashButton((col.kind === 'custom' ? 'Delete ' : 'Remove ') + col.label, function(){ confirmDelete(key); }));
+      var label = col.kind === 'custom' ? col.shortLabel : col.label;
+      node.appendChild(nodeRow('col-row', label, t.solved + '/' + t.total, cOpen, function(){ toggleOpen('c:' + key); }, acts));
       if (cOpen){
         var kids = el('div', 'tree-kids');
         kids.setAttribute('data-col', key);
         if (col.chapters){
-          col.chapters.forEach(function(ch){
+          chapterOrder(col, key).forEach(function(ch){
             var items = col.items.filter(function(it){ return groupOf(it) === ch; });
             var gid = 'g:' + key + '::' + ch, gOpen = !!progress.open[gid];
             var gt = tally(key, items);
@@ -1066,7 +1237,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     state.startTime = Date.now();
     renderPuzzle(item);
     renderPuzzleNumberStrip();
-    state.timerHandle = setInterval(updateTimerDisplay, 1000);
+    updateTimerDisplay();
+    state.timerHandle = setInterval(updateTimerDisplay, 250);
   }
 
   function formatTime(ms){
@@ -1074,9 +1246,26 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     s = s % 60;
     return m + ':' + (s < 10 ? '0' : '') + s;
   }
+  // With a time limit the clock counts down; at zero the puzzle counts as
+  // missed and the answer is shown. Already-solved puzzles aren't timed.
+  function timeLimitMs(){ return (S().timeLimit || 0) * 1000; }
+  function timed(){ return timeLimitMs() > 0 && !state.solved && !state.revealed; }
   function updateTimerDisplay(){
     var t = $('liveTimer');
-    if (t && state.startTime) t.textContent = formatTime(Date.now() - state.startTime);
+    if (!t || !state.startTime) return;
+    var elapsed = Date.now() - state.startTime;
+    if (!timed()){ t.textContent = formatTime(elapsed); t.classList.remove('countdown', 'low'); return; }
+    var left = Math.max(0, timeLimitMs() - elapsed);
+    t.textContent = formatTime(left + 999) + ' left';
+    t.classList.add('countdown');
+    t.classList.toggle('low', left <= 10000);
+    if (left <= 0 && !state.autoplaying){
+      stopTimer();
+      var msg = 'Time’s up — here’s the solution.';
+      setFeedback('bad', msg);
+      notifyWrongMove(msg);
+      onReveal(msg);
+    }
   }
 
   // ============================================================
@@ -1093,7 +1282,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
     var actions = el('div', 'actions');
     var isLast = state.index >= state.filtered.length - 1;
-    var chapters = state.collection.chapters;
+    var chapters = chapterOrder(state.collection, state.collectionKey);
     var nextChapter = chapters ? chapters[chapters.indexOf(state.chapter) + 1] : null;
     var cont = el('button', 'btn primary', isLast ? (nextChapter ? 'Next chapter →' : 'Done') : 'Continue →');
     cont.addEventListener('click', function(){
@@ -1174,6 +1363,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var stamp = el('span', 'stamp' + stampClass, state.solved ? 'Solved ✓' : (progress.viewed[key] ? 'Revealed' : 'Unsolved'));
     stamp.id = 'stamp';
     var timer = el('span', 'meter', '0:00'); timer.id = 'liveTimer';
+    timer.title = 'Time on this puzzle';
     var wrong = el('span', 'meter bad', ''); wrong.id = 'wrongCount'; wrong.style.display = 'none';
     meters.appendChild(stamp); meters.appendChild(timer); meters.appendChild(wrong);
     head.appendChild(meters);
@@ -1208,7 +1398,10 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     hintBtn.addEventListener('click', onHint);
     var resetBtn = el('button', 'btn quiet', 'Reset ↺');
     resetBtn.addEventListener('click', function(){ loadCurrentItem(); });
-    actions.appendChild(hintBtn); actions.appendChild(resetBtn);
+    var flipBtn = el('button', 'btn quiet', 'Flip ⇅');
+    flipBtn.setAttribute('aria-label', 'Flip board');
+    flipBtn.addEventListener('click', toggleFlip);
+    actions.appendChild(hintBtn); actions.appendChild(flipBtn); actions.appendChild(resetBtn);
     controls.appendChild(actions);
 
     if (item.intro){
@@ -1318,7 +1511,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       }
     }
     board.appendChild(frag);
-    if (state.selected) highlightMoves(state.selected);
+    if (state.selected && S().showMoves) highlightMoves(state.selected);
   }
 
   function highlightMoves(from){
@@ -1400,10 +1593,21 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     } else {
       state.wrongCount++;
       state.selected = null;
-      var msg = state.wrongCount >= 3 ? 'Not quite. Tap Hint if you’d like a nudge.' : 'Not quite — try again.';
-      setFeedback('bad', msg);
+      var max = S().maxAttempts;
       var wc = $('wrongCount');
-      if (wc){ wc.textContent = '✗ ' + state.wrongCount; wc.style.display = ''; }
+      if (wc){ wc.textContent = '✗ ' + state.wrongCount + (max ? '/' + max : ''); wc.style.display = ''; }
+      if (max && state.wrongCount >= max){
+        var out = 'Out of attempts — here’s the solution.';
+        setFeedback('bad', out);
+        notifyWrongMove(out);
+        renderBoard();
+        failAndReveal(out);
+        return;
+      }
+      var left = max ? max - state.wrongCount : 0;
+      var msg = max ? 'Not quite — ' + left + (left === 1 ? ' attempt' : ' attempts') + ' left.'
+                    : (state.wrongCount >= 3 ? 'Not quite. Tap Hint if you’d like a nudge.' : 'Not quite — try again.');
+      setFeedback('bad', msg);
       notifyWrongMove(msg);
       renderBoard();
     }
@@ -1430,7 +1634,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
         setFeedback('', 'Your move.');
         if (state.chess.turn() !== state.solverColor) maybeAutoReply(item);
       }
-    }, 550);
+    }, S().replyMs);
   }
 
   function showLedger(){ var e = $('ledgerEmpty'); if (e) e.style.display = 'none'; }
@@ -1531,7 +1735,17 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     showToast('Hint: move the piece on ' + exp.from);
   }
 
-  function onReveal(){
+  function failAndReveal(why){
+    var token = state.token;
+    state.autoplaying = true;   // no more moves while the answer starts
+    setTimeout(function(){
+      if (token !== state.token) return;
+      state.autoplaying = false;
+      onReveal(why);
+    }, 900);
+  }
+
+  function onReveal(why){
     var item = currentItem();
     if (!item || item.type !== 'puzzle' || !state.chess || state.revealed) return;
     var key = recordKey(item);
@@ -1548,7 +1762,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     renderPuzzleNumberStrip();
     showLedger();
     state.autoplaying = true;
-    setFeedback('', state.moveIndex ? 'Playing out the rest of the line…' : 'Playing through the solution…');
+    if (typeof why === 'string') setFeedback('bad', why);
+    else setFeedback('', state.moveIndex ? 'Playing out the rest of the line…' : 'Playing through the solution…');
     renderBoard();
     var token = state.token;
     (function step(){
@@ -1563,7 +1778,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       if (res) appendLedgerLine(item, state.moveIndex, res.san);
       state.moveIndex = res ? state.moveIndex + 1 : item.moves.length;
       renderBoard();
-      setTimeout(step, 520);
+      setTimeout(step, S().replyMs);
     })();
     renderFooter();
   }
@@ -1592,6 +1807,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   document.addEventListener('keydown', function(e){
     if (modalBackdrop.classList.contains('open')){ if (e.key === 'Escape') closeModal(); return; }
     if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if (document.body.classList.contains('mode-editor')) return;
     if (e.key === 'ArrowRight') step(1);
     else if (e.key === 'ArrowLeft') step(-1);
   });
@@ -1633,9 +1849,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     safeRemove(LIB_ITEM_PREFIX + id);
     delete colCache[id];
     pruneOrphans();
-    if (state.collectionKey === id) switchCollection('endings');
-    else renderCollectionStrip();
-    if (modalBackdrop.classList.contains('open')) renderStatsModal();
+    afterCollectionRemoved(id);
   }
 
   // ============================================================
@@ -1709,12 +1923,29 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     reset.addEventListener('click', function(){
       if (!confirm('This clears your rating, solved history and puzzle progress on this device. Continue?')) return;
       progress = freshProgress(progress);
+      normaliseSettings();
       saveProgress(); updateRatingBadge();
-      renderStatsModal(); loadCurrentItem();
+      renderStatsModal(); if (state.collection) loadCurrentItem();
       showToast('Progress reset.');
     });
     sec.appendChild(reset);
     modalEl.appendChild(sec);
+
+    var books = el('div', 'section');
+    books.appendChild(el('h3', 'kicker', 'Built-in books'));
+    Object.keys(BUILTIN).forEach(function(id){
+      var row = el('div', 'lib-item'), meta = el('div', 'meta');
+      meta.appendChild(el('div', 'fname', BUILTIN[id]));
+      meta.appendChild(el('div', 'fsub kicker', (progress.hidden[id] ? 'Removed · ' : '') + countPuzzles(DATA[id]) + ' puzzles'));
+      row.appendChild(meta);
+      if (progress.hidden[id]){
+        var rb = el('button', 'restore-btn', 'Restore');
+        rb.addEventListener('click', function(){ restoreBuiltin(id); rerenderModal(); });
+        row.appendChild(rb);
+      } else row.appendChild(trashButton('Remove ' + BUILTIN[id], function(){ confirmDelete(id); }));
+      books.appendChild(row);
+    });
+    modalEl.appendChild(books);
 
     var lib = el('div', 'section');
     lib.appendChild(el('h3', 'kicker', 'Your PGN files'));
@@ -1828,17 +2059,650 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (!progress.theme) progress.theme = keepTheme;
     saveProgress();
     pruneOrphans();
+    normaliseSettings();
     applyTheme(); updateRatingBadge();
     closeModal();
     renderCollectionStrip();
-    switchCollection('endings');
+    if (firstAvailable()) switchCollection(firstAvailable()); else showEmptyLibrary();
     showToast('Backup restored \u2713');
   }
 
-  function openModal(){ renderStatsModal(); modalBackdrop.classList.add('open'); var c = modalEl.querySelector('.modal-close'); if (c) c.focus(); }
+  // ============================================================
+  // Clear answers
+  // ============================================================
+  var BUCKETS = ['solved', 'viewed', 'opened', 'rated'];
+  function hasAnswers(prefix){
+    return BUCKETS.some(function(b){ return Object.keys(progress[b]).some(function(k){ return k.indexOf(prefix) === 0; }); });
+  }
+  function countAnswered(match){
+    var seen = {};
+    ['solved', 'viewed'].forEach(function(b){ Object.keys(progress[b]).forEach(function(k){ if (match(k)) seen[k] = 1; }); });
+    return Object.keys(seen).length;
+  }
+  // scope: { keys:[...] } or { prefix:'col::' } or { all:true }, plus a label
+  function clearAnswersFor(scope){
+    var match = scope.all ? function(){ return true; }
+      : scope.prefix ? function(k){ return k.indexOf(scope.prefix) === 0; }
+      : (function(set){ return function(k){ return !!set[k]; }; })(scope.keys.reduce(function(o, k){ o[k] = 1; return o; }, {}));
+    var n = countAnswered(match);
+    if (!confirm('Clear answers for ' + scope.label + '?\n\n' + n + ' solved/revealed ' + (n === 1 ? 'puzzle goes' : 'puzzles go') +
+                 ' back to unsolved so you can solve them again (they’ll count toward your rating again). Your rating so far is kept.')) return;
+    BUCKETS.forEach(function(b){ Object.keys(progress[b]).forEach(function(k){ if (match(k)) delete progress[b][k]; }); });
+    saveProgress();
+    if (state.collection) loadCurrentItem(); else renderTree();
+    if (modalBackdrop.classList.contains('open')) rerenderModal();
+    showToast('Answers cleared for ' + scope.label);
+  }
+  var CLEAR_SVG = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/></svg>';
+  function clearButton(label, onClick){
+    var b = el('button', 'trash clear');
+    b.innerHTML = CLEAR_SVG;
+    b.title = label; b.setAttribute('aria-label', label);
+    b.addEventListener('click', function(e){ e.stopPropagation(); onClick(); });
+    return b;
+  }
+
+  function showEmptyLibrary(){
+    stopTimer();
+    state.token++;
+    state.collection = null; state.collectionKey = null; state.chapter = null; state.filtered = []; state.index = 0; state.chess = null;
+    collectionLabel.textContent = 'Library is empty';
+    mainEl.innerHTML = '';
+    resetSidebarRight();
+    var box = el('div', 'empty-lib');
+    box.appendChild(el('div', 'kicker', 'Library'));
+    box.appendChild(el('h2', null, 'Your library is empty'));
+    box.appendChild(el('p', null, 'Add a PGN file of puzzles, set up your own positions in the Custom Positions tab, or bring back the built-in books.'));
+    var row = el('div', 'actions');
+    var add = el('button', 'btn primary', '+ Add PGN file');
+    add.addEventListener('click', function(){ fileInput.click(); });
+    var rest = el('button', 'btn', 'Restore built-in books');
+    rest.addEventListener('click', function(){ progress.hidden = {}; saveProgress(); switchCollection('endings'); });
+    row.appendChild(add); row.appendChild(rest);
+    box.appendChild(row);
+    mainEl.appendChild(box);
+    renderPuzzleNumberStrip();
+    renderFooter();
+  }
+
+  // ============================================================
+  // Settings sheet
+  // ============================================================
+  function setSetting(key, value){
+    S()[key] = value;
+    saveProgress();
+    if (key === 'showMoves') renderBoard();
+    if (key === 'sortTopics'){ renderTree(); renderFooter(); }
+    if (key === 'timeLimit') updateTimerDisplay();
+    if (modalBackdrop.classList.contains('open') && modalKind === 'settings') renderSettingsModal();
+  }
+  function seg(options, value, onChange, label){
+    var wrap = el('div', 'seg');
+    wrap.setAttribute('role', 'radiogroup');
+    if (label) wrap.setAttribute('aria-label', label);
+    options.forEach(function(o){
+      var b = el('button', 'seg-btn' + (o[0] === value ? ' on' : ''), o[1]);
+      b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', o[0] === value ? 'true' : 'false');
+      b.addEventListener('click', function(){ onChange(o[0]); });
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+  function settingRow(title, hint, control){
+    var r = el('div', 'set-row');
+    r.appendChild(el('div', 'set-title', title));
+    if (hint) r.appendChild(el('div', 'set-hint', hint));
+    r.appendChild(control);
+    return r;
+  }
+  function renderSettingsModal(){
+    var s = S();
+    modalEl.innerHTML = '';
+    var head = el('div', 'modal-head');
+    var ht = el('div');
+    ht.appendChild(el('div', 'kicker', 'Vigaasan’s Chess Board'));
+    ht.appendChild(el('h2', null, 'Settings'));
+    var close = el('button', 'modal-close', '✕');
+    close.setAttribute('aria-label', 'Close');
+    close.addEventListener('click', closeModal);
+    head.appendChild(ht); head.appendChild(close);
+    modalEl.appendChild(head);
+
+    var solving = el('div', 'section');
+    solving.appendChild(el('h3', 'kicker', 'Solving'));
+    solving.appendChild(settingRow('Attempts per puzzle', 'Wrong moves allowed before the answer is shown (and the puzzle counts as missed).',
+      seg([[0,'Unlimited'],[1,'1'],[2,'2'],[3,'3'],[5,'5']], s.maxAttempts, function(v){ setSetting('maxAttempts', v); }, 'Attempts per puzzle')));
+    solving.appendChild(settingRow('Valid moves', 'Dots showing where the selected piece can go.',
+      seg([[true,'Show'],[false,'Hide']], s.showMoves, function(v){ setSetting('showMoves', v); }, 'Valid moves')));
+    solving.appendChild(settingRow('Time per puzzle', 'With a limit the clock counts down; at zero the answer is shown and the puzzle counts as missed.',
+      seg([[0,'Off'],[30,'30 s'],[60,'1 min'],[120,'2 min'],[180,'3 min'],[300,'5 min'],[600,'10 min']], s.timeLimit, function(v){ setSetting('timeLimit', v); }, 'Time per puzzle')));
+    solving.appendChild(settingRow('Opponent & replay speed', 'How quickly replies and revealed answers are played.',
+      seg([[250,'Fast'],[550,'Normal'],[1000,'Slow']], s.replyMs, function(v){ setSetting('replyMs', v); }, 'Opponent speed')));
+    modalEl.appendChild(solving);
+
+    var lib = el('div', 'section');
+    lib.appendChild(el('h3', 'kicker', 'Library'));
+    lib.appendChild(settingRow('Sort topics', 'Order of the topics (strategies / chapters) inside each book or PGN file. Prev / Next follow this order.',
+      seg(SORT_OPTIONS, s.sortTopics, function(v){ setSetting('sortTopics', v); }, 'Sort topics')));
+    var hiddenIds = Object.keys(BUILTIN).filter(function(id){ return progress.hidden[id]; });
+    var hb = el('div', 'set-row');
+    hb.appendChild(el('div', 'set-title', 'Built-in books'));
+    if (!hiddenIds.length) hb.appendChild(el('div', 'set-hint', 'Both built-in books are in your library. Remove one with its 🗑 icon in the Library.'));
+    hiddenIds.forEach(function(id){
+      var r = el('div', 'lib-item'), m = el('div', 'meta');
+      m.appendChild(el('div', 'fname', BUILTIN[id]));
+      m.appendChild(el('div', 'fsub kicker', 'Removed'));
+      var b = el('button', 'restore-btn', 'Restore');
+      b.addEventListener('click', function(){ restoreBuiltin(id); renderSettingsModal(); });
+      r.appendChild(m); r.appendChild(b);
+      hb.appendChild(r);
+    });
+    lib.appendChild(hb);
+    modalEl.appendChild(lib);
+
+    var clr = el('div', 'section');
+    clr.appendChild(el('h3', 'kicker', 'Clear answers'));
+    clr.appendChild(el('p', 'set-hint', 'Puts solved and revealed puzzles back to unsolved so you can work through them again. Your rating history is kept.'));
+    var item = currentItem();
+    var opts = [];
+    if (item && item.type === 'puzzle' && state.collection) opts.push(['This puzzle', 'No. ' + item.num, { keys:[recordKey(item)], label:'puzzle No. ' + item.num }]);
+    if (state.chapter && state.collection) opts.push(['This topic', state.chapter, { keys: state.filtered.filter(function(it){ return it.type === 'puzzle'; }).map(recordKey), label:'“' + state.chapter + '”' }]);
+    if (state.collection) opts.push(['This file', state.collection.label, { prefix: state.collectionKey + '::', label: state.collection.label }]);
+    opts.push(['Everything', 'All books and files', { all:true, label:'everything' }]);
+    var grid = el('div', 'clear-grid');
+    opts.forEach(function(o){
+      var b = el('button', 'clear-opt');
+      b.appendChild(el('span', 'co-title', o[0]));
+      b.appendChild(el('span', 'co-sub', o[1]));
+      b.addEventListener('click', function(){ clearAnswersFor(o[2]); });
+      grid.appendChild(b);
+    });
+    clr.appendChild(grid);
+    modalEl.appendChild(clr);
+  }
+
+  var modalKind = 'stats';
+  function rerenderModal(){ if (modalKind === 'settings') renderSettingsModal(); else renderStatsModal(); }
+  function openSettings(){ modalKind = 'settings'; renderSettingsModal(); modalBackdrop.classList.add('open'); var c = modalEl.querySelector('.modal-close'); if (c) c.focus(); }
+  $('settingsBtn').addEventListener('click', openSettings);
+
+  function openModal(){ modalKind = 'stats'; renderStatsModal(); modalBackdrop.classList.add('open'); var c = modalEl.querySelector('.modal-close'); if (c) c.focus(); }
   function closeModal(){ modalBackdrop.classList.remove('open'); }
   $('statsBtn').addEventListener('click', openModal);
   modalBackdrop.addEventListener('click', function(e){ if (e.target === modalBackdrop) closeModal(); });
+
+  // ============================================================
+  // Custom Positions tab: set up any position, record the solution
+  // by playing it, and save it as a puzzle in "My Positions".
+  // ============================================================
+  var MYPOS = 'mypos';
+  var editorBody = $('editorBody');
+  var ed = {
+    board: {},            // 'e4' -> { type:'p', color:'w' }
+    turn: 'w',
+    tool: 'wq',           // 'wq', 'bp', ... or 'x' (eraser)
+    phase: 'setup',       // 'setup' | 'record'
+    chess: null,          // while recording
+    sel: null,
+    flipped: false,
+    editingNum: null,     // number of the saved position being edited
+    title: '', topic: '', note: ''
+  };
+  var FILES = 'abcdefgh';
+  var START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+  function boardFromFen(fen){
+    var b = {}, rows = fen.split(' ')[0].split('/');
+    if (rows.length !== 8) return null;
+    for (var r = 0; r < 8; r++){
+      var f = 0;
+      for (var i = 0; i < rows[r].length; i++){
+        var ch = rows[r][i];
+        if (/\d/.test(ch)) f += parseInt(ch, 10);
+        else if (/[prnbqkPRNBQK]/.test(ch)){
+          if (f > 7) return null;
+          b[FILES[f] + (8 - r)] = { type: ch.toLowerCase(), color: ch === ch.toUpperCase() ? 'w' : 'b' };
+          f++;
+        } else return null;
+      }
+      if (f !== 8) return null;
+    }
+    return b;
+  }
+  function placementFen(b){
+    var out = [];
+    for (var r = 8; r >= 1; r--){
+      var row = '', empty = 0;
+      for (var f = 0; f < 8; f++){
+        var p = b[FILES[f] + r];
+        if (!p){ empty++; continue; }
+        if (empty){ row += empty; empty = 0; }
+        row += p.color === 'w' ? p.type.toUpperCase() : p.type;
+      }
+      if (empty) row += empty;
+      out.push(row);
+    }
+    return out.join('/');
+  }
+  function has(sq, t, c){ var p = ed.board[sq]; return !!(p && p.type === t && p.color === c); }
+  function castling(){
+    var s = '';
+    if (has('e1','k','w')){ if (has('h1','r','w')) s += 'K'; if (has('a1','r','w')) s += 'Q'; }
+    if (has('e8','k','b')){ if (has('h8','r','b')) s += 'k'; if (has('a8','r','b')) s += 'q'; }
+    return s || '-';
+  }
+  function setupFen(){ return placementFen(ed.board) + ' ' + ed.turn + ' ' + castling() + ' - 0 1'; }
+
+  // Returns an error message, or '' when the position can be played.
+  function positionProblem(fen){
+    var counts = { wk:0, bk:0 }, pawnEdge = false;
+    Object.keys(ed.board).forEach(function(sq){
+      var p = ed.board[sq];
+      if (p.type === 'k') counts[p.color + 'k']++;
+      if (p.type === 'p' && (sq[1] === '1' || sq[1] === '8')) pawnEdge = true;
+    });
+    if (counts.wk !== 1 || counts.bk !== 1) return 'Each side needs exactly one king.';
+    if (pawnEdge) return 'Pawns can’t stand on the first or last rank.';
+    var c = makeChess(fen);
+    if (!c) return 'This isn’t a valid position.';
+    var other = makeChess(fen.replace(/ [wb] /, ' ' + (ed.turn === 'w' ? 'b' : 'w') + ' '));
+    if (other && other.in_check()) return (ed.turn === 'w' ? 'Black' : 'White') + ' is in check but it’s ' + (ed.turn === 'w' ? 'White' : 'Black') + '’s move.';
+    if (c.in_checkmate()) return 'The side to move is already checkmated.';
+    if (c.in_stalemate()) return 'The side to move is stalemated — no moves to play.';
+    return '';
+  }
+
+  // ---------- board ----------
+  function edBoardEl(){ return editorBody.querySelector('.ed-board'); }
+  function renderEdBoard(){
+    var board = edBoardEl();
+    if (!board) return;
+    var flipped = ed.flipped;
+    var ranks = flipped ? [1,2,3,4,5,6,7,8] : [8,7,6,5,4,3,2,1];
+    var files = flipped ? FILES.split('').reverse() : FILES.split('');
+    var rk = editorBody.querySelector('.ed-ranks'), fl = editorBody.querySelector('.ed-files');
+    rk.innerHTML = ''; ranks.forEach(function(r){ rk.appendChild(el('span', null, r)); });
+    fl.innerHTML = ''; files.forEach(function(f){ fl.appendChild(el('span', null, f)); });
+    board.innerHTML = '';
+    var recording = ed.phase === 'record' && ed.chess;
+    var hist = recording ? ed.chess.history({ verbose:true }) : [];
+    var last = hist[hist.length - 1];
+    var checkSq = recording && ed.chess.in_check() ? findKingSquare(ed.chess, ed.chess.turn()) : null;
+    var frag = document.createDocumentFragment();
+    ranks.forEach(function(r){
+      files.forEach(function(f){
+        var name = f + r, light = (FILES.indexOf(f) + r) % 2 === 1;
+        var sq = el('div', 'sq ' + (light ? 'light' : 'dark'));
+        sq.setAttribute('data-sq', name);
+        var p = recording ? ed.chess.get(name) : ed.board[name];
+        if (p) sq.appendChild(el('span', 'glyph ' + p.color, GLYPHS[p.color][p.type]));
+        sq.setAttribute('aria-label', name + (p ? ', ' + (p.color === 'w' ? 'white ' : 'black ') + PIECE_NAMES[p.type] : ''));
+        if (last && last.from === name) sq.classList.add('from');
+        if (last && last.to === name) sq.classList.add('to');
+        if (checkSq === name) sq.classList.add('check');
+        if (ed.sel === name) sq.classList.add('sel');
+        sq.addEventListener('click', onEdSquare);
+        frag.appendChild(sq);
+      });
+    });
+    board.appendChild(frag);
+    if (recording && ed.sel && S().showMoves){
+      var seen = {};
+      ed.chess.moves({ square: ed.sel, verbose:true }).forEach(function(m){
+        if (seen[m.to]) return; seen[m.to] = 1;
+        var s = board.querySelector('[data-sq="' + m.to + '"]');
+        if (s) s.appendChild(el('span', ed.chess.get(m.to) ? 'ring' : 'dot'));
+      });
+    }
+  }
+
+  function onEdSquare(e){
+    var name = e.currentTarget.getAttribute('data-sq');
+    if (ed.phase === 'setup'){
+      var cur = ed.board[name];
+      if (ed.tool === 'x') delete ed.board[name];
+      else {
+        var t = { color: ed.tool[0], type: ed.tool[1] };
+        if (cur && cur.color === t.color && cur.type === t.type) delete ed.board[name];   // tap again to remove
+        else {
+          if (t.type === 'k') Object.keys(ed.board).forEach(function(s){ var p = ed.board[s]; if (p.type === 'k' && p.color === t.color) delete ed.board[s]; });
+          ed.board[name] = t;
+        }
+      }
+      renderEdBoard(); renderSetupStatus();
+      return;
+    }
+    // recording: play legal moves for whichever side is to move
+    var c = ed.chess, piece = c.get(name);
+    if (ed.sel){
+      if (ed.sel === name){ ed.sel = null; renderEdBoard(); return; }
+      var moves = c.moves({ square: ed.sel, verbose:true }).filter(function(m){ return m.to === name; });
+      if (moves.length){
+        var promo = moves.length > 1 ? askPromotion() : moves[0].promotion;
+        c.move({ from: ed.sel, to: name, promotion: promo });
+        ed.sel = null;
+        renderEdBoard(); renderRecordPanel();
+        return;
+      }
+      ed.sel = (piece && piece.color === c.turn()) ? name : null;
+      renderEdBoard(); return;
+    }
+    if (piece && piece.color === c.turn()){ ed.sel = name; renderEdBoard(); }
+  }
+  function askPromotion(){
+    var a = (prompt('Promote to: q (queen), r (rook), b (bishop) or n (knight)', 'q') || 'q').trim().toLowerCase()[0];
+    return 'qrbn'.indexOf(a) === -1 ? 'q' : a;
+  }
+
+  function sizeEdBoard(){
+    var diag = editorBody.querySelector('.ed-diagram'), col = editorBody.querySelector('.ed-board-col');
+    if (!diag || !col) return;
+    var w = col.clientWidth - 14 - 12 - 4;           // rank gutter + frame
+    if (isThreeCol()){
+      var view = $('editorView');
+      var top = col.getBoundingClientRect().top - view.getBoundingClientRect().top;
+      w = Math.min(w, view.clientHeight - top - 14 - 12 - 34 - 16);   // files row, frame, caption, padding
+    } else {
+      w = Math.min(w, window.innerHeight * 0.72);
+    }
+    diag.style.setProperty('--sq', Math.max(24, Math.floor(w / 8)) + 'px');
+  }
+  window.addEventListener('resize', function(){ if (document.body.classList.contains('mode-editor')) sizeEdBoard(); });
+
+  // ---------- panels ----------
+  var PALETTE = ['wk','wq','wr','wb','wn','wp','bk','bq','br','bb','bn','bp'];
+  function renderSetupStatus(){
+    var fen = setupFen();
+    var fenIn = editorBody.querySelector('.ed-fen');
+    if (fenIn && document.activeElement !== fenIn) fenIn.value = fen;
+    var st = editorBody.querySelector('.ed-status'), go = editorBody.querySelector('.ed-go');
+    var problem = positionProblem(fen);
+    if (st){ st.textContent = problem || 'Position is ready — ' + (ed.turn === 'w' ? 'White' : 'Black') + ' to move.'; st.className = 'ed-status ' + (problem ? 'bad' : 'good'); }
+    if (go) go.disabled = !!problem;
+  }
+
+  function setupPanel(){
+    var p = el('div', 'ed-panel');
+    p.appendChild(el('div', 'kicker', 'Pieces · tap a piece, then tap squares'));
+    var pal = el('div', 'ed-palette');
+    PALETTE.concat(['x']).forEach(function(t){
+      var b = el('button', 'ed-piece' + (ed.tool === t ? ' on' : ''));
+      if (t === 'x'){ b.textContent = '✕'; b.title = 'Eraser'; b.classList.add('eraser'); }
+      else { b.appendChild(el('span', 'glyph ' + t[0], GLYPHS[t[0]][t[1]])); b.title = (t[0] === 'w' ? 'White ' : 'Black ') + PIECE_NAMES[t[1]]; }
+      b.setAttribute('aria-label', b.title);
+      b.addEventListener('click', function(){ ed.tool = t; renderEditor(); });
+      pal.appendChild(b);
+    });
+    p.appendChild(pal);
+
+    p.appendChild(el('div', 'kicker', 'Side to move'));
+    p.appendChild(seg([['w','White'],['b','Black']], ed.turn, function(v){ ed.turn = v; renderEditor(); }, 'Side to move'));
+
+    var row = el('div', 'ed-actions');
+    [['Start position', function(){ ed.board = boardFromFen(START_FEN); ed.turn = 'w'; renderEditor(); }],
+     ['Clear board', function(){ ed.board = {}; renderEditor(); }],
+     ['Flip ⇅', function(){ ed.flipped = !ed.flipped; renderEdBoard(); }],
+     ['From current puzzle', function(){
+        if (!state.chess){ showToast('Open a puzzle in the Puzzles tab first.'); return; }
+        var f = state.chess.fen(); ed.board = boardFromFen(f); ed.turn = f.split(' ')[1]; renderEditor(); showToast('Copied the puzzle position');
+     }]].forEach(function(a){ var b = el('button', 'btn quiet', a[0]); b.addEventListener('click', a[1]); row.appendChild(b); });
+    p.appendChild(row);
+
+    p.appendChild(el('div', 'kicker', 'FEN'));
+    var fenRow = el('div', 'ed-fenrow');
+    var fen = el('input', 'ed-fen'); fen.type = 'text'; fen.spellcheck = false; fen.setAttribute('aria-label', 'FEN');
+    var load = el('button', 'btn quiet', 'Load');
+    load.addEventListener('click', function(){
+      var v = fen.value.trim(), b = boardFromFen(v);
+      if (!b){ showToast('That FEN doesn’t look right.'); return; }
+      ed.board = b; ed.turn = (v.split(' ')[1] === 'b') ? 'b' : 'w';
+      fen.blur(); renderEditor();
+    });
+    fenRow.appendChild(fen); fenRow.appendChild(load);
+    p.appendChild(fenRow);
+
+    p.appendChild(el('div', 'ed-status'));
+    var go = el('button', 'btn primary ed-go', 'Record the solution →');
+    go.addEventListener('click', function(){
+      var f = setupFen();
+      if (positionProblem(f)) return;
+      ed.startFen = f; ed.startTurn = ed.turn;
+      ed.chess = makeChess(f); ed.phase = 'record'; ed.sel = null;
+      renderEditor();
+    });
+    p.appendChild(go);
+    return p;
+  }
+
+  function sanList(){
+    var out = el('div', 'ed-moves');
+    var hist = ed.chess.history();
+    if (!hist.length){ out.appendChild(el('div', 'empty-note', 'Play the winning line on the board — your moves and the opponent’s replies. Each move is written here.')); return out; }
+    var startFen = ed.chess.history().length ? null : null;
+    var white = ed.startTurn === 'w', n = 1;
+    hist.forEach(function(san, i){
+      var isWhite = white ? i % 2 === 0 : i % 2 === 1;
+      var num = Math.floor((white ? i : i + 1) / 2) + 1;
+      var line = el('span', 'ed-mv');
+      if (isWhite) line.appendChild(el('span', 'mn', num + '.'));
+      else if (i === 0) line.appendChild(el('span', 'mn', num + '…'));
+      line.appendChild(el('span', 'san', san));
+      out.appendChild(line);
+    });
+    return out;
+  }
+
+  function topicsInMyPositions(){
+    var items = loadLibraryItems(MYPOS) || [], seen = {}, out = [];
+    items.forEach(function(it){ if (it.chapter && !seen[it.chapter]){ seen[it.chapter] = 1; out.push(it.chapter); } });
+    return out;
+  }
+
+  function renderRecordPanel(){
+    var holder = editorBody.querySelector('.ed-record-moves');
+    if (holder){ holder.innerHTML = ''; holder.appendChild(sanList()); }
+    var saveBtn = editorBody.querySelector('.ed-save');
+    if (saveBtn) saveBtn.disabled = !ed.chess.history().length;
+    var undo = editorBody.querySelector('.ed-undo');
+    if (undo) undo.disabled = !ed.chess.history().length;
+    var turn = editorBody.querySelector('.ed-turn');
+    if (turn){
+      var c = ed.chess;
+      turn.textContent = c.in_checkmate() ? 'Checkmate — the line is complete.' : c.in_stalemate() ? 'Stalemate.' :
+        (c.turn() === 'w' ? 'White' : 'Black') + ' to play' + (c.turn() === ed.startTurn ? ' (the solver’s move)' : ' (the opponent’s reply)');
+    }
+  }
+
+  function recordPanel(){
+    var p = el('div', 'ed-panel');
+    p.appendChild(el('div', 'kicker', ed.editingNum ? 'Editing position No. ' + ed.editingNum : 'Record the solution'));
+    p.appendChild(el('p', 'ed-turn'));
+    var mv = el('div', 'ed-record-moves');
+    p.appendChild(mv);
+    var row = el('div', 'ed-actions');
+    var undo = el('button', 'btn quiet ed-undo', '↶ Undo move');
+    undo.addEventListener('click', function(){ ed.chess.undo(); ed.sel = null; renderEdBoard(); renderRecordPanel(); });
+    var back = el('button', 'btn quiet', '← Back to setup');
+    back.addEventListener('click', function(){ ed.phase = 'setup'; ed.chess = null; ed.sel = null; renderEditor(); });
+    var flip = el('button', 'btn quiet', 'Flip ⇅');
+    flip.addEventListener('click', function(){ ed.flipped = !ed.flipped; renderEdBoard(); });
+    row.appendChild(undo); row.appendChild(back); row.appendChild(flip);
+    p.appendChild(row);
+
+    var form = el('div', 'ed-form');
+    function field(lbl, input){ var f = el('label', 'ed-field'); f.appendChild(el('span', 'kicker', lbl)); f.appendChild(input); return f; }
+    var title = el('input'); title.type = 'text'; title.placeholder = 'e.g. Back-rank mate'; title.value = ed.title;
+    title.addEventListener('input', function(){ ed.title = title.value; });
+    var topic = el('input'); topic.type = 'text'; topic.placeholder = 'e.g. Tactics, Rook endings'; topic.value = ed.topic;
+    topic.setAttribute('list', 'edTopics');
+    topic.addEventListener('input', function(){ ed.topic = topic.value; });
+    var dl = el('datalist'); dl.id = 'edTopics';
+    topicsInMyPositions().forEach(function(t){ var o = el('option'); o.value = t; dl.appendChild(o); });
+    var note = el('textarea'); note.placeholder = 'Optional note shown with the puzzle'; note.value = ed.note; note.rows = 2;
+    note.addEventListener('input', function(){ ed.note = note.value; });
+    form.appendChild(field('Title', title));
+    form.appendChild(field('Topic / strategy', topic));
+    form.appendChild(dl);
+    form.appendChild(field('Note', note));
+    p.appendChild(form);
+
+    var save = el('button', 'btn primary ed-save', ed.editingNum ? 'Save changes' : 'Save as puzzle');
+    save.addEventListener('click', savePosition);
+    p.appendChild(save);
+    return p;
+  }
+
+  // ---------- saving ----------
+  function savePosition(){
+    var hist = ed.chess.history();
+    if (!hist.length){ showToast('Play at least one move first.'); return; }
+    var items = loadLibraryItems(MYPOS) || [];
+    var fen = ed.startFen;
+    var num = ed.editingNum || items.reduce(function(m, it){ return Math.max(m, it.num || 0); }, 0) + 1;
+    var item = { type:'puzzle', source:MYPOS, num:num, chapter:(ed.topic || '').trim() || 'My positions',
+                 title:(ed.title || '').trim() || ('Position ' + num), fen:fen, moves:hist, moveComments:{}, moveNags:{},
+                 intro:(ed.note || '').trim(), created: Date.now() };
+    var i = items.findIndex ? items.findIndex(function(x){ return x.num === num; }) : -1;
+    if (i >= 0){
+      items[i] = item;
+      // the position changed, so its old answer no longer applies
+      var k = MYPOS + '::' + MYPOS + ':' + num;
+      BUCKETS.forEach(function(b){ delete progress[b][k]; });
+      saveProgress();
+    } else items.push(item);
+    if (!safeSet(LIB_ITEM_PREFIX + MYPOS, JSON.stringify(items))){ showToast('Storage is full — remove an old file first.'); return; }
+    var entry = library.filter(function(l){ return l.id === MYPOS; })[0];
+    if (!entry){ entry = { id:MYPOS, filename:'My Positions', count:0, addedAt:Date.now() }; library.push(entry); }
+    entry.count = items.length;
+    saveLibraryIndex(library);
+    delete colCache[MYPOS];
+    renderTree();
+    showToast((ed.editingNum ? 'Saved changes to No. ' : 'Saved as My Positions No. ') + num);
+    ed.phase = 'setup'; ed.chess = null; ed.sel = null; ed.editingNum = null; ed.title = ''; ed.note = '';
+    renderEditor();
+  }
+
+  function practise(num){
+    var col = collectionFor(MYPOS);
+    if (!col) return;
+    var it = col.items.filter(function(x){ return x.num === num; })[0];
+    if (!it) return;
+    setMode('puzzles');
+    var ch = col.chapters ? (it.chapter || '—') : null;
+    var list = ch ? col.items.filter(function(x){ return (x.chapter || '—') === ch; }) : col.items;
+    openAt(MYPOS, ch, list.indexOf(it));
+  }
+  function editSaved(it){
+    ed.board = boardFromFen(it.fen) || {};
+    ed.turn = it.fen.split(' ')[1] === 'b' ? 'b' : 'w';
+    ed.startFen = it.fen; ed.startTurn = ed.turn;
+    ed.chess = makeChess(it.fen);
+    for (var i = 0; i < it.moves.length; i++){ if (!ed.chess.move(it.moves[i], { sloppy:true })) break; }
+    ed.phase = 'record'; ed.sel = null; ed.editingNum = it.num;
+    ed.title = it.title || ''; ed.topic = it.chapter === 'My positions' ? '' : (it.chapter || ''); ed.note = it.intro || '';
+    renderEditor();
+    window.scrollTo(0, 0); var v = $('editorView'); if (v) v.scrollTop = 0;
+  }
+  function deleteSaved(it){
+    if (!confirm('Delete “' + (it.title || 'Position ' + it.num) + '”?')) return;
+    var items = (loadLibraryItems(MYPOS) || []).filter(function(x){ return x.num !== it.num; });
+    var k = MYPOS + '::' + MYPOS + ':' + it.num;
+    BUCKETS.forEach(function(b){ delete progress[b][k]; });
+    saveProgress();
+    if (!items.length){ removeLibraryFile(MYPOS); }
+    else {
+      safeSet(LIB_ITEM_PREFIX + MYPOS, JSON.stringify(items));
+      library.forEach(function(l){ if (l.id === MYPOS) l.count = items.length; });
+      saveLibraryIndex(library);
+      delete colCache[MYPOS];
+      if (state.collectionKey === MYPOS) switchCollection(MYPOS); else renderTree();
+    }
+    renderEditor();
+    showToast('Deleted');
+  }
+
+  function savedList(){
+    var wrap = el('section', 'ed-saved');
+    var items = loadLibraryItems(MYPOS) || [];
+    wrap.appendChild(el('div', 'kicker', 'My Positions · ' + items.length + ' saved'));
+    if (!items.length){ wrap.appendChild(el('div', 'empty-note', 'Positions you save appear here and in the Library under “My Positions”, grouped by topic.')); return wrap; }
+    items.slice().sort(function(a, b){ return (a.chapter || '').localeCompare(b.chapter || '') || a.num - b.num; }).forEach(function(it){
+      var row = el('div', 'lib-item');
+      var meta = el('div', 'meta');
+      meta.appendChild(el('div', 'fname', 'No. ' + it.num + ' · ' + (it.title || 'Position')));
+      var st = statusFor(MYPOS, it);
+      meta.appendChild(el('div', 'fsub kicker', (it.chapter || 'My positions') + ' · ' + it.moves.length + (it.moves.length === 1 ? ' move' : ' moves') + ' · ' + STATUS_TEXT[st]));
+      row.appendChild(meta);
+      var pr = el('button', 'restore-btn', 'Practise');
+      pr.addEventListener('click', function(){ practise(it.num); });
+      var edb = el('button', 'restore-btn quiet', 'Edit');
+      edb.addEventListener('click', function(){ editSaved(it); });
+      row.appendChild(pr); row.appendChild(edb);
+      row.appendChild(trashButton('Delete ' + (it.title || 'position'), function(){ deleteSaved(it); }));
+      wrap.appendChild(row);
+    });
+    return wrap;
+  }
+
+  function renderEditor(){
+    if (!editorBody) return;
+    if (ed.phase === 'setup'){ ed.startFen = setupFen(); ed.startTurn = ed.turn; }
+    editorBody.innerHTML = '';
+    var head = el('div', 'ed-head');
+    head.appendChild(el('div', 'kicker', 'Custom positions'));
+    head.appendChild(el('h2', null, ed.phase === 'setup' ? 'Set up a position' : 'Play the solution'));
+    editorBody.appendChild(head);
+    var grid = el('div', 'ed-grid');
+    var bc = el('div', 'ed-board-col');
+    var diag = el('div', 'diagram ed-diagram');
+    var frame = el('div', 'frame'), fin = el('div', 'frame-in'), board = el('div', 'board ed-board');
+    fin.appendChild(board); frame.appendChild(fin);
+    diag.appendChild(el('div', 'ranks ed-ranks')); diag.appendChild(frame); diag.appendChild(el('div', 'files ed-files'));
+    bc.appendChild(diag);
+    var cap = el('div', 'caption');
+    var turn = ed.phase === 'record' && ed.chess ? ed.chess.turn() : ed.turn;
+    cap.appendChild(el('span', 'side' + (turn === 'b' ? ' b' : '')));
+    cap.appendChild(document.createTextNode((turn === 'w' ? 'White' : 'Black') + ' to move'));
+    bc.appendChild(cap);
+    grid.appendChild(bc);
+    grid.appendChild(ed.phase === 'setup' ? setupPanel() : recordPanel());
+    editorBody.appendChild(grid);
+    editorBody.appendChild(savedList());
+    sizeEdBoard();
+    renderEdBoard();
+    if (ed.phase === 'setup') renderSetupStatus(); else renderRecordPanel();
+  }
+
+  // ---------- tabs: Puzzles | Custom Positions ----------
+  var modeBtns = document.querySelectorAll('.mode');
+  var chessLabel = null;
+  function setMode(mode){
+    var editor = mode === 'editor';
+    progress.mode = mode; saveProgress();
+    document.body.classList.toggle('mode-editor', editor);
+    Array.prototype.forEach.call(modeBtns, function(b){
+      var on = b.getAttribute('data-mode') === mode;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    if (editor){
+      if (chessLabel === null) chessLabel = collectionLabel.textContent;
+      collectionLabel.textContent = 'Custom positions';
+      closeDrawer();
+      if (!Object.keys(ed.board).length && ed.phase === 'setup') ed.board = boardFromFen(START_FEN);
+      renderEditor();
+      window.scrollTo(0, 0);
+    } else {
+      if (chessLabel !== null){ collectionLabel.textContent = chessLabel; chessLabel = null; }
+      sizeBoard();
+      if (state.collection) renderTree();
+    }
+  }
+  Array.prototype.forEach.call(modeBtns, function(b){
+    b.addEventListener('click', function(){ setMode(b.getAttribute('data-mode')); });
+  });
+
 
   // ============================================================
   // Boot
@@ -1851,8 +2715,10 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       return;
     }
     placeNav();
-    var lastKey = progress.lastCollection && collectionFor(progress.lastCollection) ? progress.lastCollection : 'endings';
-    switchCollection(lastKey);
+    var keys = allCollectionKeys();
+    var lastKey = progress.lastCollection && keys.indexOf(progress.lastCollection) !== -1 && collectionFor(progress.lastCollection) ? progress.lastCollection : keys[0];
+    if (lastKey) switchCollection(lastKey); else showEmptyLibrary();
+    if (progress.mode === 'editor') setMode('editor');
   }
   boot();
 
