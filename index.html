@@ -191,7 +191,10 @@
     position:relative; z-index:1; line-height:1; pointer-events:none; font-size:calc(var(--sq) * .76);
     font-family:"DejaVu Sans","Segoe UI Symbol","Noto Sans Symbols 2","Apple Symbols",Arial,sans-serif;
   }
-  .glyph.w{ color:#fffaf0; -webkit-text-stroke:1.3px #1a1210; paint-order:stroke fill; filter:drop-shadow(0 1px 0 rgba(0,0,0,.25)); }
+  .glyph.w{ display:inline-grid; filter:drop-shadow(0 1px 0 rgba(0,0,0,.28)); }
+  .glyph.w > span{ grid-area:1 / 1; line-height:1; }
+  .glyph.w .g-fill{ color:#fffaf0; -webkit-text-stroke:.6px #fffaf0; }
+  .glyph.w .g-line{ color:#1a1210; -webkit-text-stroke:.35px #1a1210; }
   .glyph.b{ color:#1a1210; -webkit-text-stroke:.5px #1a1210; filter:drop-shadow(0 1px 0 rgba(255,250,240,.25)); }
   .sq .dot{ position:absolute; z-index:2; width:26%; height:26%; border-radius:50%; background:var(--dot); pointer-events:none; }
   .sq .ring{ position:absolute; z-index:2; inset:6%; border-radius:50%; box-shadow:inset 0 0 0 3px var(--dot); pointer-events:none; }
@@ -438,6 +441,35 @@
     .ed-panel{ flex:1; }
   }
 
+
+  /* ---------- attempt history ---------- */
+  .attempts{ margin-top:18px; }
+  .att-list{ display:flex; flex-direction:column; }
+  .att-row{ display:grid; grid-template-columns:34px 1fr auto; gap:8px; align-items:baseline; padding:8px 0; border-bottom:1px solid var(--rule-soft); }
+  .att-row:last-child{ border-bottom:none; }
+  .att-no{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); text-align:right; }
+  .att-mid{ display:flex; flex-direction:column; min-width:0; }
+  .att-res{ font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+  .att-res.solved{ color:var(--good); }
+  .att-res.revealed, .att-res.timeout, .att-res.out{ color:var(--bad); }
+  .att-res.reset, .att-res.left{ color:var(--amber); }
+  .att-when{ font-style:italic; font-size:13.5px; color:var(--ink-faint); }
+  .att-meta{ font-family:var(--mono); font-size:11.5px; color:var(--ink-dim); white-space:nowrap; }
+  .meter.att-meter{ color:var(--ink-faint); font-size:11px; }
+
+  /* ---------- parent PIN ---------- */
+  .pin-backdrop{ position:fixed; inset:0; z-index:70; background:rgba(12,4,8,.65); display:none; align-items:center; justify-content:center; padding:16px; }
+  .pin-backdrop.open{ display:flex; }
+  .pin-box{ width:min(360px, 100%); background:var(--bg); border-top:2px solid var(--ink); padding:18px; display:flex; flex-direction:column; gap:10px; box-shadow:var(--shadow); }
+  .pin-box.shake{ animation:shake .32s ease; }
+  .pin-box h3{ margin:2px 0 0; font-size:24px; font-weight:500; }
+  .pin-reason{ margin:0; font-style:italic; color:var(--ink-dim); font-size:15px; line-height:1.45; }
+  .pin-input{ height:48px; border:1px solid var(--rule); background:var(--panel); color:var(--ink); font-family:var(--mono); font-size:22px; letter-spacing:.4em; text-align:center; }
+  .pin-msg{ min-height:18px; font-size:14px; font-style:italic; }
+  .pin-msg.bad{ color:var(--bad); }
+  .pin-msg.info{ color:var(--ink-dim); }
+  .pin-forgot{ align-self:flex-start; border:none; background:none; padding:2px 0; cursor:pointer; color:var(--ink-faint); text-decoration:underline; font-size:13.5px; }
+
   ::selection{ background:var(--accent); color:var(--accent-ink); }
   input[type=file]{ display:none; }
 
@@ -594,7 +626,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     return b;
   }
   var BUILTIN = { endings:'Practical Chess Endings', strategy:'Chess Strategy: Simplified' };
-  function confirmDelete(id){
+  function confirmDelete(id){ requireParent('A parent PIN is needed to remove books or files.', function(){ confirmDeleteNow(id); }); }
+  function confirmDeleteNow(id){
     if (BUILTIN[id]){
       if (!confirm('Remove “' + BUILTIN[id] + '” from your library?\n\nIt’s a built-in book, so you can bring it back any time from ⚙ Settings → Built-in books. Your progress in it is kept.')) return;
       progress.hidden[id] = true;
@@ -609,7 +642,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     removeLibraryFile(id);
     showToast('Deleted ' + entry.filename);
   }
-  function restoreBuiltin(id){
+  function restoreBuiltin(id){ requireParent('A parent PIN is needed to restore books.', function(){ restoreBuiltinNow(id); }); }
+  function restoreBuiltinNow(id){
     delete progress.hidden[id];
     saveProgress();
     renderTree();
@@ -641,7 +675,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   function freshProgress(keep){
     keep = keep || {};
     return { solved:{}, viewed:{}, opened:{}, rated:{}, last:{}, theme:keep.theme || null, flipOverride:!!keep.flipOverride, rating:1200, history:[],
-             settings: keep.settings || {}, hidden: keep.hidden || {} };
+             settings: keep.settings || {}, hidden: keep.hidden || {}, attempts: keep.attempts || {} };
   }
   function loadProgress(){
     var raw = safeGet(STORE_KEY);
@@ -653,6 +687,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       if ('flipped' in p){ delete p.flipped; p.flipOverride = false; }
       p.rating = typeof p.rating === 'number' ? p.rating : 1200;
       p.history = Array.isArray(p.history) ? p.history : [];
+      p.attempts = p.attempts || {};
       if (!p.rated){
         // Migration: anything already solved or revealed under the old
         // version has already moved the rating once.
@@ -667,7 +702,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   function saveProgress(){ safeSet(STORE_KEY, JSON.stringify(progress)); }
 
   // ---- player settings (saved with progress, so backups carry them) ----
-  var DEFAULT_SETTINGS = { showMoves:true, maxAttempts:0, timeLimit:0, replyMs:550, sortTopics:'book' };
+  var DEFAULT_SETTINGS = { showMoves:true, maxAttempts:0, timeLimit:0, replyMs:550, sortTopics:'book', helpMode:'allow', pinHash:null };
   function normaliseSettings(){
     var s = progress.settings || {};
     Object.keys(DEFAULT_SETTINGS).forEach(function(k){ if (s[k] === undefined) s[k] = DEFAULT_SETTINGS[k]; });
@@ -696,7 +731,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var live = { endings:true, strategy:true };
     library.forEach(function(l){ live[l.id] = true; });
     var changed = false;
-    ['solved','viewed','opened','rated'].forEach(function(bucket){
+    progress.attempts = progress.attempts || {};
+    ['solved','viewed','opened','rated','attempts'].forEach(function(bucket){
       Object.keys(progress[bucket]).forEach(function(k){
         var col = k.split('::')[0];
         if (!live[col]){ delete progress[bucket][k]; changed = true; }
@@ -1204,7 +1240,57 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     }catch(e){ return null; }
   }
 
+  // ---- attempt log: every try at a puzzle is kept, even after Reset or
+  // Clear answers (only deleting the file, or "Clear attempt history",
+  // removes it) ----
+  var RESULT_TEXT = { solved:'Solved', revealed:'Answer shown', timeout:'Time\u2019s up', out:'Out of attempts', reset:'Reset', left:'Left unfinished' };
+  function attemptsFor(key){ return (progress.attempts && progress.attempts[key]) || []; }
+  function attemptActive(){ return state.att && !state.att.done; }
+  function attemptHasActivity(){ return state.wrongCount > 0 || state.hintsUsed > 0 || state.moveIndex > 0; }
+  function endAttempt(result){
+    if (!attemptActive()) return;
+    var a = state.att;
+    a.done = true;
+    var list = progress.attempts[a.key] = attemptsFor(a.key).slice();
+    list.push({ t:a.start, r:result, w:state.wrongCount, h:state.hintsUsed, ms:Date.now() - a.start, m:state.moveIndex });
+    if (list.length > 50) list.splice(0, list.length - 50);
+    saveProgress();
+    renderAttempts();
+  }
+  function renderAttempts(){
+    var box = $('attemptsBox'), item = currentItem();
+    if (!box) return;
+    box.innerHTML = '';
+    if (!item || item.type !== 'puzzle' || !state.collection) return;
+    var list = attemptsFor(recordKey(item));
+    var head = el('div', 'ledger-head');
+    head.appendChild(el('span', 'kicker', 'Attempts on this puzzle'));
+    head.appendChild(el('span', 'kicker', String(list.length)));
+    box.appendChild(head);
+    if (!list.length){ box.appendChild(el('div', 'empty-note', 'Every try is recorded here \u2014 kept even if you reset the puzzle or clear its answer.')); return; }
+    var ol = el('div', 'att-list');
+    for (var i = list.length - 1; i >= 0; i--){
+      var at = list[i], row = el('div', 'att-row');
+      row.appendChild(el('span', 'att-no', '#' + (i + 1)));
+      var mid = el('div', 'att-mid');
+      mid.appendChild(el('span', 'att-res ' + at.r, RESULT_TEXT[at.r] || at.r));
+      var d = new Date(at.t);
+      mid.appendChild(el('span', 'att-when', d.toLocaleDateString(undefined, { day:'numeric', month:'short' }) + ', ' + d.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' })));
+      row.appendChild(mid);
+      var bits = [formatTime(at.ms)];
+      if (at.w) bits.push('\u2717 ' + at.w);
+      if (at.h) bits.push((at.h === 1 ? '1 hint' : at.h + ' hints'));
+      row.appendChild(el('span', 'att-meta', bits.join(' \u00b7 ')));
+      ol.appendChild(row);
+    }
+    box.appendChild(ol);
+  }
+  window.addEventListener('pagehide', function(){ if (attemptActive() && attemptHasActivity()) endAttempt('left'); });
+
   function loadCurrentItem(){
+    if (attemptActive() && attemptHasActivity()) endAttempt(state.resetting ? 'reset' : 'left');
+    state.resetting = false;
+    state.att = null;
     stopTimer();
     state.token++;
     state.autoplaying = false;
@@ -1235,8 +1321,10 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     state.wrongCount = 0;
     state.hintsUsed = 0;
     state.startTime = Date.now();
+    state.att = { key:key, start:state.startTime, done:false };
     renderPuzzle(item);
     renderPuzzleNumberStrip();
+    renderAttempts();
     updateTimerDisplay();
     state.timerHandle = setInterval(updateTimerDisplay, 250);
   }
@@ -1264,7 +1352,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       var msg = 'Time’s up — here’s the solution.';
       setFeedback('bad', msg);
       notifyWrongMove(msg);
-      onReveal(msg);
+      onReveal(msg, 'timeout');
     }
   }
 
@@ -1333,6 +1421,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var note = el('div', 'empty-note', 'Moves you play — or the answer, once revealed — are written here.');
     note.id = 'ledgerEmpty';
     ledgerBox.appendChild(note);
+    var att = el('div', 'attempts'); att.id = 'attemptsBox';
+    ledgerBox.appendChild(att);
   }
 
   function pad3(n){ n = String(n); return n.length >= 3 ? n : ('00' + n).slice(-3); }
@@ -1365,7 +1455,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var timer = el('span', 'meter', '0:00'); timer.id = 'liveTimer';
     timer.title = 'Time on this puzzle';
     var wrong = el('span', 'meter bad', ''); wrong.id = 'wrongCount'; wrong.style.display = 'none';
-    meters.appendChild(stamp); meters.appendChild(timer); meters.appendChild(wrong);
+    var attNo = el('span', 'meter att-meter', 'Attempt ' + (attemptsFor(key).length + 1));
+    meters.appendChild(stamp); meters.appendChild(attNo); meters.appendChild(timer); meters.appendChild(wrong);
     head.appendChild(meters);
     mainEl.appendChild(head);
 
@@ -1395,9 +1486,10 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
     var actions = el('div', 'actions');
     var hintBtn = el('button', 'btn quiet', 'Hint');
-    hintBtn.addEventListener('click', onHint);
+    hintBtn.id = 'hintBtn';
+    hintBtn.addEventListener('click', onHintClick);
     var resetBtn = el('button', 'btn quiet', 'Reset ↺');
-    resetBtn.addEventListener('click', function(){ loadCurrentItem(); });
+    resetBtn.addEventListener('click', function(){ state.resetting = true; loadCurrentItem(); });
     var flipBtn = el('button', 'btn quiet', 'Flip ⇅');
     flipBtn.setAttribute('aria-label', 'Flip board');
     flipBtn.addEventListener('click', toggleFlip);
@@ -1412,6 +1504,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     }
     mainEl.appendChild(controls);
     placeControls();
+    refreshHelpButtons();
 
     sizeBoard();
     renderBoard();
@@ -1461,6 +1554,16 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     w:{ k:'♔︎', q:'♕︎', r:'♖︎', b:'♗︎', n:'♘︎', p:'♙︎' },
     b:{ k:'♚︎', q:'♛︎', r:'♜︎', b:'♝︎', n:'♞︎', p:'♟︎' }
   };
+  // White pieces: a white silhouette (the filled symbol) under the outline
+  // symbol, so they are solid white with dark detail lines.
+  function glyphEl(color, type){
+    var g = el('span', 'glyph ' + color);
+    if (color === 'w'){
+      g.appendChild(el('span', 'g-fill', GLYPHS.b[type]));
+      g.appendChild(el('span', 'g-line', GLYPHS.w[type]));
+    } else g.textContent = GLYPHS.b[type];
+    return g;
+  }
   var PIECE_NAMES = { k:'king', q:'queen', r:'rook', b:'bishop', n:'knight', p:'pawn' };
 
   function findKingSquare(chess, color){
@@ -1501,7 +1604,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
         sq.setAttribute('role', 'gridcell');
         var piece = state.chess.get(name);
         sq.setAttribute('aria-label', name + (piece ? ', ' + (piece.color === 'w' ? 'white ' : 'black ') + PIECE_NAMES[piece.type] : ''));
-        if (piece) sq.appendChild(el('span', 'glyph ' + piece.color, GLYPHS[piece.color][piece.type]));
+        if (piece) sq.appendChild(glyphEl(piece.color, piece.type));
         if (lastMove && lastMove.from === name) sq.classList.add('from');
         if (lastMove && lastMove.to === name) sq.classList.add('to');
         if (inCheckSq === name) sq.classList.add('check');
@@ -1704,6 +1807,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     progress.solved[key] = true;
     var delta = wasRevealed ? 0 : applyRatingUpdate(item, solveScore(), elapsed);
     saveProgress();
+    endAttempt('solved');
     var deltaTxt = delta ? ('  ·  Rating ' + progress.rating + ' (' + (delta > 0 ? '+' : '') + delta + ')') : '';
     setFeedback('good', 'Solved in ' + formatTime(elapsed) + '.' + deltaTxt);
     var t = $('liveTimer');
@@ -1715,6 +1819,20 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     renderPuzzleNumberStrip();
     showToast('Puzzle solved ✓');
     playTone(660, 0.12);
+  }
+
+  function onHintClick(){
+    var mode = S().helpMode;
+    if (mode === 'hide') return;
+    if (mode === 'pin' && hasPin()) requireParent('A parent PIN is needed to show a hint.', onHint);
+    else onHint();
+  }
+  function onRevealClick(){
+    var mode = S().helpMode;
+    if (state.solved && !state.revealed) return onReveal();          // replaying a line you solved
+    if (mode === 'hide') return;
+    if (mode === 'pin' && hasPin()) requireParent('A parent PIN is needed to see the answer.', function(){ onReveal(); });
+    else onReveal();
   }
 
   function onHint(){
@@ -1741,13 +1859,15 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     setTimeout(function(){
       if (token !== state.token) return;
       state.autoplaying = false;
-      onReveal(why);
+      onReveal(why, 'out');
     }, 900);
   }
 
-  function onReveal(why){
+  function onReveal(why, code){
     var item = currentItem();
     if (!item || item.type !== 'puzzle' || !state.chess || state.revealed) return;
+    if (!state.solved || attemptHasActivity()) endAttempt(code || 'revealed');
+    else if (state.att) state.att.done = true;   // replaying an already-solved line
     var key = recordKey(item);
     state.revealed = true;
     state.selected = null;
@@ -1795,14 +1915,16 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     counterEl.appendChild(document.createElement('br'));
     counterEl.appendChild(el('b', null, item ? (item.type === 'puzzle' ? 'No. ' + item.num : (item.title || 'Lesson')) : ''));
     var isPuzzle = !!(item && item.type === 'puzzle' && state.chess);
-    revealBtn.style.visibility = isPuzzle ? 'visible' : 'hidden';
+    var helpHidden = S().helpMode === 'hide' && !state.solved;
+    revealBtn.style.visibility = isPuzzle && !helpHidden ? 'visible' : 'hidden';
     revealBtn.className = 'reveal' + (state.revealed ? ' done' : '');
-    revealBtn.textContent = state.revealed ? 'Revealed' : (state.solved ? 'Replay line' : 'Reveal →');
+    var locked = S().helpMode === 'pin' && hasPin() && !state.solved;
+    revealBtn.textContent = state.revealed ? 'Revealed' : (state.solved ? 'Replay line' : (locked ? 'Reveal \uD83D\uDD12' : 'Reveal →'));
     revealBtn.disabled = !isPuzzle || state.revealed;
   }
   prevBtn.addEventListener('click', function(){ step(-1); });
   nextBtn.addEventListener('click', function(){ step(1); });
-  revealBtn.addEventListener('click', onReveal);
+  revealBtn.addEventListener('click', onRevealClick);
 
   document.addEventListener('keydown', function(e){
     if (modalBackdrop.classList.contains('open')){ if (e.key === 'Escape') closeModal(); return; }
@@ -1920,14 +2042,15 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (spark){ sec.appendChild(el('div', 'kicker', 'Rating trend · last ' + Math.min(30, s.hist.length))); sec.appendChild(spark); }
     var reset = el('button', 'btn danger', 'Reset stats & progress');
     reset.style.width = '100%';
-    reset.addEventListener('click', function(){
-      if (!confirm('This clears your rating, solved history and puzzle progress on this device. Continue?')) return;
+    reset.addEventListener('click', function(){ requireParent('A parent PIN is needed to reset progress.', resetAll); });
+    function resetAll(){
+      if (!confirm('This clears your rating, solved history and puzzle progress on this device. Your attempt history is kept. Continue?')) return;
       progress = freshProgress(progress);
       normaliseSettings();
       saveProgress(); updateRatingBadge();
       renderStatsModal(); if (state.collection) loadCurrentItem();
       showToast('Progress reset.');
-    });
+    }
     sec.appendChild(reset);
     modalEl.appendChild(sec);
 
@@ -2038,7 +2161,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     box.appendChild(ta); box.appendChild(row); box.appendChild(fi);
     container.appendChild(box);
   }
-  function restoreBackup(text){
+  function restoreBackup(text){ requireParent('A parent PIN is needed to restore a backup.', function(){ restoreBackupNow(text); }); }
+  function restoreBackupNow(text){
     var data;
     try{ data = JSON.parse(String(text || '').trim()); }catch(e){ showToast('That doesn\u2019t look like a backup.'); return; }
     if (!data || data.app !== 'vigaasans-chess-board' || !data.progress){ showToast('That doesn\u2019t look like a backup.'); return; }
@@ -2059,6 +2183,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (!progress.theme) progress.theme = keepTheme;
     saveProgress();
     pruneOrphans();
+    progress.attempts = progress.attempts || {};
     normaliseSettings();
     applyTheme(); updateRatingBadge();
     closeModal();
@@ -2080,13 +2205,15 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     return Object.keys(seen).length;
   }
   // scope: { keys:[...] } or { prefix:'col::' } or { all:true }, plus a label
-  function clearAnswersFor(scope){
+  function clearAnswersFor(scope){ requireParent('A parent PIN is needed to clear answers.', function(){ clearAnswersNow(scope); }); }
+  function clearAnswersNow(scope){
     var match = scope.all ? function(){ return true; }
       : scope.prefix ? function(k){ return k.indexOf(scope.prefix) === 0; }
       : (function(set){ return function(k){ return !!set[k]; }; })(scope.keys.reduce(function(o, k){ o[k] = 1; return o; }, {}));
     var n = countAnswered(match);
     if (!confirm('Clear answers for ' + scope.label + '?\n\n' + n + ' solved/revealed ' + (n === 1 ? 'puzzle goes' : 'puzzles go') +
-                 ' back to unsolved so you can solve them again (they’ll count toward your rating again). Your rating so far is kept.')) return;
+                 ' back to unsolved so you can solve them again (they\u2019ll count toward your rating again). Your rating so far and the attempt history are kept.')) return;
+    if (state.att && !state.att.done && attemptHasActivity()) endAttempt('reset');
     BUCKETS.forEach(function(b){ Object.keys(progress[b]).forEach(function(k){ if (match(k)) delete progress[b][k]; }); });
     saveProgress();
     if (state.collection) loadCurrentItem(); else renderTree();
@@ -2128,6 +2255,72 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   // ============================================================
   // Settings sheet
   // ============================================================
+  // ============================================================
+  // Parent PIN
+  // ============================================================
+  function hashPin(pin){
+    var h1 = 0x811c9dc5, s = 'vigaasan:' + pin;
+    for (var i = 0; i < s.length; i++){ h1 ^= s.charCodeAt(i); h1 = Math.imul(h1, 16777619) >>> 0; }
+    var h2 = 5381;
+    for (var j = 0; j < s.length; j++) h2 = (Math.imul(h2, 33) ^ s.charCodeAt(j)) >>> 0;
+    return h1.toString(16) + h2.toString(16);
+  }
+  function hasPin(){ return !!S().pinHash; }
+
+  var pinBackdrop = el('div', 'pin-backdrop');
+  pinBackdrop.setAttribute('role', 'dialog'); pinBackdrop.setAttribute('aria-modal', 'true');
+  document.body.appendChild(pinBackdrop);
+  function closePin(){ pinBackdrop.classList.remove('open'); pinBackdrop.innerHTML = ''; }
+
+  // mode 'check': ask for the PIN; mode 'set': choose a new one (twice)
+  function pinDialog(mode, reason, onOk){
+    pinBackdrop.innerHTML = '';
+    var box = el('div', 'pin-box');
+    box.appendChild(el('div', 'kicker', 'Parental control'));
+    box.appendChild(el('h3', null, mode === 'set' ? 'Choose a parent PIN' : 'Parent PIN needed'));
+    box.appendChild(el('p', 'pin-reason', reason));
+    function input(ph){
+      var i = el('input', 'pin-input'); i.type = 'password'; i.inputMode = 'numeric'; i.autocomplete = 'off';
+      i.maxLength = 8; i.placeholder = ph; return i;
+    }
+    var a1 = input(mode === 'set' ? 'New PIN (4\u20138 digits)' : 'PIN'), a2 = mode === 'set' ? input('Repeat the PIN') : null;
+    box.appendChild(a1); if (a2) box.appendChild(a2);
+    var msg = el('div', 'pin-msg'); box.appendChild(msg);
+    var row = el('div', 'actions');
+    var cancel = el('button', 'btn quiet', 'Cancel'), ok = el('button', 'btn primary', mode === 'set' ? 'Save PIN' : 'Unlock');
+    row.appendChild(cancel); row.appendChild(ok); box.appendChild(row);
+    if (mode === 'check'){
+      var forgot = el('button', 'pin-forgot', 'Forgot the PIN?');
+      forgot.addEventListener('click', function(){
+        msg.className = 'pin-msg info';
+        msg.textContent = 'The PIN can\u2019t be recovered. To remove it, clear the app\u2019s storage (Android: Settings \u2192 Apps \u2192 Vigaasan \u2192 Storage \u2192 Clear data). That also erases progress on this device, so restore a backup afterwards if you have one.';
+      });
+      box.appendChild(forgot);
+    }
+    function fail(t){ msg.className = 'pin-msg bad'; msg.textContent = t; box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake'); vibrate(80); }
+    function submit(){
+      var p = (a1.value || '').trim();
+      if (mode === 'set'){
+        if (!/^\d{4,8}$/.test(p)) return fail('Use 4 to 8 digits.');
+        if (p !== (a2.value || '').trim()) return fail('The two PINs don\u2019t match.');
+        closePin(); onOk(hashPin(p)); return;
+      }
+      if (hashPin(p) !== S().pinHash){ a1.value = ''; return fail('Wrong PIN.'); }
+      closePin(); onOk();
+    }
+    ok.addEventListener('click', submit);
+    cancel.addEventListener('click', closePin);
+    [a1, a2].forEach(function(i){ if (i) i.addEventListener('keydown', function(e){ if (e.key === 'Enter') submit(); if (e.key === 'Escape') closePin(); }); });
+    pinBackdrop.appendChild(box);
+    pinBackdrop.classList.add('open');
+    setTimeout(function(){ a1.focus(); }, 30);
+  }
+  // Runs `fn` straight away when no PIN is set, otherwise after the PIN.
+  function requireParent(reason, fn){
+    if (!hasPin()) return fn();
+    pinDialog('check', reason, fn);
+  }
+
   function setSetting(key, value){
     S()[key] = value;
     saveProgress();
@@ -2181,6 +2374,42 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       seg([[250,'Fast'],[550,'Normal'],[1000,'Slow']], s.replyMs, function(v){ setSetting('replyMs', v); }, 'Opponent speed')));
     modalEl.appendChild(solving);
 
+    var par = el('div', 'section');
+    par.appendChild(el('h3', 'kicker', 'Parental control'));
+    par.appendChild(settingRow('Hint & Reveal', 'Hide the Hint and Reveal buttons, or keep them but ask for the parent PIN each time.',
+      seg([['allow','Allow'],['hide','Hide'],['pin','Ask for PIN']], s.helpMode, function(v){
+        if (v === 'pin' && !hasPin()){
+          pinDialog('set', 'Set a PIN first. It will be asked for Hint, Reveal, Settings, clearing answers, removing books and restoring backups.', function(hash){
+            S().pinHash = hash; setSetting('helpMode', 'pin'); loadCurrentItemIfPuzzle(); showToast('Parent PIN set');
+          });
+          return;
+        }
+        setSetting('helpMode', v); loadCurrentItemIfPuzzle();
+      }, 'Hint and Reveal')));
+    var pinRow = el('div', 'set-row');
+    pinRow.appendChild(el('div', 'set-title', 'Parent PIN'));
+    pinRow.appendChild(el('div', 'set-hint', hasPin()
+      ? 'A PIN is set. It\u2019s needed to open Settings, clear answers, remove books or files, reset progress and restore backups' + (s.helpMode === 'pin' ? ', and for Hint and Reveal.' : '.')
+      : 'No PIN set. With a PIN, a child can\u2019t change these settings or clear answers.'));
+    var pinActs = el('div', 'seg');
+    var setBtn = el('button', 'seg-btn', hasPin() ? 'Change PIN' : 'Set PIN');
+    setBtn.addEventListener('click', function(){
+      pinDialog('set', 'Choose a 4\u20138 digit PIN that the child doesn\u2019t know.', function(hash){ S().pinHash = hash; saveProgress(); renderSettingsModal(); loadCurrentItemIfPuzzle(); showToast('Parent PIN saved'); });
+    });
+    pinActs.appendChild(setBtn);
+    if (hasPin()){
+      var rm = el('button', 'seg-btn', 'Remove PIN');
+      rm.addEventListener('click', function(){
+        if (!confirm('Remove the parent PIN?')) return;
+        S().pinHash = null; if (S().helpMode === 'pin') S().helpMode = 'allow';
+        saveProgress(); renderSettingsModal(); loadCurrentItemIfPuzzle(); showToast('Parent PIN removed');
+      });
+      pinActs.appendChild(rm);
+    }
+    pinRow.appendChild(pinActs);
+    par.appendChild(pinRow);
+    modalEl.appendChild(par);
+
     var lib = el('div', 'section');
     lib.appendChild(el('h3', 'kicker', 'Library'));
     lib.appendChild(settingRow('Sort topics', 'Order of the topics (strategies / chapters) inside each book or PGN file. Prev / Next follow this order.',
@@ -2219,12 +2448,36 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       grid.appendChild(b);
     });
     clr.appendChild(grid);
+    var nAtt = 0; Object.keys(progress.attempts).forEach(function(k){ nAtt += progress.attempts[k].length; });
+    var ah = el('div', 'set-row');
+    ah.appendChild(el('div', 'set-title', 'Attempt history'));
+    ah.appendChild(el('div', 'set-hint', nAtt + ' attempts recorded. They stay when you reset a puzzle, clear answers or reset progress.'));
+    var ahb = el('button', 'seg-btn', 'Clear attempt history');
+    ahb.addEventListener('click', function(){
+      if (!confirm('Delete all ' + nAtt + ' recorded attempts? This can\u2019t be undone.')) return;
+      progress.attempts = {}; if (state.att) state.att.done = true; saveProgress(); renderSettingsModal(); renderAttempts(); showToast('Attempt history cleared');
+    });
+    ah.appendChild(ahb);
+    clr.appendChild(ah);
     modalEl.appendChild(clr);
   }
 
+  function refreshHelpButtons(){
+    var hb = $('hintBtn');
+    if (hb){
+      var mode = S().helpMode;
+      hb.style.display = mode === 'hide' ? 'none' : '';
+      var locked = mode === 'pin' && hasPin();
+      hb.textContent = locked ? 'Hint \uD83D\uDD12' : 'Hint';
+      hb.title = locked ? 'Needs the parent PIN' : '';
+    }
+    renderFooter();
+  }
+  function loadCurrentItemIfPuzzle(){ refreshHelpButtons(); }
   var modalKind = 'stats';
   function rerenderModal(){ if (modalKind === 'settings') renderSettingsModal(); else renderStatsModal(); }
-  function openSettings(){ modalKind = 'settings'; renderSettingsModal(); modalBackdrop.classList.add('open'); var c = modalEl.querySelector('.modal-close'); if (c) c.focus(); }
+  function openSettings(){ requireParent('Settings are locked with the parent PIN.', openSettingsNow); }
+  function openSettingsNow(){ modalKind = 'settings'; renderSettingsModal(); modalBackdrop.classList.add('open'); var c = modalEl.querySelector('.modal-close'); if (c) c.focus(); }
   $('settingsBtn').addEventListener('click', openSettings);
 
   function openModal(){ modalKind = 'stats'; renderStatsModal(); modalBackdrop.classList.add('open'); var c = modalEl.querySelector('.modal-close'); if (c) c.focus(); }
@@ -2336,7 +2589,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
         var sq = el('div', 'sq ' + (light ? 'light' : 'dark'));
         sq.setAttribute('data-sq', name);
         var p = recording ? ed.chess.get(name) : ed.board[name];
-        if (p) sq.appendChild(el('span', 'glyph ' + p.color, GLYPHS[p.color][p.type]));
+        if (p) sq.appendChild(glyphEl(p.color, p.type));
         sq.setAttribute('aria-label', name + (p ? ', ' + (p.color === 'w' ? 'white ' : 'black ') + PIECE_NAMES[p.type] : ''));
         if (last && last.from === name) sq.classList.add('from');
         if (last && last.to === name) sq.classList.add('to');
@@ -2429,7 +2682,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     PALETTE.concat(['x']).forEach(function(t){
       var b = el('button', 'ed-piece' + (ed.tool === t ? ' on' : ''));
       if (t === 'x'){ b.textContent = '✕'; b.title = 'Eraser'; b.classList.add('eraser'); }
-      else { b.appendChild(el('span', 'glyph ' + t[0], GLYPHS[t[0]][t[1]])); b.title = (t[0] === 'w' ? 'White ' : 'Black ') + PIECE_NAMES[t[1]]; }
+      else { b.appendChild(glyphEl(t[0], t[1])); b.title = (t[0] === 'w' ? 'White ' : 'Black ') + PIECE_NAMES[t[1]]; }
       b.setAttribute('aria-label', b.title);
       b.addEventListener('click', function(){ ed.tool = t; renderEditor(); });
       pal.appendChild(b);

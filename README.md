@@ -127,6 +127,31 @@ Uninstall the old "Vigaasan" app once you've moved your progress.
   topic, this file, or everything, to solve them again. Your rating history
   is kept. The ↺ icon next to a file in the Library clears that file.
 
+## Parental control
+
+In ⚙ Settings → **Parental control**:
+
+- **Hint & Reveal:** choose **Allow**, **Hide** (the buttons disappear), or
+  **Ask for PIN** (the buttons show 🔒 and need the parent PIN each time).
+  Replaying the line of a puzzle you've already solved never needs the PIN.
+- **Parent PIN** (4 to 8 digits): once set, it's also needed to open
+  Settings, clear answers, remove books or files, reset progress and
+  restore a backup, so a child can't switch the controls off.
+- **Forgot PIN?** It can't be recovered. Clearing the app's storage removes
+  it, along with this device's progress, so restore a backup afterwards if
+  you have one.
+
+## Attempt history
+
+Every try at a puzzle is recorded: solved, answer shown, time's up, out of
+attempts, reset, or left unfinished. Each entry has the date, time taken,
+wrong moves and hints used. The list appears under the ledger ("Attempts on
+this puzzle"), and the plate heading shows which attempt you're on.
+
+The history is kept when you reset a puzzle, clear answers or reset
+progress. Only deleting the PGN file, or ⚙ Settings → **Clear attempt
+history**, removes it. It's also included in backups.
+
 ## Deleting books and files
 
 Every book and file in the Library has a 🗑 icon.
