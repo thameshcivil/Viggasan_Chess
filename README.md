@@ -141,16 +141,30 @@ In ⚙ Settings → **Parental control**:
   it, along with this device's progress, so restore a backup afterwards if
   you have one.
 
-## Attempt history
+## Attempts (wrong moves)
 
-Every try at a puzzle is recorded: solved, answer shown, time's up, out of
-attempts, reset, or left unfinished. Each entry has the date, time taken,
-wrong moves and hints used. The list appears under the ledger ("Attempts on
-this puzzle"), and the plate heading shows which attempt you're on.
+Each wrong move counts as one **attempt**. The "Attempts per puzzle" setting
+limits them, and every one is recorded with:
 
-The history is kept when you reset a puzzle, clear answers or reset
-progress. Only deleting the PGN file, or ⚙ Settings → **Clear attempt
-history**, removes it. It's also included in backups.
+- the move you played and the correct move;
+- the position it was played in;
+- the date and time.
+
+**Per puzzle:** under the ledger, **Attempts (wrong moves)** lists them all,
+and the heading shows the all-time count ("Attempts: 3"). Tap **View** to
+see that position on the board: your move is marked in red and the correct
+move's squares in green. **◀ Prev / Next ▶** step through the attempts, and
+**Back to puzzle** returns to solving.
+
+**Across puzzles:** **ELO → Recent attempts** lists the latest wrong moves
+from all puzzles. Tap one to open that puzzle and view the attempt.
+
+**Sessions:** below the attempts, each try at the puzzle is listed: solved,
+answer shown, time's up, out of attempts, reset, or left unfinished.
+
+All of this is kept through Reset, Clear answers and Reset progress, and is
+included in backups. Only deleting the PGN file, or ⚙ Settings → **Clear
+attempt history**, removes it.
 
 ## Deleting books and files
 

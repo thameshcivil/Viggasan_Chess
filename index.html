@@ -136,7 +136,7 @@
   .plate.current{ outline:2px solid var(--ink); outline-offset:1px; }
 
   /* ---------- layout ---------- */
-  .layout{ display:flex; flex-direction:column; flex:1; min-height:0; }
+  .layout{ display:flex; flex-direction:column; flex:1 0 auto; }   /* grows with its content so the page (and the sticky footer) extend with it */
   .sidebar-left{ display:flex; flex-direction:column; flex-shrink:0; }
   main{ flex:1; padding:12px 10px 12px; display:flex; flex-direction:column; gap:12px; min-width:0; }
   main > :not(.diagram), #controls{ width:100%; max-width:760px; margin-left:auto; margin-right:auto; }
@@ -470,6 +470,35 @@
   .pin-msg.info{ color:var(--ink-dim); }
   .pin-forgot{ align-self:flex-start; border:none; background:none; padding:2px 0; cursor:pointer; color:var(--ink-faint); text-decoration:underline; font-size:13.5px; }
 
+
+  /* ---------- wrong-move attempts ---------- */
+  .mx-list, .recent-mx{ display:flex; flex-direction:column; }
+  .recent-mx{ margin:4px 0 16px; }
+  .mx-row{ display:grid; grid-template-columns:34px 1fr auto; gap:8px; align-items:center; padding:9px 4px; border:none; border-bottom:1px solid var(--rule-soft);
+    background:none; cursor:pointer; text-align:left; color:var(--ink); width:100%; }
+  .recent-mx .mx-row{ grid-template-columns:1fr auto; }
+  .mx-row:last-child{ border-bottom:none; }
+  .mx-row.on{ background:var(--panel-2); outline:2px solid var(--accent); outline-offset:-2px; }
+  .mx-row:disabled{ opacity:.45; cursor:default; }
+  .mx-mid{ display:flex; flex-direction:column; min-width:0; }
+  .mx-move{ display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; }
+  .mx-num{ font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); }
+  .mx-bad{ font-family:var(--mono); font-weight:700; font-size:14.5px; color:var(--bad); text-decoration:line-through; text-decoration-thickness:1.5px; }
+  .mx-arrow{ color:var(--ink-faint); }
+  .mx-good{ font-family:var(--mono); font-weight:700; font-size:14.5px; color:var(--good); }
+  .mx-view{ font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); border:1px solid var(--accent); padding:4px 7px; }
+  .sessions-head{ margin-top:16px; }
+  .preview-bar{ border:2px solid var(--bad); background:var(--panel); padding:10px 12px; display:flex; flex-direction:column; gap:8px; }
+  .pv-line{ margin:0; font-size:16px; line-height:1.4; }
+  .pv-bad{ font-family:var(--mono); color:var(--bad); }
+  .pv-good{ font-family:var(--mono); color:var(--good); }
+  .pv-actions{ display:flex; gap:6px; }
+  .pv-actions .btn{ flex:1; padding:9px 6px; }
+  .sq.mx-sq::after{ background:rgba(226,72,52,.5); }
+  .sq.ok-sq::after{ box-shadow:inset 0 0 0 4px var(--good); }
+  .sq.mx-sq.ok-sq::after{ background:rgba(226,72,52,.5); box-shadow:inset 0 0 0 4px var(--good); }
+  .board.previewing{ cursor:default; }
+
   ::selection{ background:var(--accent); color:var(--accent-ink); }
   input[type=file]{ display:none; }
 
@@ -501,7 +530,7 @@
     .app{ max-width:none; height:100vh; height:100dvh; min-height:0; }
     header.top{ padding:12px 24px 10px; }
     .brand small{ max-width:none; }
-    .layout{ flex-direction:row; overflow:hidden; }
+    .layout{ flex-direction:row; overflow:hidden; flex:1 1 auto; min-height:0; }
     .sidebar-left{ width:clamp(200px, 22vw, 290px); flex:0 0 auto; overflow:hidden; display:flex; flex-direction:column; border-right:1px solid var(--rule); padding:4px 0 8px; }
     .sidebar-left .strip{ flex-direction:column; align-items:stretch; overflow:visible; }
     .sidebar-left .tabs{ gap:0; padding:8px 16px; border-bottom:1px solid var(--rule-soft); }
@@ -650,6 +679,19 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (!state.collection) switchCollection(id);
     showToast('Restored ' + BUILTIN[id]);
   }
+  function openPuzzleByKey(key, then){
+    var colKey = key.split('::')[0], rest = key.split('::')[1] || '';
+    if (allCollectionKeys().indexOf(colKey) === -1){ showToast('That book or file is no longer in your library.'); return; }
+    var col = collectionFor(colKey);
+    var src = rest.split(':')[0], num = parseInt(rest.split(':')[1], 10);
+    var it = col && col.items.filter(function(x){ return x.type === 'puzzle' && x.source === src && x.num === num; })[0];
+    if (!it){ showToast('Puzzle not found.'); return; }
+    if (document.body.classList.contains('mode-editor')) setMode('puzzles');
+    var ch = col.chapters ? (it.chapter || '\u2014') : null;
+    var list = ch ? col.items.filter(function(x){ return (x.chapter || '\u2014') === ch; }) : col.items;
+    openAt(colKey, ch, list.indexOf(it));
+    if (then) then();
+  }
   function firstAvailable(){ return allCollectionKeys()[0] || null; }
   function afterCollectionRemoved(id){
     if (state.collectionKey === id || !state.collection){
@@ -675,7 +717,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   function freshProgress(keep){
     keep = keep || {};
     return { solved:{}, viewed:{}, opened:{}, rated:{}, last:{}, theme:keep.theme || null, flipOverride:!!keep.flipOverride, rating:1200, history:[],
-             settings: keep.settings || {}, hidden: keep.hidden || {}, attempts: keep.attempts || {} };
+             settings: keep.settings || {}, hidden: keep.hidden || {}, attempts: keep.attempts || {}, mistakes: keep.mistakes || {} };
   }
   function loadProgress(){
     var raw = safeGet(STORE_KEY);
@@ -688,6 +730,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       p.rating = typeof p.rating === 'number' ? p.rating : 1200;
       p.history = Array.isArray(p.history) ? p.history : [];
       p.attempts = p.attempts || {};
+      p.mistakes = p.mistakes || {};
       if (!p.rated){
         // Migration: anything already solved or revealed under the old
         // version has already moved the rating once.
@@ -732,7 +775,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     library.forEach(function(l){ live[l.id] = true; });
     var changed = false;
     progress.attempts = progress.attempts || {};
-    ['solved','viewed','opened','rated','attempts'].forEach(function(bucket){
+    progress.mistakes = progress.mistakes || {};
+    ['solved','viewed','opened','rated','attempts','mistakes'].forEach(function(bucket){
       Object.keys(progress[bucket]).forEach(function(k){
         var col = k.split('::')[0];
         if (!live[col]){ delete progress[bucket][k]; changed = true; }
@@ -1257,17 +1301,129 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     saveProgress();
     renderAttempts();
   }
+  // ---- every wrong move is an "attempt": recorded with its position so it
+  // can be looked at again on the board ----
+  function mistakesFor(key){ return (progress.mistakes && progress.mistakes[key]) || []; }
+  function recordMistake(item, from, to, exp){
+    var key = recordKey(item), fen = state.chess.fen(), san = from + '\u2013' + to;
+    try{ var tmp = new Chess(fen), mv = tmp.move({ from:from, to:to, promotion:'q' }); if (mv) san = mv.san; }catch(e){}
+    var list = progress.mistakes[key] = mistakesFor(key).slice();
+    list.push({ t:Date.now(), fen:fen, from:from, to:to, san:san, exp: exp ? exp.san : null, ef: exp ? exp.from : null, et: exp ? exp.to : null, ply: state.moveIndex });
+    if (list.length > 100) list.splice(0, list.length - 100);
+    saveProgress();
+    renderAttempts();
+    var am = $('attMeter'); if (am) am.textContent = 'Attempts: ' + list.length;
+  }
+  function moveLabel(item, ply){
+    var startWhite = item.fen.split(' ')[1] === 'w', full = parseInt(item.fen.split(' ')[5], 10) || 1;
+    var p = startWhite ? ply : ply + 1;
+    return (full + Math.floor(p / 2)) + (p % 2 === 0 ? '.' : '\u2026');
+  }
+  function fmtWhen(t){
+    var d = new Date(t);
+    return d.toLocaleDateString(undefined, { day:'numeric', month:'short' }) + ', ' + d.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' });
+  }
+
+  // Preview: show the position of a recorded wrong move on the board.
+  function enterPreview(i){
+    var item = currentItem();
+    if (!item || item.type !== 'puzzle') return;
+    var list = mistakesFor(recordKey(item));
+    if (!list.length) return;
+    i = Math.max(0, Math.min(list.length - 1, i));
+    var m = list[i], c = makeChess(m.fen);
+    if (!c) return;
+    var played = c.move({ from:m.from, to:m.to, promotion:'q' });
+    state.preview = { i:i, m:m, chess:c, played:played };
+    state.selected = null;
+    renderPreviewBar();
+    renderBoard();
+    renderAttempts();
+    var bar = $('previewBar');
+    if (bar){
+      if (isThreeCol()) bar.scrollIntoView({ block:'nearest' });
+      else {
+        var hdr = document.querySelector('header.top');
+        var y = bar.getBoundingClientRect().top + window.scrollY - (hdr ? hdr.offsetHeight : 0) - 8;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    }
+  }
+  function exitPreview(){
+    if (!state.preview) return;
+    state.preview = null;
+    var bar = $('previewBar'); if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+    renderBoard();
+    renderAttempts();
+  }
+  function renderPreviewBar(){
+    var p = state.preview, item = currentItem();
+    var bar = $('previewBar');
+    if (!bar){
+      bar = el('div', 'preview-bar'); bar.id = 'previewBar';
+      var d = $('diagram'); if (d) d.parentNode.insertBefore(bar, d);
+    }
+    bar.innerHTML = '';
+    var total = mistakesFor(recordKey(item)).length;
+    var top = el('div', 'pv-top');
+    top.appendChild(el('span', 'kicker', 'Attempt ' + (p.i + 1) + ' of ' + total + ' \u00b7 ' + fmtWhen(p.m.t)));
+    bar.appendChild(top);
+    var line = el('p', 'pv-line');
+    line.appendChild(document.createTextNode('At ' + moveLabel(item, p.m.ply) + ' you played '));
+    line.appendChild(el('b', 'pv-bad', p.m.san + ' \u2717'));
+    if (p.m.exp){ line.appendChild(document.createTextNode(' \u2014 the move was ')); line.appendChild(el('b', 'pv-good', p.m.exp)); }
+    line.appendChild(document.createTextNode('.'));
+    bar.appendChild(line);
+    var row = el('div', 'pv-actions');
+    var prev = el('button', 'btn quiet', '\u25c0 Prev'), next = el('button', 'btn quiet', 'Next \u25b6'), back = el('button', 'btn primary', 'Back to puzzle');
+    prev.disabled = p.i <= 0; next.disabled = p.i >= total - 1;
+    prev.addEventListener('click', function(){ enterPreview(p.i - 1); });
+    next.addEventListener('click', function(){ enterPreview(p.i + 1); });
+    back.addEventListener('click', exitPreview);
+    row.appendChild(prev); row.appendChild(next); row.appendChild(back);
+    bar.appendChild(row);
+  }
+
   function renderAttempts(){
     var box = $('attemptsBox'), item = currentItem();
     if (!box) return;
     box.innerHTML = '';
     if (!item || item.type !== 'puzzle' || !state.collection) return;
-    var list = attemptsFor(recordKey(item));
-    var head = el('div', 'ledger-head');
-    head.appendChild(el('span', 'kicker', 'Attempts on this puzzle'));
+    var key = recordKey(item);
+    var mx = mistakesFor(key);
+    var mh = el('div', 'ledger-head');
+    mh.appendChild(el('span', 'kicker', 'Attempts (wrong moves)'));
+    mh.appendChild(el('span', 'kicker', String(mx.length)));
+    box.appendChild(mh);
+    if (!mx.length) box.appendChild(el('div', 'empty-note', 'Every wrong move is recorded here \u2014 tap one to see it on the board. Kept even if you reset the puzzle or clear its answer.'));
+    else {
+      var ml = el('div', 'mx-list');
+      for (var j = mx.length - 1; j >= 0; j--){
+        (function(j){
+          var m = mx[j];
+          var b = el('button', 'mx-row' + (state.preview && state.preview.i === j ? ' on' : ''));
+          b.appendChild(el('span', 'att-no', '#' + (j + 1)));
+          var mid = el('span', 'mx-mid');
+          var mv = el('span', 'mx-move');
+          mv.appendChild(el('span', 'mx-num', moveLabel(item, m.ply)));
+          mv.appendChild(el('span', 'mx-bad', m.san));
+          if (m.exp){ mv.appendChild(el('span', 'mx-arrow', '\u2192')); mv.appendChild(el('span', 'mx-good', m.exp)); }
+          mid.appendChild(mv);
+          mid.appendChild(el('span', 'att-when', fmtWhen(m.t)));
+          b.appendChild(mid);
+          b.appendChild(el('span', 'mx-view', 'View'));
+          b.addEventListener('click', function(){ enterPreview(j); });
+          ml.appendChild(b);
+        })(j);
+      }
+      box.appendChild(ml);
+    }
+    var list = attemptsFor(key);
+    if (!list.length) return;
+    var head = el('div', 'ledger-head sessions-head');
+    head.appendChild(el('span', 'kicker', 'Sessions'));
     head.appendChild(el('span', 'kicker', String(list.length)));
     box.appendChild(head);
-    if (!list.length){ box.appendChild(el('div', 'empty-note', 'Every try is recorded here \u2014 kept even if you reset the puzzle or clear its answer.')); return; }
     var ol = el('div', 'att-list');
     for (var i = list.length - 1; i >= 0; i--){
       var at = list[i], row = el('div', 'att-row');
@@ -1278,7 +1434,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       mid.appendChild(el('span', 'att-when', d.toLocaleDateString(undefined, { day:'numeric', month:'short' }) + ', ' + d.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' })));
       row.appendChild(mid);
       var bits = [formatTime(at.ms)];
-      if (at.w) bits.push('\u2717 ' + at.w);
+      if (at.w) bits.push(at.w + (at.w === 1 ? ' wrong' : ' wrong'));
       if (at.h) bits.push((at.h === 1 ? '1 hint' : at.h + ' hints'));
       row.appendChild(el('span', 'att-meta', bits.join(' \u00b7 ')));
       ol.appendChild(row);
@@ -1288,6 +1444,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   window.addEventListener('pagehide', function(){ if (attemptActive() && attemptHasActivity()) endAttempt('left'); });
 
   function loadCurrentItem(){
+    state.preview = null;
     if (attemptActive() && attemptHasActivity()) endAttempt(state.resetting ? 'reset' : 'left');
     state.resetting = false;
     state.att = null;
@@ -1455,7 +1612,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var timer = el('span', 'meter', '0:00'); timer.id = 'liveTimer';
     timer.title = 'Time on this puzzle';
     var wrong = el('span', 'meter bad', ''); wrong.id = 'wrongCount'; wrong.style.display = 'none';
-    var attNo = el('span', 'meter att-meter', 'Attempt ' + (attemptsFor(key).length + 1));
+    var attNo = el('span', 'meter att-meter', 'Attempts: ' + mistakesFor(key).length); attNo.id = 'attMeter';
+    attNo.title = 'Wrong moves recorded on this puzzle, all time';
     meters.appendChild(stamp); meters.appendChild(attNo); meters.appendChild(timer); meters.appendChild(wrong);
     head.appendChild(meters);
     mainEl.appendChild(head);
@@ -1578,6 +1736,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   function renderBoard(){
     var board = $('board');
     if (!board || !state.chess) return;
+    var pv = state.preview, C = pv ? pv.chess : state.chess;
     board.innerHTML = '';
     var files = ['a','b','c','d','e','f','g','h'];
     // The side to move always sits at the bottom (Black to move = viewed
@@ -1590,9 +1749,10 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (ranksEl){ ranksEl.innerHTML = ''; rankOrder.forEach(function(r){ ranksEl.appendChild(el('span', null, r)); }); }
     if (filesEl){ filesEl.innerHTML = ''; fileOrder.forEach(function(f){ filesEl.appendChild(el('span', null, f)); }); }
 
-    var hist = state.chess.history({ verbose:true });
-    var lastMove = hist[hist.length - 1];
-    var inCheckSq = state.chess.in_check() ? findKingSquare(state.chess, state.chess.turn()) : null;
+    var hist = C.history({ verbose:true });
+    var lastMove = pv ? null : hist[hist.length - 1];
+    var inCheckSq = C.in_check() ? findKingSquare(C, C.turn()) : null;
+    board.classList.toggle('previewing', !!pv);
     var frag = document.createDocumentFragment();
 
     for (var r = 0; r < 8; r++){
@@ -1602,13 +1762,17 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
         var sq = el('div', 'sq ' + (isLight ? 'light' : 'dark'));
         sq.setAttribute('data-sq', name);
         sq.setAttribute('role', 'gridcell');
-        var piece = state.chess.get(name);
+        var piece = C.get(name);
         sq.setAttribute('aria-label', name + (piece ? ', ' + (piece.color === 'w' ? 'white ' : 'black ') + PIECE_NAMES[piece.type] : ''));
         if (piece) sq.appendChild(glyphEl(piece.color, piece.type));
         if (lastMove && lastMove.from === name) sq.classList.add('from');
         if (lastMove && lastMove.to === name) sq.classList.add('to');
         if (inCheckSq === name) sq.classList.add('check');
         if (state.selected === name) sq.classList.add('sel');
+        if (pv){
+          if (pv.m.from === name || pv.m.to === name) sq.classList.add('mx-sq');
+          if (pv.m.ef === name || pv.m.et === name) sq.classList.add('ok-sq');
+        }
         sq.addEventListener('click', onSquareClick);
         frag.appendChild(sq);
       }
@@ -1628,6 +1792,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   }
 
   function onSquareClick(e){
+    if (state.preview){ showToast('Viewing a past attempt \u2014 tap \u201cBack to puzzle\u201d to keep solving.'); return; }
     if (state.autoplaying || state.revealed) return;
     var item = currentItem();
     if (!item || item.type !== 'puzzle' || !state.chess) return;
@@ -1694,6 +1859,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       if (state.moveIndex >= item.moves.length) onSolved(item);
       else maybeAutoReply(item);
     } else {
+      recordMistake(item, state.selected, to, exp);
       state.wrongCount++;
       state.selected = null;
       var max = S().maxAttempts;
@@ -1836,6 +2002,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   }
 
   function onHint(){
+    if (state.preview) exitPreview();
     var item = currentItem();
     if (!item || item.type !== 'puzzle' || !state.chess || state.revealed) return;
     if (state.autoplaying || state.chess.turn() !== state.solverColor || state.moveIndex >= item.moves.length){
@@ -1864,6 +2031,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   }
 
   function onReveal(why, code){
+    if (state.preview) exitPreview();
     var item = currentItem();
     if (!item || item.type !== 'puzzle' || !state.chess || state.revealed) return;
     if (!state.solved || attemptHasActivity()) endAttempt(code || 'revealed');
@@ -2040,6 +2208,29 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     sec.appendChild(grid);
     var spark = sparklineSVG(s.hist);
     if (spark){ sec.appendChild(el('div', 'kicker', 'Rating trend · last ' + Math.min(30, s.hist.length))); sec.appendChild(spark); }
+    var all = [];
+    Object.keys(progress.mistakes).forEach(function(k){ progress.mistakes[k].forEach(function(m, i){ all.push({ k:k, i:i, m:m }); }); });
+    all.sort(function(x, y){ return y.m.t - x.m.t; });
+    var rec = el('div', 'recent-mx');
+    rec.appendChild(el('div', 'kicker', 'Recent attempts (wrong moves) \u00b7 ' + all.length + ' recorded'));
+    if (!all.length) rec.appendChild(el('div', 'empty-note', 'No wrong moves recorded yet.'));
+    all.slice(0, 25).forEach(function(e){
+      var colKey = e.k.split('::')[0], col = allCollectionKeys().indexOf(colKey) !== -1 ? collectionFor(colKey) : null;
+      var num = (e.k.split(':').pop());
+      var b = el('button', 'mx-row');
+      var mid = el('span', 'mx-mid');
+      var mv = el('span', 'mx-move');
+      mv.appendChild(el('span', 'mx-bad', e.m.san));
+      if (e.m.exp){ mv.appendChild(el('span', 'mx-arrow', '\u2192')); mv.appendChild(el('span', 'mx-good', e.m.exp)); }
+      mid.appendChild(mv);
+      mid.appendChild(el('span', 'att-when', (col ? col.shortLabel : 'Removed file') + ' \u00b7 No. ' + num + ' \u00b7 ' + fmtWhen(e.m.t)));
+      b.appendChild(mid);
+      b.appendChild(el('span', 'mx-view', 'Open'));
+      if (!col) b.disabled = true;
+      b.addEventListener('click', function(){ closeModal(); openPuzzleByKey(e.k, function(){ enterPreview(e.i); }); });
+      rec.appendChild(b);
+    });
+    sec.appendChild(rec);
     var reset = el('button', 'btn danger', 'Reset stats & progress');
     reset.style.width = '100%';
     reset.addEventListener('click', function(){ requireParent('A parent PIN is needed to reset progress.', resetAll); });
@@ -2184,6 +2375,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     saveProgress();
     pruneOrphans();
     progress.attempts = progress.attempts || {};
+    progress.mistakes = progress.mistakes || {};
     normaliseSettings();
     applyTheme(); updateRatingBadge();
     closeModal();
@@ -2364,7 +2556,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
     var solving = el('div', 'section');
     solving.appendChild(el('h3', 'kicker', 'Solving'));
-    solving.appendChild(settingRow('Attempts per puzzle', 'Wrong moves allowed before the answer is shown (and the puzzle counts as missed).',
+    solving.appendChild(settingRow('Attempts per puzzle', 'Each wrong move is one attempt. When they are used up the answer is shown and the puzzle counts as missed.',
       seg([[0,'Unlimited'],[1,'1'],[2,'2'],[3,'3'],[5,'5']], s.maxAttempts, function(v){ setSetting('maxAttempts', v); }, 'Attempts per puzzle')));
     solving.appendChild(settingRow('Valid moves', 'Dots showing where the selected piece can go.',
       seg([[true,'Show'],[false,'Hide']], s.showMoves, function(v){ setSetting('showMoves', v); }, 'Valid moves')));
@@ -2448,14 +2640,14 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       grid.appendChild(b);
     });
     clr.appendChild(grid);
-    var nAtt = 0; Object.keys(progress.attempts).forEach(function(k){ nAtt += progress.attempts[k].length; });
+    var nAtt = 0; Object.keys(progress.mistakes).forEach(function(k){ nAtt += progress.mistakes[k].length; });
     var ah = el('div', 'set-row');
     ah.appendChild(el('div', 'set-title', 'Attempt history'));
-    ah.appendChild(el('div', 'set-hint', nAtt + ' attempts recorded. They stay when you reset a puzzle, clear answers or reset progress.'));
+    ah.appendChild(el('div', 'set-hint', nAtt + ' attempts (wrong moves) recorded, with their positions. They stay when you reset a puzzle, clear answers or reset progress.'));
     var ahb = el('button', 'seg-btn', 'Clear attempt history');
     ahb.addEventListener('click', function(){
       if (!confirm('Delete all ' + nAtt + ' recorded attempts? This can\u2019t be undone.')) return;
-      progress.attempts = {}; if (state.att) state.att.done = true; saveProgress(); renderSettingsModal(); renderAttempts(); showToast('Attempt history cleared');
+      progress.attempts = {}; progress.mistakes = {}; state.preview = null; if (state.att) state.att.done = true; saveProgress(); renderSettingsModal(); renderAttempts(); showToast('Attempt history cleared');
     });
     ah.appendChild(ahb);
     clr.appendChild(ah);
