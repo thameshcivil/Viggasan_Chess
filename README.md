@@ -152,8 +152,9 @@ limits them, and every one is recorded with:
 
 **Per puzzle:** under the ledger, **Attempts (wrong moves)** lists them all,
 and the heading shows the all-time count ("Attempts: 3"). Tap **View** to
-see that position on the board: your move is marked in red and the correct
-move's squares in green. **◀ Prev / Next ▶** step through the attempts, and
+see that position on the board, with your move marked in red. The correct
+move isn't shown until the puzzle is solved or its answer revealed; after
+that it appears in green. **◀ Prev / Next ▶** step through the attempts, and
 **Back to puzzle** returns to solving.
 
 **Across puzzles:** **ELO → Recent attempts** lists the latest wrong moves

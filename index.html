@@ -1303,6 +1303,9 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   }
   // ---- every wrong move is an "attempt": recorded with its position so it
   // can be looked at again on the board ----
+  // The correct move is only shown with a wrong attempt once the puzzle's
+  // answer is known (solved, or revealed). Clearing answers hides it again.
+  function answerKnown(key){ return !!(progress.solved[key] || progress.viewed[key] || (state.revealed && state.att && state.att.key === key)); }
   function mistakesFor(key){ return (progress.mistakes && progress.mistakes[key]) || []; }
   function recordMistake(item, from, to, exp){
     var key = recordKey(item), fen = state.chess.fen(), san = from + '\u2013' + to;
@@ -1334,7 +1337,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var m = list[i], c = makeChess(m.fen);
     if (!c) return;
     var played = c.move({ from:m.from, to:m.to, promotion:'q' });
-    state.preview = { i:i, m:m, chess:c, played:played };
+    state.preview = { i:i, m:m, chess:c, played:played, known: answerKnown(recordKey(item)) };
     state.selected = null;
     renderPreviewBar();
     renderBoard();
@@ -1371,8 +1374,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var line = el('p', 'pv-line');
     line.appendChild(document.createTextNode('At ' + moveLabel(item, p.m.ply) + ' you played '));
     line.appendChild(el('b', 'pv-bad', p.m.san + ' \u2717'));
-    if (p.m.exp){ line.appendChild(document.createTextNode(' \u2014 the move was ')); line.appendChild(el('b', 'pv-good', p.m.exp)); }
-    line.appendChild(document.createTextNode('.'));
+    if (p.m.exp && answerKnown(recordKey(item))){ line.appendChild(document.createTextNode(' \u2014 the move was ')); line.appendChild(el('b', 'pv-good', p.m.exp)); line.appendChild(document.createTextNode('.')); }
+    else line.appendChild(document.createTextNode(' \u2014 not the right move. The answer stays hidden until you solve the puzzle.'));
     bar.appendChild(line);
     var row = el('div', 'pv-actions');
     var prev = el('button', 'btn quiet', '\u25c0 Prev'), next = el('button', 'btn quiet', 'Next \u25b6'), back = el('button', 'btn primary', 'Back to puzzle');
@@ -1390,7 +1393,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     box.innerHTML = '';
     if (!item || item.type !== 'puzzle' || !state.collection) return;
     var key = recordKey(item);
-    var mx = mistakesFor(key);
+    var mx = mistakesFor(key), known = answerKnown(key);
     var mh = el('div', 'ledger-head');
     mh.appendChild(el('span', 'kicker', 'Attempts (wrong moves)'));
     mh.appendChild(el('span', 'kicker', String(mx.length)));
@@ -1407,7 +1410,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
           var mv = el('span', 'mx-move');
           mv.appendChild(el('span', 'mx-num', moveLabel(item, m.ply)));
           mv.appendChild(el('span', 'mx-bad', m.san));
-          if (m.exp){ mv.appendChild(el('span', 'mx-arrow', '\u2192')); mv.appendChild(el('span', 'mx-good', m.exp)); }
+          if (m.exp && known){ mv.appendChild(el('span', 'mx-arrow', '\u2192')); mv.appendChild(el('span', 'mx-good', m.exp)); }
           mid.appendChild(mv);
           mid.appendChild(el('span', 'att-when', fmtWhen(m.t)));
           b.appendChild(mid);
@@ -1771,7 +1774,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
         if (state.selected === name) sq.classList.add('sel');
         if (pv){
           if (pv.m.from === name || pv.m.to === name) sq.classList.add('mx-sq');
-          if (pv.m.ef === name || pv.m.et === name) sq.classList.add('ok-sq');
+          if (pv.known && (pv.m.ef === name || pv.m.et === name)) sq.classList.add('ok-sq');
         }
         sq.addEventListener('click', onSquareClick);
         frag.appendChild(sq);
@@ -1974,6 +1977,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var delta = wasRevealed ? 0 : applyRatingUpdate(item, solveScore(), elapsed);
     saveProgress();
     endAttempt('solved');
+    renderAttempts();
     var deltaTxt = delta ? ('  ·  Rating ' + progress.rating + ' (' + (delta > 0 ? '+' : '') + delta + ')') : '';
     setFeedback('good', 'Solved in ' + formatTime(elapsed) + '.' + deltaTxt);
     var t = $('liveTimer');
@@ -2048,6 +2052,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     saveProgress();
     stopTimer();
     renderPuzzleNumberStrip();
+    renderAttempts();
     showLedger();
     state.autoplaying = true;
     if (typeof why === 'string') setFeedback('bad', why);
@@ -2221,7 +2226,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       var mid = el('span', 'mx-mid');
       var mv = el('span', 'mx-move');
       mv.appendChild(el('span', 'mx-bad', e.m.san));
-      if (e.m.exp){ mv.appendChild(el('span', 'mx-arrow', '\u2192')); mv.appendChild(el('span', 'mx-good', e.m.exp)); }
+      if (e.m.exp && answerKnown(e.k)){ mv.appendChild(el('span', 'mx-arrow', '\u2192')); mv.appendChild(el('span', 'mx-good', e.m.exp)); }
       mid.appendChild(mv);
       mid.appendChild(el('span', 'att-when', (col ? col.shortLabel : 'Removed file') + ' \u00b7 No. ' + num + ' \u00b7 ' + fmtWhen(e.m.t)));
       b.appendChild(mid);
