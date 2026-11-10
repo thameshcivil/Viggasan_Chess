@@ -516,7 +516,7 @@
   .mx-why{ font-style:italic; font-size:13.5px; color:var(--ink-dim); line-height:1.35; margin-top:2px; }
   .pv-why{ margin:0; font-style:italic; font-size:15px; color:var(--ink-dim); }
   .sq.dance::after{ background:rgba(226,72,52,.22); box-shadow:inset 0 0 0 3px var(--bad); }
-  .sq.dance .glyph{ animation:piece-dance .5s ease-in-out infinite; z-index:3; transform-origin:50% 85%; }
+  .sq.dance .glyph{ animation:piece-dance .25s ease-in-out infinite; z-index:3; transform-origin:50% 85%; }
   @keyframes piece-dance{
     0%,100%{ transform:scale(1.12) rotate(0deg); }
     25%{ transform:scale(1.28) rotate(-11deg) translateY(-6%); }
@@ -1446,7 +1446,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       state.autoplaying = false;
       renderBoard();
       if (after) after();
-    }, 2200);
+    }, 750);
   }
 
   function mistakesFor(key){ return (progress.mistakes && progress.mistakes[key]) || []; }
