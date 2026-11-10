@@ -127,6 +127,34 @@ Uninstall the old "Vigaasan" app once you've moved your progress.
   topic, this file, or everything, to solve them again. Your rating history
   is kept. The ↺ icon next to a file in the Library clears that file.
 
+## Settings for each file
+
+Every book and PGN file can have its own settings. Tap the **⚙** next to a
+file in the Library, or tap the header **⚙**, which opens the settings for
+the file you're on. Then use **Settings for** to choose a file or **All
+files (defaults)**.
+
+- **Per file:** attempts, valid moves, time per puzzle, speed, topic order,
+  Hint & Reveal, and wrong-move sound, vibration and shake.
+- **Defaults:** each option shows **this file** if it's set for that file,
+  or **default** if it follows the all-files setting. **Reset this file to
+  the defaults** clears a file's own settings.
+- **Sorting:** each open file in the Library also has its own **Sort
+  topics** box.
+
+## Wrong moves: feedback and "why"
+
+A wrong move gives a short buzz, a vibration on phones, and a board shake
+with a red screen-edge flash. Each can be switched off in Settings, per file.
+
+The wrong move is played on the board for a moment. The pieces that punish
+it **dance**, and the square under attack is marked. A short explanation is
+shown, for example *"Your rook on a3 can be taken by the bishop on e7"*,
+*"It leaves your queen on d4 open to the rook on d8"*, or *"It lets the
+knight on f3 give checkmate"*. Then the position goes back. The correct
+move is never shown. The explanation is saved with the attempt and shown
+again when you open it.
+
 ## Parental control
 
 In ⚙ Settings → **Parental control**:
@@ -151,7 +179,7 @@ limits them, and every one is recorded with:
 - the date and time.
 
 **Per puzzle:** under the ledger, **Attempts (wrong moves)** lists them all,
-and the heading shows the all-time count ("Attempts: 3"). Tap **View** to
+and the heading shows the all-time count ("Attempts: 3"). Tap an attempt to
 see that position on the board, with your move marked in red. The correct
 move isn't shown until the puzzle is solved or its answer revealed; after
 that it appears in green. **◀ Prev / Next ▶** step through the attempts, and

@@ -499,6 +499,38 @@
   .sq.mx-sq.ok-sq::after{ background:rgba(226,72,52,.5); box-shadow:inset 0 0 0 4px var(--good); }
   .board.previewing{ cursor:default; }
 
+
+  /* ---------- per-file settings ---------- */
+  .scope-box{ border:1px solid var(--accent); padding:12px; margin-bottom:16px; display:flex; flex-direction:column; gap:8px; }
+  .scope-box .set-hint{ margin:0; }
+  .scope-sel{ height:42px; border:1px solid var(--rule); background:var(--panel); color:var(--ink); font-family:var(--serif); font-size:16px; padding:0 8px; }
+  .set-tag{ margin-left:8px; font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; padding:2px 6px;
+    border:1px solid var(--rule); color:var(--ink-faint); vertical-align:middle; }
+  .set-tag.custom{ border-color:var(--accent); color:var(--accent); }
+  .trash.gear:hover, .trash.gear:focus-visible{ color:var(--accent); border-color:var(--accent); }
+  .tree-kids > .tree-tools{ position:sticky; top:0; z-index:2; background:var(--bg); padding-left:6px; }
+
+  /* ---------- wrong move: why, dancing pieces, shake ---------- */
+  .mx-row{ grid-template-columns:34px 1fr; }
+  .recent-mx .mx-row{ grid-template-columns:1fr; }
+  .mx-why{ font-style:italic; font-size:13.5px; color:var(--ink-dim); line-height:1.35; margin-top:2px; }
+  .pv-why{ margin:0; font-style:italic; font-size:15px; color:var(--ink-dim); }
+  .sq.dance::after{ background:rgba(226,72,52,.22); box-shadow:inset 0 0 0 3px var(--bad); }
+  .sq.dance .glyph{ animation:piece-dance .5s ease-in-out infinite; z-index:3; transform-origin:50% 85%; }
+  @keyframes piece-dance{
+    0%,100%{ transform:scale(1.12) rotate(0deg); }
+    25%{ transform:scale(1.28) rotate(-11deg) translateY(-6%); }
+    75%{ transform:scale(1.28) rotate(11deg) translateY(-6%); }
+  }
+  .sq.threat::after{ box-shadow:inset 0 0 0 3px var(--amber); background:rgba(217,154,60,.25); }
+  .sq.threat .glyph{ animation:piece-pulse .6s ease-in-out infinite alternate; }
+  @keyframes piece-pulse{ from{ transform:scale(1); } to{ transform:scale(1.14); } }
+  .frame.shake{ animation:board-shake .45s cubic-bezier(.36,.07,.19,.97); }
+  @keyframes board-shake{ 10%,90%{ transform:translateX(-2px); } 20%,80%{ transform:translateX(4px); } 30%,50%,70%{ transform:translateX(-7px); } 40%,60%{ transform:translateX(7px); } }
+  .wrong-flash{ position:fixed; inset:0; pointer-events:none; z-index:80; opacity:0; box-shadow:inset 0 0 0 6px rgba(226,72,52,.9), inset 0 0 60px rgba(226,72,52,.45); }
+  .wrong-flash.on{ animation:edge-flash .6s ease-out; }
+  @keyframes edge-flash{ 0%{ opacity:1; } 100%{ opacity:0; } }
+
   ::selection{ background:var(--accent); color:var(--accent-ink); }
   input[type=file]{ display:none; }
 
@@ -717,7 +749,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   function freshProgress(keep){
     keep = keep || {};
     return { solved:{}, viewed:{}, opened:{}, rated:{}, last:{}, theme:keep.theme || null, flipOverride:!!keep.flipOverride, rating:1200, history:[],
-             settings: keep.settings || {}, hidden: keep.hidden || {}, attempts: keep.attempts || {}, mistakes: keep.mistakes || {} };
+             settings: keep.settings || {}, hidden: keep.hidden || {}, attempts: keep.attempts || {}, mistakes: keep.mistakes || {},
+             colSettings: keep.colSettings || {} };
   }
   function loadProgress(){
     var raw = safeGet(STORE_KEY);
@@ -745,15 +778,27 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   function saveProgress(){ safeSet(STORE_KEY, JSON.stringify(progress)); }
 
   // ---- player settings (saved with progress, so backups carry them) ----
-  var DEFAULT_SETTINGS = { showMoves:true, maxAttempts:0, timeLimit:0, replyMs:550, sortTopics:'book', helpMode:'allow', pinHash:null };
+  var DEFAULT_SETTINGS = { showMoves:true, maxAttempts:0, timeLimit:0, replyMs:550, sortTopics:'book', helpMode:'allow', pinHash:null,
+                           sound:true, vibrate:true, shake:true };
+  // Settings each book / PGN file can override; anything a file doesn't
+  // set follows the defaults ("all files").
+  var PER_FILE = ['showMoves','maxAttempts','timeLimit','replyMs','sortTopics','helpMode','sound','vibrate','shake'];
   function normaliseSettings(){
     var s = progress.settings || {};
     Object.keys(DEFAULT_SETTINGS).forEach(function(k){ if (s[k] === undefined) s[k] = DEFAULT_SETTINGS[k]; });
     progress.settings = s;
     progress.hidden = progress.hidden || {};
+    progress.colSettings = progress.colSettings || {};
   }
   normaliseSettings();
-  function S(){ return progress.settings; }
+  function G(){ return progress.settings; }                 // defaults for all files
+  function settingsFor(colKey){
+    var o = {}, g = progress.settings, ov = colKey ? progress.colSettings[colKey] : null;
+    Object.keys(g).forEach(function(k){ o[k] = g[k]; });
+    if (ov) PER_FILE.forEach(function(k){ if (ov[k] !== undefined) o[k] = ov[k]; });
+    return o;
+  }
+  function S(){ return settingsFor(state.collectionKey); }   // what applies right now
 
   function loadLibraryIndex(){
     var raw = safeGet(LIB_INDEX_KEY);
@@ -948,7 +993,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   // Topic order inside a collection, per the "Sort topics" setting.
   function chapterOrder(col, key){
     if (!col || !col.chapters) return null;
-    var mode = S().sortTopics, chs = col.chapters.slice();
+    var mode = settingsFor(key).sortTopics, chs = col.chapters.slice();
     if (mode === 'book') return chs;
     var info = {};
     chs.forEach(function(ch){ info[ch] = { total:0, solved:0 }; });
@@ -1140,15 +1185,6 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var oldKids = navTree.querySelector('.tree-node.col.open > .tree-kids');
     var keepKey = oldKids ? oldKids.getAttribute('data-col') : null, keep = oldKids ? oldKids.scrollTop : 0;
     navTree.innerHTML = '';
-    var tools = el('div', 'tree-tools');
-    tools.appendChild(el('span', 'kicker', 'Sort topics'));
-    var sortSel = el('select', 'tree-sort');
-    sortSel.setAttribute('aria-label', 'Sort topics');
-    SORT_OPTIONS.forEach(function(o){ var op = el('option', null, o[1]); op.value = o[0]; sortSel.appendChild(op); });
-    sortSel.value = S().sortTopics;
-    sortSel.addEventListener('change', function(){ setSetting('sortTopics', sortSel.value); });
-    tools.appendChild(sortSel);
-    navTree.appendChild(tools);
     if (!allCollectionKeys().length) navTree.appendChild(el('div', 'empty-note', 'Your library is empty. Add a PGN file, or restore the built-in books from ⚙ Settings.'));
     allCollectionKeys().forEach(function(key){
       var col = collectionFor(key);
@@ -1157,6 +1193,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       var t = tally(key, col.items);
       var node = el('div', 'tree-node col' + (key === state.collectionKey ? ' active' : '') + (cOpen ? ' open' : ''));
       var acts = el('span', 'row-acts');
+      acts.appendChild(gearButton('Settings for ' + col.label, function(){ closeDrawer(); openSettings(key); }));
       if (hasAnswers(key + '::')) acts.appendChild(clearButton('Clear answers in ' + col.label, function(){ clearAnswersFor({ prefix: key + '::', label: col.label }); }));
       acts.appendChild(trashButton((col.kind === 'custom' ? 'Delete ' : 'Remove ') + col.label, function(){ confirmDelete(key); }));
       var label = col.kind === 'custom' ? col.shortLabel : col.label;
@@ -1165,6 +1202,20 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
         var kids = el('div', 'tree-kids');
         kids.setAttribute('data-col', key);
         if (col.chapters){
+          var tools = el('div', 'tree-tools');
+          tools.appendChild(el('span', 'kicker', 'Sort topics'));
+          var sortSel = el('select', 'tree-sort');
+          sortSel.setAttribute('aria-label', 'Sort topics in ' + col.label);
+          SORT_OPTIONS.forEach(function(o){ var op = el('option', null, o[1]); op.value = o[0]; sortSel.appendChild(op); });
+          sortSel.value = settingsFor(key).sortTopics;
+          sortSel.addEventListener('change', function(){
+            requireParent('A parent PIN is needed to change settings.', function(){
+              (progress.colSettings[key] = progress.colSettings[key] || {}).sortTopics = sortSel.value;
+              saveProgress(); renderTree(); renderFooter();
+            });
+          });
+          tools.appendChild(sortSel);
+          kids.appendChild(tools);
           chapterOrder(col, key).forEach(function(ch){
             var items = col.items.filter(function(it){ return groupOf(it) === ch; });
             var gid = 'g:' + key + '::' + ch, gOpen = !!progress.open[gid];
@@ -1269,8 +1320,44 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       osc.start(now); osc.stop(now + dur + 0.02);
     }catch(e){}
   }
-  function vibrate(p){ try{ if (navigator.vibrate) navigator.vibrate(p); }catch(e){} }
-  function notifyWrongMove(msg){ showToast(msg); vibrate(120); playTone(220, 0.16); }
+  function vibrate(p){
+    try{
+      if (window.VigaasanBridge && window.VigaasanBridge.vibrate){ window.VigaasanBridge.vibrate(String([].concat(p).join(','))); return; }
+      if (navigator.vibrate) navigator.vibrate(p);
+    }catch(e){}
+  }
+  // A short, clearly audible "wrong" buzz (phone speakers barely play the
+  // old low sine tone).
+  function playBuzz(){
+    try{
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      var now = audioCtx.currentTime;
+      [[392, 0, 0.11], [262, 0.13, 0.2]].forEach(function(t){
+        var osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+        osc.type = 'square'; osc.frequency.value = t[0];
+        gain.gain.setValueAtTime(0.0001, now + t[1]);
+        gain.gain.exponentialRampToValueAtTime(0.22, now + t[1] + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + t[1] + t[2]);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now + t[1]); osc.stop(now + t[1] + t[2] + 0.02);
+      });
+    }catch(e){}
+  }
+  var flashEl = null;
+  function shakeScreen(){
+    var f = document.querySelector('#diagram .frame');
+    if (f){ f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); }
+    if (!flashEl){ flashEl = el('div', 'wrong-flash'); document.body.appendChild(flashEl); }
+    flashEl.classList.remove('on'); void flashEl.offsetWidth; flashEl.classList.add('on');
+  }
+  function notifyWrongMove(msg){
+    var s = S();
+    showToast(msg);
+    if (s.vibrate) vibrate([70, 50, 70]);
+    if (s.sound) playBuzz();
+    if (s.shake) shakeScreen();
+  }
 
   // ============================================================
   // Loading an item
@@ -1306,12 +1393,69 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   // The correct move is only shown with a wrong attempt once the puzzle's
   // answer is known (solved, or revealed). Clearing answers hides it again.
   function answerKnown(key){ return !!(progress.solved[key] || progress.viewed[key] || (state.revealed && state.att && state.att.key === key)); }
+  // Works out why a wrong move is bad, without giving the right move away:
+  // the opponent can then mate, take the moved piece, or take another piece.
+  var VALUE = { p:1, n:3, b:3, r:5, q:9, k:0 };
+  function pieceAt(c, sq){ var p = c.get(sq); return p ? PIECE_NAMES[p.type] + ' on ' + sq : sq; }
+  function listNames(arr){ return arr.length <= 1 ? (arr[0] || '') : arr.slice(0, -1).join(', ') + ' and ' + arr[arr.length - 1]; }
+  function explainWrong(fen, from, to){
+    var c = makeChess(fen);
+    if (!c) return null;
+    var mv = c.move({ from:from, to:to, promotion:'q' });
+    if (!mv) return null;
+    var res = { chess:c, mv:mv, dance:[], threat:[], text:'' };
+    var opp = c.moves({ verbose:true });
+    for (var i = 0; i < opp.length; i++){
+      c.move(opp[i]); var mate = c.in_checkmate(); c.undo();
+      if (mate){
+        res.dance = [opp[i].from]; res.threat = [findKingSquare(c, mv.color)];
+        res.text = 'It lets the ' + pieceAt(c, opp[i].from) + ' give checkmate.';
+        return res;
+      }
+    }
+    var onIt = {}, takers = [];
+    opp.forEach(function(m){ if (m.to === to && m.captured && !onIt[m.from]){ onIt[m.from] = 1; takers.push(m.from); } });
+    if (takers.length){
+      res.dance = takers; res.threat = [to];
+      res.text = 'Your ' + PIECE_NAMES[mv.piece] + ' on ' + to + ' can be taken by the ' + listNames(takers.map(function(s){ return pieceAt(c, s); })) + '.';
+      return res;
+    }
+    var best = null;
+    opp.forEach(function(m){ if (m.captured && (!best || VALUE[m.captured] > VALUE[best.captured])) best = m; });
+    if (best){
+      var att = {}, list = [];
+      opp.forEach(function(m){ if (m.to === best.to && m.captured && !att[m.from]){ att[m.from] = 1; list.push(m.from); } });
+      res.dance = list; res.threat = [best.to];
+      res.text = 'It leaves your ' + PIECE_NAMES[best.captured] + ' on ' + best.to + ' open to the ' + listNames(list.map(function(s){ return pieceAt(c, s); })) + '.';
+      return res;
+    }
+    res.text = '';
+    return res;
+  }
+  // Briefly play the wrong move on the board with the punishing pieces
+  // "dancing", then put the position back.
+  function showWrongFlash(ex, after){
+    if (!ex){ renderBoard(); if (after) after(); return; }
+    var token = state.token;
+    state.flash = ex;
+    state.autoplaying = true;
+    renderBoard();
+    setTimeout(function(){
+      if (token !== state.token) return;
+      state.flash = null;
+      state.autoplaying = false;
+      renderBoard();
+      if (after) after();
+    }, 2200);
+  }
+
   function mistakesFor(key){ return (progress.mistakes && progress.mistakes[key]) || []; }
-  function recordMistake(item, from, to, exp){
+  function recordMistake(item, from, to, exp, ex){
     var key = recordKey(item), fen = state.chess.fen(), san = from + '\u2013' + to;
     try{ var tmp = new Chess(fen), mv = tmp.move({ from:from, to:to, promotion:'q' }); if (mv) san = mv.san; }catch(e){}
     var list = progress.mistakes[key] = mistakesFor(key).slice();
-    list.push({ t:Date.now(), fen:fen, from:from, to:to, san:san, exp: exp ? exp.san : null, ef: exp ? exp.from : null, et: exp ? exp.to : null, ply: state.moveIndex });
+    list.push({ t:Date.now(), fen:fen, from:from, to:to, san:san, exp: exp ? exp.san : null, ef: exp ? exp.from : null, et: exp ? exp.to : null, ply: state.moveIndex,
+                why: ex && ex.text ? ex.text : '' });
     if (list.length > 100) list.splice(0, list.length - 100);
     saveProgress();
     renderAttempts();
@@ -1337,7 +1481,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var m = list[i], c = makeChess(m.fen);
     if (!c) return;
     var played = c.move({ from:m.from, to:m.to, promotion:'q' });
-    state.preview = { i:i, m:m, chess:c, played:played, known: answerKnown(recordKey(item)) };
+    var ex = explainWrong(m.fen, m.from, m.to);
+    state.preview = { i:i, m:m, chess:c, played:played, known: answerKnown(recordKey(item)), ex: ex };
     state.selected = null;
     renderPreviewBar();
     renderBoard();
@@ -1377,6 +1522,8 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (p.m.exp && answerKnown(recordKey(item))){ line.appendChild(document.createTextNode(' \u2014 the move was ')); line.appendChild(el('b', 'pv-good', p.m.exp)); line.appendChild(document.createTextNode('.')); }
     else line.appendChild(document.createTextNode(' \u2014 not the right move. The answer stays hidden until you solve the puzzle.'));
     bar.appendChild(line);
+    var whyText = (p.ex && p.ex.text) || p.m.why;
+    if (whyText) bar.appendChild(el('p', 'pv-why', 'Why: ' + whyText));
     var row = el('div', 'pv-actions');
     var prev = el('button', 'btn quiet', '\u25c0 Prev'), next = el('button', 'btn quiet', 'Next \u25b6'), back = el('button', 'btn primary', 'Back to puzzle');
     prev.disabled = p.i <= 0; next.disabled = p.i >= total - 1;
@@ -1412,9 +1559,9 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
           mv.appendChild(el('span', 'mx-bad', m.san));
           if (m.exp && known){ mv.appendChild(el('span', 'mx-arrow', '\u2192')); mv.appendChild(el('span', 'mx-good', m.exp)); }
           mid.appendChild(mv);
+          if (m.why) mid.appendChild(el('span', 'mx-why', m.why));
           mid.appendChild(el('span', 'att-when', fmtWhen(m.t)));
           b.appendChild(mid);
-          b.appendChild(el('span', 'mx-view', 'View'));
           b.addEventListener('click', function(){ enterPreview(j); });
           ml.appendChild(b);
         })(j);
@@ -1448,6 +1595,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
   function loadCurrentItem(){
     state.preview = null;
+    state.flash = null;
     if (attemptActive() && attemptHasActivity()) endAttempt(state.resetting ? 'reset' : 'left');
     state.resetting = false;
     state.att = null;
@@ -1739,7 +1887,9 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   function renderBoard(){
     var board = $('board');
     if (!board || !state.chess) return;
-    var pv = state.preview, C = pv ? pv.chess : state.chess;
+    var pv = state.preview, fl = !pv && state.flash ? state.flash : null;
+    var C = pv ? pv.chess : (fl ? fl.chess : state.chess);
+    var marks = pv ? pv.ex : fl;
     board.innerHTML = '';
     var files = ['a','b','c','d','e','f','g','h'];
     // The side to move always sits at the bottom (Black to move = viewed
@@ -1753,9 +1903,9 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (filesEl){ filesEl.innerHTML = ''; fileOrder.forEach(function(f){ filesEl.appendChild(el('span', null, f)); }); }
 
     var hist = C.history({ verbose:true });
-    var lastMove = pv ? null : hist[hist.length - 1];
+    var lastMove = (pv || fl) ? null : hist[hist.length - 1];
     var inCheckSq = C.in_check() ? findKingSquare(C, C.turn()) : null;
-    board.classList.toggle('previewing', !!pv);
+    board.classList.toggle('previewing', !!(pv || fl));
     var frag = document.createDocumentFragment();
 
     for (var r = 0; r < 8; r++){
@@ -1772,6 +1922,11 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
         if (lastMove && lastMove.to === name) sq.classList.add('to');
         if (inCheckSq === name) sq.classList.add('check');
         if (state.selected === name) sq.classList.add('sel');
+        if (fl && (fl.mv.from === name || fl.mv.to === name)) sq.classList.add('mx-sq');
+        if (marks){
+          if (marks.dance && marks.dance.indexOf(name) !== -1) sq.classList.add('dance');
+          if (marks.threat && marks.threat.indexOf(name) !== -1) sq.classList.add('threat');
+        }
         if (pv){
           if (pv.m.from === name || pv.m.to === name) sq.classList.add('mx-sq');
           if (pv.known && (pv.m.ef === name || pv.m.et === name)) sq.classList.add('ok-sq');
@@ -1862,26 +2017,28 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       if (state.moveIndex >= item.moves.length) onSolved(item);
       else maybeAutoReply(item);
     } else {
-      recordMistake(item, state.selected, to, exp);
+      var wrongFrom = state.selected;
+      var ex = explainWrong(state.chess.fen(), wrongFrom, to);
+      recordMistake(item, wrongFrom, to, exp, ex);
       state.wrongCount++;
       state.selected = null;
       var max = S().maxAttempts;
       var wc = $('wrongCount');
       if (wc){ wc.textContent = '✗ ' + state.wrongCount + (max ? '/' + max : ''); wc.style.display = ''; }
+      var why = ex && ex.text ? ' ' + ex.text : '';
       if (max && state.wrongCount >= max){
         var out = 'Out of attempts — here’s the solution.';
-        setFeedback('bad', out);
+        setFeedback('bad', (why ? why.trim() + ' ' : '') + out);
         notifyWrongMove(out);
-        renderBoard();
-        failAndReveal(out);
+        showWrongFlash(ex, function(){ failAndReveal(out); });
         return;
       }
       var left = max ? max - state.wrongCount : 0;
       var msg = max ? 'Not quite — ' + left + (left === 1 ? ' attempt' : ' attempts') + ' left.'
                     : (state.wrongCount >= 3 ? 'Not quite. Tap Hint if you’d like a nudge.' : 'Not quite — try again.');
-      setFeedback('bad', msg);
+      setFeedback('bad', msg + why);
       notifyWrongMove(msg);
-      renderBoard();
+      showWrongFlash(ex);
     }
   }
 
@@ -2230,7 +2387,6 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       mid.appendChild(mv);
       mid.appendChild(el('span', 'att-when', (col ? col.shortLabel : 'Removed file') + ' \u00b7 No. ' + num + ' \u00b7 ' + fmtWhen(e.m.t)));
       b.appendChild(mid);
-      b.appendChild(el('span', 'mx-view', 'Open'));
       if (!col) b.disabled = true;
       b.addEventListener('click', function(){ closeModal(); openPuzzleByKey(e.k, function(){ enterPreview(e.i); }); });
       rec.appendChild(b);
@@ -2417,6 +2573,14 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     if (modalBackdrop.classList.contains('open')) rerenderModal();
     showToast('Answers cleared for ' + scope.label);
   }
+  var GEAR_SVG = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+  function gearButton(label, onClick){
+    var b = el('button', 'trash gear');
+    b.innerHTML = GEAR_SVG;
+    b.title = label; b.setAttribute('aria-label', label);
+    b.addEventListener('click', function(e){ e.stopPropagation(); onClick(); });
+    return b;
+  }
   var CLEAR_SVG = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/></svg>';
   function clearButton(label, onClick){
     var b = el('button', 'trash clear');
@@ -2518,11 +2682,15 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     pinDialog('check', reason, fn);
   }
 
+  var settingsScope = null;   // null = defaults for all files, else a collection key
   function setSetting(key, value){
-    S()[key] = value;
+    if (settingsScope && PER_FILE.indexOf(key) !== -1){
+      (progress.colSettings[settingsScope] = progress.colSettings[settingsScope] || {})[key] = value;
+    } else G()[key] = value;
     saveProgress();
     if (key === 'showMoves') renderBoard();
     if (key === 'sortTopics'){ renderTree(); renderFooter(); }
+    if (key === 'helpMode') refreshHelpButtons();
     if (key === 'timeLimit') updateTimerDisplay();
     if (modalBackdrop.classList.contains('open') && modalKind === 'settings') renderSettingsModal();
   }
@@ -2539,15 +2707,18 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     });
     return wrap;
   }
-  function settingRow(title, hint, control){
+  var settingRow = function(title, hint, control){
     var r = el('div', 'set-row');
     r.appendChild(el('div', 'set-title', title));
     if (hint) r.appendChild(el('div', 'set-hint', hint));
     r.appendChild(control);
     return r;
-  }
+  };
+  function scopeLabel(key){ var c = key && collectionFor(key); return c ? (c.kind === 'custom' ? c.shortLabel : c.label) : ''; }
   function renderSettingsModal(){
-    var s = S();
+    if (settingsScope && allCollectionKeys().indexOf(settingsScope) === -1) settingsScope = null;
+    var s = settingsScope ? settingsFor(settingsScope) : G();
+    var ov = settingsScope ? (progress.colSettings[settingsScope] || {}) : {};
     modalEl.innerHTML = '';
     var head = el('div', 'modal-head');
     var ht = el('div');
@@ -2559,17 +2730,56 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     head.appendChild(ht); head.appendChild(close);
     modalEl.appendChild(head);
 
+    // which file these settings are for
+    var scopeBox = el('div', 'scope-box');
+    scopeBox.appendChild(el('div', 'kicker', 'Settings for'));
+    var scopeSel = el('select', 'scope-sel');
+    scopeSel.setAttribute('aria-label', 'Settings for');
+    var od = el('option', null, 'All files (defaults)'); od.value = ''; scopeSel.appendChild(od);
+    allCollectionKeys().forEach(function(k){
+      var o = el('option', null, scopeLabel(k) + (progress.colSettings[k] && Object.keys(progress.colSettings[k]).length ? '  \u2022 custom' : ''));
+      o.value = k; scopeSel.appendChild(o);
+    });
+    scopeSel.value = settingsScope || '';
+    scopeSel.addEventListener('change', function(){ settingsScope = scopeSel.value || null; renderSettingsModal(); });
+    scopeBox.appendChild(scopeSel);
+    scopeBox.appendChild(el('p', 'set-hint', settingsScope
+      ? 'Only for \u201c' + scopeLabel(settingsScope) + '\u201d. Options marked \u201cdefault\u201d follow the all-files settings until you change them here.'
+      : 'Used by every book and PGN file that doesn\u2019t have its own setting for an option.'));
+    if (settingsScope && Object.keys(ov).length){
+      var rs = el('button', 'seg-btn', 'Reset this file to the defaults');
+      rs.addEventListener('click', function(){ delete progress.colSettings[settingsScope]; saveProgress(); renderTree(); refreshHelpButtons(); renderBoard(); renderSettingsModal(); showToast('Using the default settings'); });
+      scopeBox.appendChild(rs);
+    }
+    modalEl.appendChild(scopeBox);
+    // tag rows that follow the defaults when editing one file
+    var _row = settingRow;
+    settingRow = function(title, hint, control, key){
+      var r = _row(title, hint, control);
+      if (settingsScope && key) r.querySelector('.set-title').appendChild(el('span', 'set-tag' + (ov[key] !== undefined ? ' custom' : ''), ov[key] !== undefined ? 'this file' : 'default'));
+      return r;
+    };
+
     var solving = el('div', 'section');
     solving.appendChild(el('h3', 'kicker', 'Solving'));
     solving.appendChild(settingRow('Attempts per puzzle', 'Each wrong move is one attempt. When they are used up the answer is shown and the puzzle counts as missed.',
-      seg([[0,'Unlimited'],[1,'1'],[2,'2'],[3,'3'],[5,'5']], s.maxAttempts, function(v){ setSetting('maxAttempts', v); }, 'Attempts per puzzle')));
+      seg([[0,'Unlimited'],[1,'1'],[2,'2'],[3,'3'],[5,'5']], s.maxAttempts, function(v){ setSetting('maxAttempts', v); }, 'Attempts per puzzle'), 'maxAttempts'));
     solving.appendChild(settingRow('Valid moves', 'Dots showing where the selected piece can go.',
-      seg([[true,'Show'],[false,'Hide']], s.showMoves, function(v){ setSetting('showMoves', v); }, 'Valid moves')));
+      seg([[true,'Show'],[false,'Hide']], s.showMoves, function(v){ setSetting('showMoves', v); }, 'Valid moves'), 'showMoves'));
     solving.appendChild(settingRow('Time per puzzle', 'With a limit the clock counts down; at zero the answer is shown and the puzzle counts as missed.',
-      seg([[0,'Off'],[30,'30 s'],[60,'1 min'],[120,'2 min'],[180,'3 min'],[300,'5 min'],[600,'10 min']], s.timeLimit, function(v){ setSetting('timeLimit', v); }, 'Time per puzzle')));
+      seg([[0,'Off'],[30,'30 s'],[60,'1 min'],[120,'2 min'],[180,'3 min'],[300,'5 min'],[600,'10 min']], s.timeLimit, function(v){ setSetting('timeLimit', v); }, 'Time per puzzle'), 'timeLimit'));
     solving.appendChild(settingRow('Opponent & replay speed', 'How quickly replies and revealed answers are played.',
-      seg([[250,'Fast'],[550,'Normal'],[1000,'Slow']], s.replyMs, function(v){ setSetting('replyMs', v); }, 'Opponent speed')));
+      seg([[250,'Fast'],[550,'Normal'],[1000,'Slow']], s.replyMs, function(v){ setSetting('replyMs', v); }, 'Opponent speed'), 'replyMs'));
+    solving.appendChild(settingRow('Sort topics', 'Order of the topics (strategies / chapters). Prev / Next follow this order.',
+      seg(SORT_OPTIONS, s.sortTopics, function(v){ setSetting('sortTopics', v); }, 'Sort topics'), 'sortTopics'));
     modalEl.appendChild(solving);
+
+    var fb = el('div', 'section');
+    fb.appendChild(el('h3', 'kicker', 'On a wrong move'));
+    fb.appendChild(settingRow('Sound', 'A short buzz.', seg([[true,'On'],[false,'Off']], s.sound, function(v){ setSetting('sound', v); if (v) playBuzz(); }, 'Sound'), 'sound'));
+    fb.appendChild(settingRow('Vibration', 'A short vibration on phones.', seg([[true,'On'],[false,'Off']], s.vibrate, function(v){ setSetting('vibrate', v); if (v) vibrate([70, 50, 70]); }, 'Vibration'), 'vibrate'));
+    fb.appendChild(settingRow('Screen shake', 'The board shakes and the screen edge flashes red.', seg([[true,'On'],[false,'Off']], s.shake, function(v){ setSetting('shake', v); if (v) shakeScreen(); }, 'Screen shake'), 'shake'));
+    modalEl.appendChild(fb);
 
     var par = el('div', 'section');
     par.appendChild(el('h3', 'kicker', 'Parental control'));
@@ -2577,12 +2787,12 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
       seg([['allow','Allow'],['hide','Hide'],['pin','Ask for PIN']], s.helpMode, function(v){
         if (v === 'pin' && !hasPin()){
           pinDialog('set', 'Set a PIN first. It will be asked for Hint, Reveal, Settings, clearing answers, removing books and restoring backups.', function(hash){
-            S().pinHash = hash; setSetting('helpMode', 'pin'); loadCurrentItemIfPuzzle(); showToast('Parent PIN set');
+            G().pinHash = hash; setSetting('helpMode', 'pin'); loadCurrentItemIfPuzzle(); showToast('Parent PIN set');
           });
           return;
         }
         setSetting('helpMode', v); loadCurrentItemIfPuzzle();
-      }, 'Hint and Reveal')));
+      }, 'Hint and Reveal'), 'helpMode'));
     var pinRow = el('div', 'set-row');
     pinRow.appendChild(el('div', 'set-title', 'Parent PIN'));
     pinRow.appendChild(el('div', 'set-hint', hasPin()
@@ -2591,14 +2801,15 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     var pinActs = el('div', 'seg');
     var setBtn = el('button', 'seg-btn', hasPin() ? 'Change PIN' : 'Set PIN');
     setBtn.addEventListener('click', function(){
-      pinDialog('set', 'Choose a 4\u20138 digit PIN that the child doesn\u2019t know.', function(hash){ S().pinHash = hash; saveProgress(); renderSettingsModal(); loadCurrentItemIfPuzzle(); showToast('Parent PIN saved'); });
+      pinDialog('set', 'Choose a 4\u20138 digit PIN that the child doesn\u2019t know.', function(hash){ G().pinHash = hash; saveProgress(); renderSettingsModal(); loadCurrentItemIfPuzzle(); showToast('Parent PIN saved'); });
     });
     pinActs.appendChild(setBtn);
     if (hasPin()){
       var rm = el('button', 'seg-btn', 'Remove PIN');
       rm.addEventListener('click', function(){
         if (!confirm('Remove the parent PIN?')) return;
-        S().pinHash = null; if (S().helpMode === 'pin') S().helpMode = 'allow';
+        G().pinHash = null; if (G().helpMode === 'pin') G().helpMode = 'allow';
+        Object.keys(progress.colSettings).forEach(function(k){ if (progress.colSettings[k].helpMode === 'pin') progress.colSettings[k].helpMode = 'allow'; });
         saveProgress(); renderSettingsModal(); loadCurrentItemIfPuzzle(); showToast('Parent PIN removed');
       });
       pinActs.appendChild(rm);
@@ -2609,8 +2820,6 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
 
     var lib = el('div', 'section');
     lib.appendChild(el('h3', 'kicker', 'Library'));
-    lib.appendChild(settingRow('Sort topics', 'Order of the topics (strategies / chapters) inside each book or PGN file. Prev / Next follow this order.',
-      seg(SORT_OPTIONS, s.sortTopics, function(v){ setSetting('sortTopics', v); }, 'Sort topics')));
     var hiddenIds = Object.keys(BUILTIN).filter(function(id){ return progress.hidden[id]; });
     var hb = el('div', 'set-row');
     hb.appendChild(el('div', 'set-title', 'Built-in books'));
@@ -2657,6 +2866,7 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
     ah.appendChild(ahb);
     clr.appendChild(ah);
     modalEl.appendChild(clr);
+    settingRow = _row;
   }
 
   function refreshHelpButtons(){
@@ -2673,9 +2883,12 @@ window.__PUZZLE_DATA__ = {"endings": [{"type": "puzzle", "source": "endings", "n
   function loadCurrentItemIfPuzzle(){ refreshHelpButtons(); }
   var modalKind = 'stats';
   function rerenderModal(){ if (modalKind === 'settings') renderSettingsModal(); else renderStatsModal(); }
-  function openSettings(){ requireParent('Settings are locked with the parent PIN.', openSettingsNow); }
+  function openSettings(scopeKey){
+    var k = (typeof scopeKey === 'string') ? scopeKey : (state.collectionKey || null);
+    requireParent('Settings are locked with the parent PIN.', function(){ settingsScope = k; openSettingsNow(); });
+  }
   function openSettingsNow(){ modalKind = 'settings'; renderSettingsModal(); modalBackdrop.classList.add('open'); var c = modalEl.querySelector('.modal-close'); if (c) c.focus(); }
-  $('settingsBtn').addEventListener('click', openSettings);
+  $('settingsBtn').addEventListener('click', function(){ openSettings(); });
 
   function openModal(){ modalKind = 'stats'; renderStatsModal(); modalBackdrop.classList.add('open'); var c = modalEl.querySelector('.modal-close'); if (c) c.focus(); }
   function closeModal(){ modalBackdrop.classList.remove('open'); }

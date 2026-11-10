@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewGroup;
@@ -211,6 +213,21 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void saveBackup(String filename, String text) {
             new Handler(Looper.getMainLooper()).post(() -> writeBackup(filename, text));
+        }
+
+        /** Short vibration for a wrong move. `pattern` is "on,off,on,..." in ms. */
+        @JavascriptInterface
+        public void vibrate(String pattern) {
+            try {
+                String[] parts = (pattern == null ? "80" : pattern).split(",");
+                long[] wave = new long[parts.length + 1];
+                wave[0] = 0;
+                for (int i = 0; i < parts.length; i++) wave[i + 1] = Math.max(0, Math.min(1000, Long.parseLong(parts[i].trim())));
+                Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                if (v == null || !v.hasVibrator()) return;
+                if (Build.VERSION.SDK_INT >= 26) v.vibrate(VibrationEffect.createWaveform(wave, -1));
+                else v.vibrate(wave, -1);
+            } catch (Exception ignored) { }
         }
     }
 
